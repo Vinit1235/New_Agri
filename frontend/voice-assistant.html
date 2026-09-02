@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎤 Voice Assistant - SoilEdge</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 50%, #2E7D32 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #1a1a2e;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.3);
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .language-badges {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .language-badge {
+            background: #E8F5E9;
+            color: #2E7D32;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .mic-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2E7D32, #43A047);
+            border: none;
+            color: white;
+            font-size: 48px;
+            cursor: pointer;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 30px rgba(46,125,50,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(46,125,50,0.4);
+        }
+
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+
+        .mic-button.listening {
+            background: linear-gradient(135deg, #E53935, #F44336);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 30px rgba(229,57,53,0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 50px rgba(229,57,53,0.5); }
+        }
+
+        .mic-button.processing {
+            background: linear-gradient(135deg, #1565C0, #1E88E5);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 20px;
+            min-height: 20px;
+        }
+
+        .status.listening { color: #E53935; }
+        .status.processing { color: #1565C0; }
+        .status.speaking { color: #2E7D32; }
+
+        .transcript-section {
+            margin-bottom: 20px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-label i {
+            font-size: 14px;
+        }
+
+        .transcript-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-height: 60px;
+            border: 2px solid #e8ecf0;
+            color: #1a1a2e;
+            font-size: 16px;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .transcript-box.empty {
+            color: #ccc;
+            font-style: italic;
+        }
+
+        .answer-box {
+            background: #E8F5E9;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 100px;
+            border: 2px solid #A5D6A7;
+            color: #1a1a2e;
+            font-size: 16px;
+            line-height: 1.8;
+            transition: all 0.3s ease;
+        }
+
+        .answer-box.empty {
+            color: #81C784;
+            font-style: italic;
+        }
+
+        .context-info {
+            background: #FFF8E1;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            border-left: 4px solid #F9A825;
+        }
+
+        .context-info .context-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #E65100;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .context-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .context-item {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .context-item strong {
+            color: #2E7D32;
+            font-weight: 600;
+        }
+
+        .language-select {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px solid #e8ecf0;
+        }
+
+        .language-select label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .language-select select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 2px solid #e8ecf0;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .language-select select:focus {
+            outline: none;
+            border-color: #2E7D32;
+        }
+
+        .error-message {
+            background: #FFEBEE;
+            border: 2px solid #EF5350;
+            border-radius: 12px;
+            padding: 16px;
+            color: #C62828;
+            font-size: 14px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .info-box {
+            background: #E3F2FD;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            border-left: 4px solid #1976D2;
+        }
+
+        .info-box .info-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0D47A1;
+            margin-bottom: 8px;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-box li {
+            font-size: 13px;
+            color: #555;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box li i {
+            color: #1976D2;
+            width: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .mic-button {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+
+            .context-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 Voice Assistant</h1>
+            <p class="subtitle">Ask me anything about your farm in Hindi, Marathi, or English</p>
+            <div class="language-badges">
+                <span class="language-badge">हिंदी Hindi</span>
+                <span class="language-badge">मराठी Marathi</span>
+                <span class="language-badge">English</span>
+            </div>
+        </div>
+
+        <button class="mic-button" id="micButton">
+            <i class="fas fa-microphone"></i>
+        </button>
+
+        <div class="status" id="status">Click the microphone to start</div>
+
+        <div class="transcript-section">
+            <div class="section-label">
+                <i class="fas fa-user"></i>
+                YOU SAID:
+            </div>
+            <div class="transcript-box empty" id="transcriptBox">
+                Your speech will appear here...
+            </div>
+        </div>
+
+        <div class="transcript-section">
+            <div class="section-label">
+                <i class="fas fa-robot"></i>
+                SOILEDGE ASSISTANT:
+            </div>
+            <div class="answer-box empty" id="answerBox">
+                Answer will appear here...
+            </div>
+        </div>
+
+        <div class="context-info" id="contextInfo" style="display: none;">
+            <div class="context-title">📊 Farm Data Used</div>
+            <div class="context-grid" id="contextGrid">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <div class="language-select">
+            <label for="languageSelect">🌍 Voice Recognition Language</label>
+            <select id="languageSelect">
+                <option value="hi-IN">हिंदी Hindi</option>
+                <option value="mr-IN">मराठी Marathi</option>
+                <option value="en-IN">English (India)</option>
+            </select>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <!-- Error messages appear here -->
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">💡 Try asking:</div>
+            <ul>
+                <li><i class="fas fa-circle"></i> "मेरी मिट्टी की नमी कितनी है?" (What is my soil moisture?)</li>
+                <li><i class="fas fa-circle"></i> "EC किती आहे?" (What is the EC? - Marathi)</li>
+                <li><i class="fas fa-circle"></i> "Why is fertilizer blocked?"</li>
+                <li><i class="fas fa-circle"></i> "क्या मुझे पानी देना चाहिए?" (Should I water?)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : window.location.origin;
+        
+        const API_ENDPOINT = `${API_BASE}/api/voice/chat`;
+
+        // DOM Elements
+        const micButton = document.getElementById('micButton');
+        const status = document.getElementById('status');
+        const transcriptBox = document.getElementById('transcriptBox');
+        const answerBox = document.getElementById('answerBox');
+        const contextInfo = document.getElementById('contextInfo');
+        const contextGrid = document.getElementById('contextGrid');
+        const languageSelect = document.getElementById('languageSelect');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Check browser support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            showError('❌ Speech recognition not supported. Please use Chrome, Edge, or Safari.');
+            micButton.disabled = true;
+        }
+
+        // Initialize speech recognition
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        
+        if (recognition) {
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            
+            // Set initial language
+            recognition.lang = languageSelect.value;
+            
+            // Update language when changed
+            languageSelect.addEventListener('change', (e) => {
+                recognition.lang = e.target.value;
+                console.log('Language changed to:', e.target.value);
+            });
+        }
+
+        // State
+        let isListening = false;
+        let isProcessing = false;
+
+        // Mic button click handler
+        micButton.addEventListener('click', () => {
+            if (isProcessing) return;
+            
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        });
+
+        function startListening() {
+            if (!recognition) return;
+            
+            hideError();
+            isListening = true;
+            micButton.classList.add('listening');
+            micButton.querySelector('i').className = 'fas fa-microphone';
+            status.textContent = '🎤 Listening... Speak now!';
+            status.className = 'status listening';
+            
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error('Recognition start error:', e);
+                showError('Could not start microphone. Please try again.');
+                stopListening();
+            }
+        }
+
+        function stopListening() {
+            isListening = false;
+            micButton.classList.remove('listening');
+            status.textContent = 'Click the microphone to start';
+            status.className = 'status';
+            
+            if (recognition) {
+                try {
+                    recognition.stop();
+                } catch (e) {
+                    console.error('Recognition stop error:', e);
+                }
+            }
+        }
+
+        // Speech recognition handlers
+        if (recognition) {
+            recognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript;
+                console.log('Transcript:', transcript);
+                
+                // Display transcript
+                transcriptBox.textContent = transcript;
+                transcriptBox.classList.remove('empty');
+                
+                // Process with Gemini
+                await processQuery(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                
+                let errorText = 'Speech recognition error. ';
+                switch (event.error) {
+                    case 'no-speech':
+                        errorText += 'No speech detected. Please try again.';
+                        break;
+                    case 'network':
+                        errorText += 'Network error. Check your internet connection.';
+                        break;
+                    case 'not-allowed':
+                        errorText += 'Microphone access denied. Please allow microphone permission.';
+                        break;
+                    default:
+                        errorText += event.error;
+                }
+                
+                showError(errorText);
+                stopListening();
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    stopListening();
+                }
+            };
+        }
+
+        async function processQuery(text) {
+            isProcessing = true;
+            micButton.classList.remove('listening');
+            micButton.classList.add('processing');
+            micButton.querySelector('i').className = 'fas fa-spinner fa-spin';
+            status.textContent = '🤔 Thinking...';
+            status.className = 'status processing';
+            
+            answerBox.textContent = 'Processing your question...';
+            answerBox.classList.remove('empty');
+
+            try {
+                // Get auth token if available
+                const token = localStorage.getItem('krishi_token');
+                
+                // Build request body
+                const requestBody = {
+                    text: text,
+                    // Try to get field_id from localStorage or use demo values
+                    field_id: parseInt(localStorage.getItem('current_field_id')) || null,
+                    // Demo values as fallback
+                    moisture: 28.5,
+                    ph: 6.7,
+                    ec: 5.4,
+                    temperature: 28.0,
+                    last_action: "Fertilizer blocked (high EC)"
+                };
+
+                console.log('Sending request:', requestBody);
+
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Response:', data);
+
+                // Display answer
+                answerBox.textContent = data.answer;
+                answerBox.classList.remove('empty');
+
+                // Display context
+                displayContext(data.context_used);
+
+                // Speak the answer
+                speakAnswer(data.answer);
+
+            } catch (error) {
+                console.error('Error processing query:', error);
+                answerBox.textContent = 'Sorry, I could not process your question. Please check if the backend is running.';
+                showError(`Error: ${error.message}`);
+            } finally {
+                isProcessing = false;
+                micButton.classList.remove('processing');
+                micButton.querySelector('i').className = 'fas fa-microphone';
+                status.textContent = 'Click the microphone to ask another question';
+                status.className = 'status';
+            }
+        }
+
+        function displayContext(context) {
+            if (!context) return;
+
+            contextGrid.innerHTML = `
+                ${context.field_name ? `<div class="context-item"><strong>Field:</strong> ${context.field_name}</div>` : ''}
+                ${context.moisture !== undefined ? `<div class="context-item"><strong>Moisture:</strong> ${context.moisture}%</div>` : ''}
+                ${context.ph !== undefined ? `<div class="context-item"><strong>pH:</strong> ${context.ph}</div>` : ''}
+                ${context.ec !== undefined ? `<div class="context-item"><strong>EC:</strong> ${context.ec} dS/m</div>` : ''}
+                ${context.temperature !== undefined ? `<div class="context-item"><strong>Temp:</strong> ${context.temperature}°C</div>` : ''}
+                ${context.timestamp ? `<div class="context-item"><strong>Updated:</strong> ${context.timestamp}</div>` : ''}
+                ${context.source ? `<div class="context-item"><strong>Source:</strong> ${context.source}</div>` : ''}
+            `;
+
+            contextInfo.style.display = 'block';
+        }
+
+        function speakAnswer(text) {
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Try to match the recognition language
+            utterance.lang = languageSelect.value;
+            
+            // Adjust speech parameters
+            utterance.rate = 0.9;  // Slightly slower for clarity
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            status.textContent = '🔊 Speaking answer...';
+            status.className = 'status speaking';
+
+            utterance.onend = () => {
+                status.textContent = 'Click the microphone to ask another question';
+                status.className = 'status';
+            };
+
+            utterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event);
+                status.textContent = 'Click the microphone to ask another question';
+                status.className = 'status';
+            };
+
+            speechSynthesis.speak(utterance);
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        // Check for field_id in URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const fieldId = urlParams.get('field_id');
+        if (fieldId) {
+            localStorage.setItem('current_field_id', fieldId);
+        }
+
+        console.log('Voice Assistant initialized');
+        console.log('API Endpoint:', API_ENDPOINT);
+        console.log('Speech Recognition:', SpeechRecognition ? 'Available' : 'Not available');
+    </script>
+</body>
+</html>

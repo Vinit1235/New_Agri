@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop Health Monitoring - Krishi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ===== ALL EXISTING STYLES REMAIN SAME ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            background: #f0f4f8;
+            line-height: 1.6;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 12px 30px; border-radius: 50px; font-weight: 600; font-size: 14px;
+            border: none; cursor: pointer; transition: all 0.3s ease;
+            text-decoration: none; font-family: inherit;
+        }
+        .btn-primary { background: #1565C0; color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(21,101,192,0.3); }
+        .btn-green { background: #2E7D32; color: white; }
+        .btn-green:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(46,125,50,0.3); }
+        .btn-blue { background: #1565C0; color: white; }
+        .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(21,101,192,0.3); }
+        .btn-outline { background: transparent; border: 2px solid #1565C0; color: #1565C0; }
+        .btn-outline:hover { background: #1565C0; color: white; }
+        .btn-sm { padding: 8px 20px; font-size: 13px; }
+        .btn-danger { background: #E53935; color: white; }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(229,57,53,0.3); }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 12px 0; background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 2px 30px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+        .nav-container {
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 24px; font-weight: 800; color: #1565C0;
+        }
+        .nav-logo .logo-icon { font-size: 30px; }
+        .nav-links {
+            display: flex; align-items: center; gap: 24px;
+        }
+        .nav-links a {
+            color: #1a1a2e; font-weight: 500; font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover { color: #1565C0; }
+        .btn-nav {
+            padding: 8px 24px; border-radius: 50px;
+            background: #1565C0; color: white !important;
+            font-weight: 600;
+        }
+        .btn-nav:hover { background: #0D47A1; transform: translateY(-2px); }
+        .mobile-menu-btn {
+            display: none; background: none; border: none;
+            font-size: 24px; cursor: pointer; color: #1a1a2e;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            padding: 120px 0 60px;
+            background: linear-gradient(160deg, #0a1a2e 0%, #1a3a5a 40%, #1565C0 70%, #1E88E5 100%);
+            color: white;
+            position: relative;
+        }
+        .hero .container { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .hero-content h1 { font-size: 44px; font-weight: 900; line-height: 1.08; margin-bottom: 16px; }
+        .hero-content h1 .highlight { color: #64B5F6; }
+        .hero-content p { font-size: 18px; color: rgba(255,255,255,0.85); max-width: 520px; line-height: 1.8; margin-bottom: 24px; }
+        .hero-badges { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+        .hero-badges span {
+            background: rgba(255,255,255,0.1); padding: 4px 16px; border-radius: 50px;
+            font-size: 13px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hero-image-wrapper {
+            width: 100%; max-width: 520px; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+        .hero-image-wrapper img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4/3; display: block; }
+
+        /* ===== SECTION ===== */
+        .section { padding: 60px 0; }
+        .section-white { background: white; }
+        .section-gray { background: #f8fafc; }
+        .section-light-blue { background: #E3F2FD; }
+        .section-header { text-align: center; margin-bottom: 40px; }
+        .section-badge {
+            display: inline-block; background: #E3F2FD; color: #1565C0;
+            padding: 4px 18px; border-radius: 50px; font-size: 12px; font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .section-title { font-size: 34px; font-weight: 800; color: #1a1a2e; line-height: 1.15; margin-bottom: 12px; }
+        .section-title .highlight { color: #1565C0; }
+        .section-subtitle { font-size: 17px; color: #666; max-width: 580px; margin: 0 auto; line-height: 1.7; }
+
+        /* ============================================
+           ENHANCED NDVI & NDWI MAPS SECTION
+           ============================================ */
+        
+        /* Detailed Information Cards above Maps */
+        .maps-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        .maps-info-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .maps-info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        }
+        .maps-info-card .icon {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .maps-info-card h4 {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .maps-info-card h4 .badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 50px;
+        }
+        .badge-ndvi-info { background: #E8F5E9; color: #2E7D32; }
+        .badge-ndwi-info { background: #E3F2FD; color: #1565C0; }
+        .maps-info-card p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-top: 8px;
+        }
+        .maps-info-card .detail-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .maps-info-card .detail-list .item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            padding: 4px 10px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+        .maps-info-card .detail-list .item .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        /* Maps Container */
+        .maps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 10px;
+        }
+        .map-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #e8ecf0;
+        }
+        .map-container .map-title {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+        }
+        .map-container .map-title h3 {
+            font-size: 18px; font-weight: 700;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .map-container .map-title h3 i { font-size: 20px; }
+        .map-container .map-title .map-badge {
+            padding: 4px 14px; border-radius: 50px;
+            font-size: 12px; font-weight: 600;
+        }
+        .badge-ndvi { background: #E8F5E9; color: #2E7D32; }
+        .badge-ndwi { background: #E3F2FD; color: #1565C0; }
+
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 3px;
+            background: #e8ecf0;
+            padding: 3px;
+            border-radius: 10px;
+            aspect-ratio: 8/6;
+            position: relative;
+            min-height: 280px;
+        }
+        .map-cell {
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 28px;
+        }
+        .map-cell:hover {
+            transform: scale(1.1);
+            z-index: 2;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .map-cell .cell-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 10;
+            min-width: 130px;
+            text-align: center;
+        }
+        .map-cell:hover .cell-tooltip {
+            display: block;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            z-index: 5;
+        }
+
+        /* NDVI Colors - 8 Levels */
+        .ndvi-0 { background: #1B5E20; }
+        .ndvi-1 { background: #2E7D32; }
+        .ndvi-2 { background: #43A047; }
+        .ndvi-3 { background: #66BB6A; }
+        .ndvi-4 { background: #F9A825; }
+        .ndvi-5 { background: #FB8C00; }
+        .ndvi-6 { background: #E53935; }
+        .ndvi-7 { background: #B71C1C; }
+
+        /* NDWI Colors - 8 Levels */
+        .ndwi-0 { background: #0D47A1; }
+        .ndwi-1 { background: #1565C0; }
+        .ndwi-2 { background: #1E88E5; }
+        .ndwi-3 { background: #42A5F5; }
+        .ndwi-4 { background: #90CAF9; }
+        .ndwi-5 { background: #F9A825; }
+        .ndwi-6 { background: #E53935; }
+        .ndwi-7 { background: #B71C1C; }
+
+        /* Enhanced Map Legends */
+        .map-legend {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .map-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            color: #555;
+        }
+        .map-legend .legend-item .color-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Map Statistics */
+        .map-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .map-stat {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #e8ecf0;
+        }
+        .map-stat .number {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1a1a2e;
+        }
+        .map-stat .label {
+            font-size: 11px;
+            color: #888;
+        }
+        .map-stat .color-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        /* ===== INTERPRETATION BOX ===== */
+        .interpretation-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px 24px;
+            border: 1px solid #e8ecf0;
+            margin-top: 20px;
+        }
+        .interpretation-box h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .interpretation-box .interpret-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        .interpretation-box .interpret-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+            border: 1px solid #e8ecf0;
+        }
+        .interpretation-box .interpret-item .label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .interpretation-box .interpret-item .desc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* ===== ANALYSIS SECTION ===== */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .analysis-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            border: 1px solid #e8ecf0;
+        }
+        .analysis-card h4 {
+            font-size: 16px; font-weight: 700; margin-bottom: 12px;
+        }
+        .analysis-card h4 i { color: #1565C0; margin-right: 8px; }
+
+        .status-box {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .status-box.good { background: #E8F5E9; border-left: 4px solid #2E7D32; }
+        .status-box.warning { background: #FFF3E0; border-left: 4px solid #F57C00; }
+        .status-box.danger { background: #FFEBEE; border-left: 4px solid #E53935; }
+        .status-box .title { font-weight: 700; font-size: 15px; }
+        .status-box .desc { font-size: 13px; color: #555; margin-top: 4px; }
+        .status-box .action-btn {
+            display: inline-block; margin-top: 8px;
+            padding: 6px 18px; border-radius: 50px;
+            font-size: 12px; font-weight: 600;
+            border: none; cursor: pointer; transition: all 0.3s ease;
+        }
+
+        /* ===== PREDICTIONS ===== */
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 24px;
+        }
+        .prediction-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .prediction-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+        .prediction-card .icon { font-size: 36px; display: block; margin-bottom: 8px; }
+        .prediction-card .value { font-size: 24px; font-weight: 800; color: #1565C0; }
+        .prediction-card .label { font-size: 13px; color: #666; }
+        .prediction-card .status-text { font-size: 12px; font-weight: 600; margin-top: 4px; }
+
+        /* ===== FAQ ===== */
+        .faq-grid { max-width: 750px; margin: 0 auto; display: grid; gap: 12px; }
+        .faq-item {
+            background: white; border-radius: 12px; border: 1px solid #e8ecf0; overflow: hidden;
+        }
+        .faq-item .faq-question {
+            padding: 16px 20px; display: flex; justify-content: space-between;
+            align-items: center; cursor: pointer; font-weight: 600; color: #1a1a2e;
+            transition: all 0.3s ease;
+        }
+        .faq-item .faq-question:hover { color: #1565C0; }
+        .faq-item .faq-question .icon { transition: all 0.3s ease; color: #999; }
+        .faq-item.active .faq-question .icon { transform: rotate(180deg); color: #1565C0; }
+        .faq-item .faq-answer { padding: 0 20px 20px; display: none; color: #666; line-height: 1.8; font-size: 14px; }
+        .faq-item.active .faq-answer { display: block; }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            padding: 60px 0;
+            background: linear-gradient(160deg, #0a1a2e 0%, #1565C0 70%, #1E88E5 100%);
+            text-align: center; color: white;
+        }
+        .cta-section h2 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+        .cta-section h2 .highlight { color: #64B5F6; }
+        .cta-section p { font-size: 17px; color: rgba(255,255,255,0.8); max-width: 520px; margin: 0 auto 28px; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0a0a12; color: rgba(255,255,255,0.6);
+            padding: 50px 0 30px;
+        }
+        .footer-grid {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px; margin-bottom: 30px;
+        }
+        .footer-brand h3 { color: white; font-size: 22px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .footer-brand p { max-width: 320px; font-size: 14px; line-height: 1.8; }
+        .footer-links h4 { color: white; margin-bottom: 12px; font-size: 15px; }
+        .footer-links a { display: block; margin-bottom: 8px; font-size: 14px; transition: all 0.3s ease; }
+        .footer-links a:hover { color: white; padding-left: 4px; }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 20px; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px;
+        }
+        .footer-social { display: flex; gap: 10px; }
+        .footer-social a {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .footer-social a:hover { background: #1565C0; border-color: #1565C0; color: white; }
+
+        /* ===== TOAST ===== */
+        .toast-notification {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #1a1a2e; color: white;
+            padding: 16px 24px; border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            max-width: 380px;
+            display: none;
+            align-items: center; gap: 12px;
+        }
+        .toast-notification.show { display: flex; }
+
+        /* ============================================
+           RESPONSIVE - ENHANCED
+           ============================================ */
+        @media (max-width: 1024px) {
+            .hero .container { grid-template-columns: 1fr; text-align: center; }
+            .hero-content p { margin: 0 auto 24px; }
+            .hero-badges { justify-content: center; }
+            .maps-info-grid { grid-template-columns: 1fr; }
+            .maps-grid { grid-template-columns: 1fr; }
+            .analysis-grid { grid-template-columns: 1fr; }
+            .prediction-grid { grid-template-columns: 1fr 1fr; }
+            .map-grid { grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(4, 1fr); }
+            .map-stats { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .interpretation-box .interpret-grid { grid-template-columns: 1fr 1fr; }
+            .maps-info-card .detail-list { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; flex-direction: column;
+                position: absolute; top: 100%; left: 0; right: 0;
+                background: white; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                gap: 12px;
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .hero-content h1 { font-size: 28px; }
+            .section-title { font-size: 26px; }
+            .map-grid { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+            .map-stats { grid-template-columns: 1fr 1fr; }
+            .prediction-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-brand p { margin: 0 auto; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .interpretation-box .interpret-grid { grid-template-columns: 1fr; }
+            .maps-info-card .detail-list { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .map-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+            .map-stats { grid-template-columns: 1fr; }
+            .hero-content h1 { font-size: 24px; }
+            .map-container .map-title h3 { font-size: 15px; }
+            .map-legend .legend-item { font-size: 9px; }
+            .map-legend .legend-item .color-box { width: 12px; height: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-notification" id="toastNotification">
+        <i class="fas fa-check-circle" style="color:#4CAF50;font-size:20px;"></i>
+        <span id="toastMessage">Welcome to Crop Health Monitoring!</span>
+        <span class="close" onclick="closeToast()" style="cursor:pointer;opacity:0.7;"><i class="fas fa-times"></i></span>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header" id="header">
+        <nav class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-icon">🌾</span>
+                <span>Krishi</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#maps-section">NDVI & NDWI</a></li>
+                <li><a href="#analysis">Analysis</a></li>
+                <li><a href="#predictions">Predictions</a></li>
+                <li><a href="dashboard.html" class="btn-nav">Dashboard</a></li>
+            </ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badges">
+                    <span><i class="fas fa-satellite"></i> NDVI & NDWI Maps</span>
+                    <span><i class="fas fa-check-circle" style="color:#64B5F6;"></i> Crop Health Analysis</span>
+                    <span><i class="fas fa-check-circle" style="color:#64B5F6;"></i> AI Predictions</span>
+                </div>
+                <h1>Crop Health <span class="highlight">Monitoring</span></h1>
+                <p>Understand your crop health with NDVI & NDWI maps. Get real-time analysis, predictions, and actionable solutions.</p>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                    <a href="#maps-section" class="btn btn-primary"><i class="fas fa-map"></i> View Maps</a>
+                    <a href="#analysis" class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.4);">View Analysis</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-wrapper">
+                    <img src="https://plus.unsplash.com/premium_photo-1661902899911-d7b89906e638?w=800&h=600&fit=crop&crop=center" alt="Crop Health" onerror="this.parentElement.innerHTML='<div style=background:#E3F2FD;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;color:#1565C0;padding:40px;>🛰️</div>'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    ENHANCED NDVI & NDWI MAPS SECTION
+    ============================================ -->
+    <section class="section section-gray" id="maps-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-map"></i> Health Maps</span>
+                <h2 class="section-title">NDVI & <span class="highlight">NDWI</span> Maps</h2>
+                <p class="section-subtitle">Detailed visual representation of your crop health and water stress with comprehensive analysis</p>
+            </div>
+
+            <!-- ===== DETAILED INFORMATION CARDS ===== -->
+            <div class="maps-info-grid">
+                <!-- NDVI Info Card -->
+                <div class="maps-info-card">
+                    <span class="icon">🌿</span>
+                    <h4>NDVI <span class="badge badge-ndvi-info">Crop Health</span></h4>
+                    <p><strong>Normalized Difference Vegetation Index</strong> measures the health and greenness of your crops. It detects how well your crops are growing.</p>
+                    <div class="detail-list">
+                        <div class="item"><span class="dot" style="background:#1B5E20;"></span> 0.8 - 1.0 = Excellent</div>
+                        <div class="item"><span class="dot" style="background:#2E7D32;"></span> 0.6 - 0.8 = Very Good</div>
+                        <div class="item"><span class="dot" style="background:#43A047;"></span> 0.4 - 0.6 = Good</div>
+                        <div class="item"><span class="dot" style="background:#F9A825;"></span> 0.2 - 0.4 = Moderate</div>
+                        <div class="item"><span class="dot" style="background:#FB8C00;"></span> 0.1 - 0.2 = Stressed</div>
+                        <div class="item"><span class="dot" style="background:#E53935;"></span> 0.0 - 0.1 = Poor</div>
+                        <div class="item"><span class="dot" style="background:#B71C1C;"></span> &lt; 0.0 = Critical</div>
+                    </div>
+                    <p style="font-size:13px;color:#888;margin-top:8px;"><i class="fas fa-info-circle"></i> Higher NDVI = Healthier crops</p>
+                </div>
+
+                <!-- NDWI Info Card -->
+                <div class="maps-info-card">
+                    <span class="icon">💧</span>
+                    <h4>NDWI <span class="badge badge-ndwi-info">Water Stress</span></h4>
+                    <p><strong>Normalized Difference Water Index</strong> measures the water content in your crops. It detects water stress and irrigation needs.</p>
+                    <div class="detail-list">
+                        <div class="item"><span class="dot" style="background:#0D47A1;"></span> 0.5 - 1.0 = Very High</div>
+                        <div class="item"><span class="dot" style="background:#1565C0;"></span> 0.3 - 0.5 = High</div>
+                        <div class="item"><span class="dot" style="background:#1E88E5;"></span> 0.2 - 0.3 = Good</div>
+                        <div class="item"><span class="dot" style="background:#42A5F5;"></span> 0.1 - 0.2 = Moderate</div>
+                        <div class="item"><span class="dot" style="background:#F9A825;"></span> 0.0 - 0.1 = Stress</div>
+                        <div class="item"><span class="dot" style="background:#E53935;"></span> -0.1 - 0.0 = High Stress</div>
+                        <div class="item"><span class="dot" style="background:#B71C1C;"></span> &lt; -0.1 = Critical</div>
+                    </div>
+                    <p style="font-size:13px;color:#888;margin-top:8px;"><i class="fas fa-info-circle"></i> Lower NDWI = Water stress</p>
+                </div>
+            </div>
+
+            <!-- ===== COMBINED ANALYSIS ===== -->
+            <div style="background:white;border-radius:12px;padding:16px 20px;border:1px solid #e8ecf0;margin-bottom:24px;">
+                <h4 style="font-size:15px;font-weight:700;margin-bottom:6px;"><i class="fas fa-link" style="color:#1565C0;"></i> Combined Interpretation</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:13px;color:#444;">
+                    <div style="background:#E8F5E9;padding:10px;border-radius:8px;border-left:3px solid #2E7D32;">
+                        <strong>🟢 Healthy</strong><br>
+                        High NDVI + High NDWI<br>
+                        <span style="font-size:12px;color:#888;">✅ No action needed</span>
+                    </div>
+                    <div style="background:#FFF3E0;padding:10px;border-radius:8px;border-left:3px solid #F57C00;">
+                        <strong>🟡 Water Stress</strong><br>
+                        High NDVI + Low NDWI<br>
+                        <span style="font-size:12px;color:#888;">💧 Irrigate</span>
+                    </div>
+                    <div style="background:#FFEBEE;padding:10px;border-radius:8px;border-left:3px solid #E53935;">
+                        <strong>🔴 Critical</strong><br>
+                        Low NDVI + Low NDWI<br>
+                        <span style="font-size:12px;color:#888;">🚨 Emergency</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== FIELD SELECTION & GEOJSON POLYGON MANAGER ===== -->
+            <div style="background:white;border-radius:16px;padding:24px;border:1px solid #e8ecf0;margin-bottom:24px;box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:18px;font-weight:800;color:#1a1a2e;display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-draw-polygon" style="color:#1565C0;"></i> Field Boundary & Satellite AOI
+                        </h3>
+                        <p style="font-size:13px;color:#666;margin-top:2px;">Select an active field, draw your field boundary on satellite view, or paste a GeoJSON Polygon.</p>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <select id="fieldSelector" style="padding:10px 16px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px;font-weight:600;color:#1e293b;background:#f8fafc;outline:none;" onchange="onFieldChange(this.value)">
+                            <option value="">Loading Fields...</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="togglePolygonModal()">
+                            <i class="fas fa-code"></i> Paste GeoJSON
+                        </button>
+                        <button class="btn btn-green btn-sm" onclick="saveFieldPolygon()">
+                            <i class="fas fa-save"></i> Save Boundary
+                        </button>
+                        <button class="btn btn-blue btn-sm" onclick="refreshSatelliteData()">
+                            <i class="fas fa-sync"></i> Fetch Sentinel-2
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Polygon Coordinates Preview -->
+                <div style="background:#f1f5f9;border-radius:8px;padding:10px 14px;font-size:12px;color:#475569;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <div id="polygonStatusText">
+                        <strong>📍 Current Boundary:</strong> <span id="polygonPointsCount">No polygon defined</span>
+                    </div>
+                    <div style="display:flex;gap:12px;">
+                        <span><strong>Lat:</strong> <span id="currentFieldLat">--</span></span>
+                        <span><strong>Lon:</strong> <span id="currentFieldLon">--</span></span>
+                        <span><strong>Crop:</strong> <span id="currentFieldCrop">--</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== GEOJSON MODAL ===== -->
+            <div id="geoJsonModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center;padding:20px;">
+                <div style="background:white;border-radius:16px;max-width:640px;width:100%;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,0.3);position:relative;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                        <h4 style="font-size:18px;font-weight:800;color:#1a1a2e;"><i class="fas fa-code" style="color:#1565C0;"></i> Paste Field GeoJSON Polygon</h4>
+                        <span onclick="togglePolygonModal()" style="cursor:pointer;font-size:20px;color:#94a3b8;"><i class="fas fa-times"></i></span>
+                    </div>
+                    <p style="font-size:13px;color:#64748b;margin-bottom:12px;">
+                        Paste a valid GeoJSON <code>Feature</code>, <code>Polygon</code>, or <code>{"coordinates": [...]}</code>. You can generate one from <a href="https://geojson.io" target="_blank" style="color:#1565C0;text-decoration:underline;">geojson.io</a>.
+                    </p>
+                    <textarea id="geoJsonInput" style="width:100%;height:160px;padding:12px;font-family:monospace;font-size:12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;outline:none;" placeholder='{"type": "Polygon", "coordinates": [[[77.58, 12.97], [77.59, 12.97], [77.59, 12.98], [77.58, 12.98], [77.58, 12.97]]]}'></textarea>
+                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+                        <button class="btn btn-outline btn-sm" onclick="togglePolygonModal()">Cancel</button>
+                        <button class="btn btn-primary btn-sm" onclick="applyPastedGeoJson()">Apply to Field Map</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== INTERACTIVE SATELLITE FIELD MAPS ===== -->
+            <div class="maps-grid">
+                <!-- NDVI SATELLITE MAP -->
+                <div class="map-container" style="display:flex;flex-direction:column;">
+                    <div class="map-title">
+                        <h3><i class="fas fa-leaf" style="color:#2E7D32;"></i> Field NDVI Map</h3>
+                        <span class="map-badge badge-ndvi" id="ndviBadge"><i class="fas fa-satellite"></i> Sentinel-2 Processed</span>
+                    </div>
+                    <!-- Leaflet NDVI Map Viewport -->
+                    <div id="ndviLeafletMap" style="width:100%;height:340px;border-radius:12px;border:1px solid #e2e8f0;z-index:1;"></div>
+                    
+                    <div class="map-legend">
+                        <div class="legend-item"><span class="color-box" style="background:#1B5E20;"></span> 0.8+ Exc</div>
+                        <div class="legend-item"><span class="color-box" style="background:#2E7D32;"></span> 0.6-0.8 V.Good</div>
+                        <div class="legend-item"><span class="color-box" style="background:#43A047;"></span> 0.4-0.6 Good</div>
+                        <div class="legend-item"><span class="color-box" style="background:#F9A825;"></span> 0.2-0.4 Mod</div>
+                        <div class="legend-item"><span class="color-box" style="background:#E53935;"></span> &lt;0.2 Stress</div>
+                    </div>
+                    <div class="map-stats">
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#2E7D32;"></span> <span class="number" id="ndviHealthy">--%</span></div>
+                            <div class="label">Healthy Crop</div>
+                        </div>
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#F9A825;"></span> <span class="number" id="ndviModerate">--%</span></div>
+                            <div class="label">Moderate</div>
+                        </div>
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#E53935;"></span> <span class="number" id="ndviStressed">--%</span></div>
+                            <div class="label">Stressed</div>
+                        </div>
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#1565C0;"></span> <span class="number" id="ndviAvg">0.00</span></div>
+                            <div class="label">Field Avg NDVI</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NDWI SATELLITE MAP -->
+                <div class="map-container" style="display:flex;flex-direction:column;">
+                    <div class="map-title">
+                        <h3><i class="fas fa-water" style="color:#1565C0;"></i> Field NDWI (Water Index)</h3>
+                        <span class="map-badge badge-ndwi" id="ndwiBadge"><i class="fas fa-tint"></i> Sentinel-2 Processed</span>
+                    </div>
+                    <!-- Leaflet NDWI Map Viewport -->
+                    <div id="ndwiLeafletMap" style="width:100%;height:340px;border-radius:12px;border:1px solid #e2e8f0;z-index:1;"></div>
+
+                    <div class="map-legend">
+                        <div class="legend-item"><span class="color-box" style="background:#0D47A1;"></span> 0.5+ High</div>
+                        <div class="legend-item"><span class="color-box" style="background:#1565C0;"></span> 0.3-0.5 Good</div>
+                        <div class="legend-item"><span class="color-box" style="background:#42A5F5;"></span> 0.1-0.3 Mod</div>
+                        <div class="legend-item"><span class="color-box" style="background:#F9A825;"></span> 0.0-0.1 Stress</div>
+                        <div class="legend-item"><span class="color-box" style="background:#E53935;"></span> &lt;0.0 Critical</div>
+                    </div>
+                    <div class="map-stats">
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#1565C0;"></span> <span class="number" id="ndwiGood">--%</span></div>
+                            <div class="label">Optimal Water</div>
+                        </div>
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#F9A825;"></span> <span class="number" id="ndwiStress">--%</span></div>
+                            <div class="label">Water Stress</div>
+                        </div>
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#E53935;"></span> <span class="number" id="ndwiCritical">--%</span></div>
+                            <div class="label">Critical Low</div>
+                        </div>
+                        <div class="map-stat">
+                            <div><span class="color-indicator" style="background:#1565C0;"></span> <span class="number" id="ndwiAvg">0.00</span></div>
+                            <div class="label">Field Avg NDWI</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== INTERPRETATION HELP ===== -->
+            <div class="interpretation-box">
+                <h4><i class="fas fa-graduation-cap" style="color:#1565C0;"></i> Field Health & Water Interpretation</h4>
+                <div class="interpret-grid">
+                    <div class="interpret-item">
+                        <div class="label">🟢 Healthy Canopy</div>
+                        <div class="desc">Robust chlorophyll & vegetative mass. NDVI: 0.6-1.0, NDWI: 0.3-0.6</div>
+                    </div>
+                    <div class="interpret-item">
+                        <div class="label">🟡 Moderate Warning</div>
+                        <div class="desc">Early water deficit or leaf chlorosis. NDVI: 0.3-0.5, NDWI: 0.0-0.3</div>
+                    </div>
+                    <div class="interpret-item">
+                        <div class="label">🔴 Severe Anomaly</div>
+                        <div class="desc">Wilting or severe nutrient starvation. NDVI: &lt;0.3, NDWI: &lt;0.0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MAP HELP & DRAW INSTRUCTIONS ===== -->
+            <div style="margin-top:20px;background:#E3F2FD;border-radius:12px;padding:16px 20px;border-left:4px solid #1565C0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <i class="fas fa-info-circle" style="color:#1565C0;font-size:20px;"></i>
+                <div style="flex:1;">
+                    <strong>💡 How to use the Interactive Field Satellite System:</strong>
+                    <span style="color:#444;font-size:13px;display:block;margin-top:2px;">
+                        Use the drawing tool (polygon icon on top-left of NDVI map) to trace your actual field boundary, or click <strong>Paste GeoJSON</strong>. Once saved, click <strong>Fetch Sentinel-2</strong> to calculate real vegetation indices over your coordinates.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    ANALYSIS SECTION - REMAINS SAME
+    ============================================ -->
+    <section class="section section-white" id="analysis">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-chart-line"></i> Analysis</span>
+                <h2 class="section-title">Crop Health <span class="highlight">Analysis</span></h2>
+                <p class="section-subtitle">Detailed analysis of your crop health with actionable solutions</p>
+            </div>
+
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <h4><i class="fas fa-leaf" style="color:#2E7D32;"></i> NDVI Analysis - Crop Health</h4>
+                    <div id="ndviAnalysisContent">
+                        <div class="status-box good" id="ndviStatusBox">
+                            <div class="title" id="ndviStatusTitle">🟢 Excellent Crop Health</div>
+                            <div class="desc" id="ndviStatusDesc">Your crops are in excellent condition. Continue current management.</div>
+                            <button class="action-btn btn-green" id="ndviActionBtn" style="display:none;">View Details</button>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;background:#f8fafc;border-radius:8px;padding:10px;border:1px solid #e8ecf0;">
+                        <div style="font-size:12px;color:#888;">📊 NDVI Range: <span id="ndviRangeDisplay">0.65 - 0.85</span></div>
+                        <div style="font-size:12px;color:#888;">📈 Trend: <span id="ndviTrendDisplay">Stable</span></div>
+                        <div style="font-size:12px;color:#888;">🌾 Status: <span id="ndviHealthStatus" style="font-weight:600;color:#2E7D32;">Excellent</span></div>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <h4><i class="fas fa-water" style="color:#1565C0;"></i> NDWI Analysis - Water Stress</h4>
+                    <div id="ndwiAnalysisContent">
+                        <div class="status-box good" id="ndwiStatusBox">
+                            <div class="title" id="ndwiStatusTitle">💧 Good Water Level</div>
+                            <div class="desc" id="ndwiStatusDesc">Water levels are optimal. No water stress detected.</div>
+                            <button class="action-btn btn-blue" id="ndwiActionBtn" style="display:none;">View Details</button>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;background:#f8fafc;border-radius:8px;padding:10px;border:1px solid #e8ecf0;">
+                        <div style="font-size:12px;color:#888;">💧 NDWI Range: <span id="ndwiRangeDisplay">0.25 - 0.55</span></div>
+                        <div style="font-size:12px;color:#888;">📈 Trend: <span id="ndwiTrendDisplay">Stable</span></div>
+                        <div style="font-size:12px;color:#888;">💧 Status: <span id="ndwiWaterStatus" style="font-weight:600;color:#1565C0;">Good</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;background:#E8F5E9;border-radius:12px;padding:20px 24px;border-left:4px solid #2E7D32;">
+                <strong style="font-size:16px;">🌱 Smart Solution Recommendation</strong>
+                <div id="solutionText" style="color:#444;font-size:14px;margin-top:6px;line-height:1.8;">
+                    Your crops are healthy with optimal water levels. No immediate action required.
+                </div>
+                <button class="btn btn-green btn-sm" style="margin-top:8px;" onclick="showToast('📋 Generating detailed report...')">
+                    <i class="fas fa-file-pdf"></i> Get Full Report
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    PREDICTIONS - REMAINS SAME
+    ============================================ -->
+    <section class="section section-gray" id="predictions">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-brain"></i> Predictions</span>
+                <h2 class="section-title">AI <span class="highlight">Predictions</span></h2>
+                <p class="section-subtitle">What's coming next for your crop health</p>
+            </div>
+
+            <div class="prediction-grid">
+                <div class="prediction-card">
+                    <span class="icon">📈</span>
+                    <div class="value" id="healthPrediction">92%</div>
+                    <div class="label">Health Score (Next 7 Days)</div>
+                    <div class="status-text" style="color:#2E7D32;" id="healthPredictionStatus">✅ Improving</div>
+                </div>
+                <div class="prediction-card">
+                    <span class="icon">💧</span>
+                    <div class="value" id="waterPrediction">35%</div>
+                    <div class="label">Water Stress Risk</div>
+                    <div class="status-text" style="color:#1565C0;" id="waterPredictionStatus">✅ Low Risk</div>
+                </div>
+                <div class="prediction-card">
+                    <span class="icon">🌾</span>
+                    <div class="value" id="yieldPrediction">+15%</div>
+                    <div class="label">Yield Impact</div>
+                    <div class="status-text" style="color:#2E7D32;" id="yieldPredictionStatus">✅ Positive</div>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;background:#E3F2FD;border-radius:12px;padding:16px 20px;border-left:4px solid #1565C0;">
+                <strong>🧠 AI Insight:</strong>
+                <span id="aiInsight" style="color:#444;font-size:14px;">Analyzing crop health data...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section section-white" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">FAQ</span>
+                <h2 class="section-title">Frequently Asked <span class="highlight">Questions</span></h2>
+                <p class="section-subtitle">Find answers to the most common questions</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item active">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What is the difference between NDVI and NDWI?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">NDVI measures crop health and greenness (how healthy your crops are). NDWI measures water content and stress (how much water your crops have). Both are calculated from satellite imagery.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What do yellow areas on the map mean?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">For NDVI (crop health), yellow means moderate stress from nutrients, pests, or diseases. For NDWI (water stress), yellow means mild water deficiency. Check these areas first.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What should I do if I see red areas?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">Red areas indicate critical stress. For NDVI: check for pests, diseases, or severe nutrient deficiency. For NDWI: check irrigation system urgently. Take immediate action.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How often are the maps updated?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">The maps are updated every 5 days using Sentinel-2 satellite imagery. You can refresh manually using the "Refresh" button.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to <span class="highlight">Monitor Your Crop Health</span>?</h2>
+            <p>Get real-time insights into your crop health and take action before problems spread.</p>
+            <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+                <a href="signup.html" class="btn btn-primary"><i class="fas fa-rocket"></i> Start Monitoring</a>
+                <a href="contact.html" class="btn" style="background:rgba(255,255,255,0.12);color:white;border:2px solid rgba(255,255,255,0.2);">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>🌾 Krishi</h3>
+                    <p>Smart farming solutions powered by AI and IoT technology. Grow smarter with Krishi.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="index.html">Home</a>
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="crop-health.html">Crop Health</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <a href="about.html">About Us</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="privacy-policy.html">Privacy Policy</a>
+                    <a href="terms-of-service.html">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Krishi Smart Farming. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================
+    JAVASCRIPT - ALL WORKING
+    ============================================ -->
+    <script>
+        // ===== 1. MOBILE MENU =====
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        // ===== 2. HEADER SCROLL =====
+        window.addEventListener('scroll', function() {
+            document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // ===== 3. FAQ TOGGLE =====
+        function toggleFAQ(element) {
+            const item = element.closest('.faq-item');
+            const isActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+            if (!isActive) {
+                item.classList.add('active');
+                item.querySelector('.faq-answer').style.display = 'block';
+            }
+        }
+
+        // ===== 4. TOAST =====
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function closeToast() {
+            document.getElementById('toastNotification').classList.remove('show');
+        }
+
+        // ===== 5. INTERACTIVE LEAFLET SATELLITE MAPS & POLYGON LOGIC =====
+        let ndviMapInstance = null;
+        let ndwiMapInstance = null;
+        let drawnItemsNDVI = null;
+        let drawnItemsNDWI = null;
+        let currentFieldList = [];
+        let currentFieldId = 1;
+        let activePolygonGeoJSON = null;
+
+        function initLeafletMaps() {
+            // Satellite Tile Layer (Esri World Imagery)
+            const esriSatelliteUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+            const esriAttr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
+
+            // 1. NDVI MAP
+            if (!ndviMapInstance) {
+                ndviMapInstance = L.map('ndviLeafletMap', { zoomControl: true }).setView([12.9716, 77.5946], 15);
+                L.tileLayer(esriSatelliteUrl, { maxZoom: 19, attribution: esriAttr }).addTo(ndviMapInstance);
+
+                drawnItemsNDVI = new L.FeatureGroup();
+                ndviMapInstance.addLayer(drawnItemsNDVI);
+
+                const drawControl = new L.Control.Draw({
+                    draw: {
+                        polygon: {
+                            allowIntersection: false,
+                            showArea: true,
+                            drawError: { color: '#e1e100', message: '<strong>Polygon shape error</strong>' },
+                            shapeOptions: { color: '#2E7D32', fillColor: '#4CAF50', fillOpacity: 0.45, weight: 3 }
+                        },
+                        polyline: false,
+                        circle: false,
+                        rectangle: {
+                            shapeOptions: { color: '#2E7D32', fillColor: '#4CAF50', fillOpacity: 0.45, weight: 3 }
+                        },
+                        circlemarker: false,
+                        marker: false
+                    },
+                    edit: {
+                        featureGroup: drawnItemsNDVI,
+                        remove: true
+                    }
+                });
+                ndviMapInstance.addControl(drawControl);
+
+                ndviMapInstance.on(L.Draw.Event.CREATED, function (e) {
+                    const layer = e.layer;
+                    drawnItemsNDVI.clearLayers();
+                    drawnItemsNDVI.addLayer(layer);
+                    const geojson = layer.toGeoJSON();
+                    activePolygonGeoJSON = geojson.geometry;
+                    syncPolygonToNDWI(geojson.geometry);
+                    updatePolygonStats(geojson.geometry);
+                    showToast('📍 Field boundary drawn! Click "Save Boundary" or "Fetch Sentinel-2".');
+                });
+
+                ndviMapInstance.on(L.Draw.Event.EDITED, function (e) {
+                    const layers = e.layers;
+                    layers.eachLayer(function (layer) {
+                        const geojson = layer.toGeoJSON();
+                        activePolygonGeoJSON = geojson.geometry;
+                        syncPolygonToNDWI(geojson.geometry);
+                        updatePolygonStats(geojson.geometry);
+                    });
+                });
+            }
+
+            // 2. NDWI MAP
+            if (!ndwiMapInstance) {
+                ndwiMapInstance = L.map('ndwiLeafletMap', { zoomControl: true }).setView([12.9716, 77.5946], 15);
+                L.tileLayer(esriSatelliteUrl, { maxZoom: 19, attribution: esriAttr }).addTo(ndwiMapInstance);
+
+                drawnItemsNDWI = new L.FeatureGroup();
+                ndwiMapInstance.addLayer(drawnItemsNDWI);
+            }
+        }
+
+        function syncPolygonToNDWI(geometry) {
+            if (!geometry || !ndwiMapInstance) return;
+            drawnItemsNDWI.clearLayers();
+            const ndwiLayer = L.geoJSON(geometry, {
+                style: { color: '#1565C0', fillColor: '#0288D1', fillOpacity: 0.45, weight: 3 }
+            });
+            drawnItemsNDWI.addLayer(ndwiLayer);
+            try {
+                const bounds = ndwiLayer.getBounds();
+                if (bounds.isValid()) {
+                    ndwiMapInstance.fitBounds(bounds, { padding: [20, 20] });
+                }
+            } catch(e) {}
+        }
+
+        function getNdviColor(val) {
+            if (val >= 0.8) return '#1B5E20';
+            if (val >= 0.6) return '#2E7D32';
+            if (val >= 0.4) return '#43A047';
+            if (val >= 0.2) return '#F9A825';
+            if (val >= 0.1) return '#FB8C00';
+            return '#E53935';
+        }
+
+        function getNdwiColor(val) {
+            if (val >= 0.5) return '#0D47A1';
+            if (val >= 0.3) return '#1565C0';
+            if (val >= 0.1) return '#42A5F5';
+            if (val >= 0.0) return '#F9A825';
+            return '#E53935';
+        }
+
+        let ndviImageLayer = null;
+        let ndwiImageLayer = null;
+
+        async function renderFieldOnMaps(field, ndviVal = 0.72, ndwiVal = 0.38) {
+            if (!field) return;
+
+            document.getElementById('currentFieldLat').textContent = field.lat != null ? Number(field.lat).toFixed(4) : '--';
+            document.getElementById('currentFieldLon').textContent = field.lon != null ? Number(field.lon).toFixed(4) : '--';
+            document.getElementById('currentFieldCrop').textContent = field.crop_type || 'Wheat';
+
+            const defaultLat = field.lat || 30.8945;
+            const defaultLon = field.lon || 75.8420;
+
+            if (ndviMapInstance) ndviMapInstance.setView([defaultLat, defaultLon], 16);
+            if (ndwiMapInstance) ndwiMapInstance.setView([defaultLat, defaultLon], 16);
+
+            drawnItemsNDVI.clearLayers();
+            drawnItemsNDWI.clearLayers();
+
+            if (ndviImageLayer && ndviMapInstance) ndviMapInstance.removeLayer(ndviImageLayer);
+            if (ndwiImageLayer && ndwiMapInstance) ndwiMapInstance.removeLayer(ndwiImageLayer);
+
+            if (field.polygon && field.polygon.coordinates && field.polygon.coordinates.length > 0) {
+                activePolygonGeoJSON = field.polygon;
+                
+                // 1. Boundary outlines
+                const ndviOutline = L.geoJSON(field.polygon, {
+                    style: { color: '#00E676', weight: 2.5, fillOpacity: 0.05 }
+                });
+                drawnItemsNDVI.addLayer(ndviOutline);
+
+                const ndwiOutline = L.geoJSON(field.polygon, {
+                    style: { color: '#00B0FF', weight: 2.5, fillOpacity: 0.05 }
+                });
+                drawnItemsNDWI.addLayer(ndwiOutline);
+
+                const bounds = ndviOutline.getBounds();
+                if (bounds.isValid()) {
+                    ndviMapInstance.fitBounds(bounds, { padding: [30, 30] });
+                    ndwiMapInstance.fitBounds(bounds, { padding: [30, 30] });
+
+                    // 2. Fetch and Overlay Authentic Sentinel-2 Multispectral PNGs
+                    const token = localStorage.getItem('krishi_token');
+                    if (token) {
+                        try {
+                            const [ndviRes, ndwiRes] = await Promise.all([
+                                fetch(`/api/fields/${field.id}/satellite/raster/ndvi`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                                fetch(`/api/fields/${field.id}/satellite/raster/ndwi`, { headers: { 'Authorization': `Bearer ${token}` } })
+                            ]);
+
+                            if (ndviRes.ok) {
+                                const ndviBlob = await ndviRes.blob();
+                                const ndviUrl = URL.createObjectURL(ndviBlob);
+                                ndviImageLayer = L.imageOverlay(ndviUrl, bounds, { opacity: 0.85 }).addTo(ndviMapInstance);
+                            }
+
+                            if (ndwiRes.ok) {
+                                const ndwiBlob = await ndwiRes.blob();
+                                const ndwiUrl = URL.createObjectURL(ndwiBlob);
+                                ndwiImageLayer = L.imageOverlay(ndwiUrl, bounds, { opacity: 0.85 }).addTo(ndwiMapInstance);
+                            }
+                        } catch (e) {
+                            console.error('Raster image overlay error:', e);
+                        }
+                    }
+                }
+
+                updatePolygonStats(field.polygon);
+            } else {
+                activePolygonGeoJSON = null;
+                document.getElementById('polygonPointsCount').textContent = 'No polygon set (draw on map or paste GeoJSON)';
+            }
+        }
+
+        function updatePolygonStats(polygon) {
+            if (!polygon || !polygon.coordinates) {
+                document.getElementById('polygonPointsCount').textContent = 'No polygon defined';
+                return;
+            }
+            const pts = polygon.coordinates[0] ? polygon.coordinates[0].length : 0;
+            document.getElementById('polygonPointsCount').textContent = `${pts} polygon vertices defined`;
+        }
+
+        function togglePolygonModal() {
+            const modal = document.getElementById('geoJsonModal');
+            const isHidden = modal.style.display === 'none' || modal.style.display === '';
+            modal.style.display = isHidden ? 'flex' : 'none';
+            if (isHidden && activePolygonGeoJSON) {
+                document.getElementById('geoJsonInput').value = JSON.stringify(activePolygonGeoJSON, null, 2);
+            }
+        }
+
+        function applyPastedGeoJson() {
+            const raw = document.getElementById('geoJsonInput').value.trim();
+            if (!raw) {
+                showToast('⚠️ Please paste valid GeoJSON content');
+                return;
+            }
+            try {
+                const parsed = JSON.parse(raw);
+                let geometry = parsed;
+                if (parsed.type === 'FeatureCollection' && parsed.features && parsed.features.length > 0) {
+                    geometry = parsed.features[0].geometry;
+                } else if (parsed.type === 'Feature' && parsed.geometry) {
+                    geometry = parsed.geometry;
+                }
+
+                if (!geometry.type || geometry.type !== 'Polygon') {
+                    showToast('⚠️ GeoJSON must be of type "Polygon"');
+                    return;
+                }
+
+                activePolygonGeoJSON = geometry;
+                const fieldObj = currentFieldList.find(f => f.id === currentFieldId) || { name: 'My Wheat Field', crop_type: 'Wheat', polygon: geometry };
+                fieldObj.polygon = geometry;
+                renderFieldOnMaps(fieldObj);
+
+                updatePolygonStats(geometry);
+                togglePolygonModal();
+                showToast('✅ Polygon geometry applied! Click "Save Boundary" to store.');
+            } catch (err) {
+                showToast('❌ Invalid JSON format: ' + err.message);
+            }
+        }
+
+        async function saveFieldPolygon() {
+            if (!activePolygonGeoJSON) {
+                showToast('⚠️ Draw a boundary or paste a GeoJSON Polygon first');
+                return;
+            }
+            const token = localStorage.getItem('krishi_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                showToast('💾 Saving field boundary to server...');
+                let centerLat = 30.8945, centerLon = 75.8420;
+                if (activePolygonGeoJSON.coordinates && activePolygonGeoJSON.coordinates[0]) {
+                    const ring = activePolygonGeoJSON.coordinates[0];
+                    let sumLat = 0, sumLon = 0;
+                    ring.forEach(pt => { sumLon += pt[0]; sumLat += pt[1]; });
+                    centerLat = sumLat / ring.length;
+                    centerLon = sumLon / ring.length;
+                }
+
+                if (!currentFieldId || currentFieldList.length === 0) {
+                    const createRes = await fetch('/api/fields', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: 'My Wheat Field',
+                            crop_type: 'Wheat',
+                            lat: centerLat,
+                            lon: centerLon,
+                            polygon: activePolygonGeoJSON
+                        })
+                    });
+                    if (createRes.ok) {
+                        const newField = await createRes.json();
+                        currentFieldId = newField.id;
+                        await loadUserFields();
+                        showToast('✅ Field created and boundary saved successfully!');
+                        refreshSatelliteData();
+                        return;
+                    }
+                }
+
+                const res = await fetch(`/api/fields/${currentFieldId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        polygon: activePolygonGeoJSON,
+                        lat: centerLat,
+                        lon: centerLon
+                    })
+                });
+
+                if (res.ok) {
+                    const updated = await res.json();
+                    showToast('✅ Field polygon boundary saved successfully!');
+                    refreshSatelliteData();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast('❌ Failed to save polygon: ' + (err.detail || 'Error ' + res.status));
+                }
+            } catch (e) {
+                showToast('❌ Network error while saving polygon');
+                console.error(e);
+            }
+        }
+
+        async function refreshSatelliteData() {
+            const token = localStorage.getItem('krishi_token');
+            if (!token) return;
+
+            showToast('🛰️ Requesting Sentinel-2 satellite indices for field...');
+            try {
+                const refreshRes = await fetch(`/api/fields/${currentFieldId}/satellite/refresh`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                await fetchFieldHealth();
+                showToast('✅ Sentinel-2 satellite metrics updated on both maps!');
+            } catch (err) {
+                console.error('Satellite refresh error:', err);
+                fetchFieldHealth();
+            }
+        }
+
+        // ===== 6. FIELD SELECTOR & DATA BINDING =====
+        async function loadUserFields() {
+            const token = localStorage.getItem('krishi_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/fields', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed to fetch fields');
+                currentFieldList = await res.json();
+
+                const select = document.getElementById('fieldSelector');
+                select.innerHTML = '';
+
+                if (currentFieldList.length === 0) {
+                    select.innerHTML = '<option value="">No fields found</option>';
+                    return;
+                }
+
+                currentFieldList.forEach((f, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.textContent = `${f.name} (${f.crop_type || 'Crop'})`;
+                    if (idx === 0) opt.selected = true;
+                    select.appendChild(opt);
+                });
+
+                currentFieldId = currentFieldList[0].id;
+                await fetchFieldHealth();
+            } catch (err) {
+                console.error('Error loading fields:', err);
+            }
+        }
+
+        function onFieldChange(fieldId) {
+            currentFieldId = parseInt(fieldId);
+            const field = currentFieldList.find(f => f.id === currentFieldId);
+            if (field) {
+                fetchFieldHealth();
+            }
+        }
+
+        async function fetchFieldHealth() {
+            const token = localStorage.getItem('krishi_token');
+            if (!token) return;
+
+            try {
+                const res = await fetch(`/api/fields/${currentFieldId}/health`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const health = await res.json();
+
+                // Apply metrics to DOM
+                const ndviVal = health.ndvi != null ? health.ndvi : 0.72;
+                const ndwiVal = health.ndwi != null ? health.ndwi : 0.38;
+
+                document.getElementById('ndviAvg').textContent = ndviVal.toFixed(2);
+                document.getElementById('ndwiAvg').textContent = ndwiVal.toFixed(2);
+
+                const field = currentFieldList.find(f => f.id === currentFieldId);
+                if (field) {
+                    renderFieldOnMaps(field, ndviVal, ndwiVal);
+                }
+
+                const ndviHealthyPct = Math.min(100, Math.max(0, Math.round(ndviVal * 105)));
+                const ndviModeratePct = Math.min(100 - ndviHealthyPct, Math.max(0, Math.round((1 - ndviVal) * 60)));
+                const ndviStressedPct = Math.max(0, 100 - ndviHealthyPct - ndviModeratePct);
+
+                document.getElementById('ndviHealthy').textContent = ndviHealthyPct + '%';
+                document.getElementById('ndviModerate').textContent = ndviModeratePct + '%';
+                document.getElementById('ndviStressed').textContent = ndviStressedPct + '%';
+
+                const ndwiGoodPct = Math.min(100, Math.max(0, Math.round((ndwiVal + 0.2) * 110)));
+                const ndwiStressPct = Math.min(100 - ndwiGoodPct, Math.max(0, Math.round((0.5 - ndwiVal) * 80)));
+                const ndwiCritPct = Math.max(0, 100 - ndwiGoodPct - ndwiStressPct);
+
+                document.getElementById('ndwiGood').textContent = ndwiGoodPct + '%';
+                document.getElementById('ndwiStress').textContent = ndwiStressPct + '%';
+                document.getElementById('ndwiCritical').textContent = ndwiCritPct + '%';
+
+                updateAnalysis(ndviVal, ndwiVal, health);
+                updatePredictions(ndviVal, ndwiVal, health);
+            } catch (err) {
+                console.error('Fetch health error:', err);
+            }
+        }
+
+        // ===== 7. ANALYSIS =====
+        function updateAnalysis(ndviVal, ndwiVal, healthData) {
+            const ndviAvg = ndviVal != null ? ndviVal : parseFloat(document.getElementById('ndviAvg').textContent) || 0.72;
+            const ndwiAvg = ndwiVal != null ? ndwiVal : parseFloat(document.getElementById('ndwiAvg').textContent) || 0.38;
+            
+            // NDVI Analysis
+            const ndviStatusBox = document.getElementById('ndviStatusBox');
+            const ndviTitle = document.getElementById('ndviStatusTitle');
+            const ndviDesc = document.getElementById('ndviStatusDesc');
+            const ndviAction = document.getElementById('ndviActionBtn');
+            const ndviHealthStatus = document.getElementById('ndviHealthStatus');
+            
+            if (ndviAvg > 0.7) {
+                ndviStatusBox.className = 'status-box good';
+                ndviTitle.textContent = '🟢 Excellent Crop Canopy';
+                ndviDesc.textContent = healthData && healthData.summary ? healthData.summary : 'Your crops are thriving with strong biomass and green leaf density. Continue current schedule.';
+                ndviAction.style.display = 'none';
+                ndviHealthStatus.textContent = 'Excellent';
+                ndviHealthStatus.style.color = '#2E7D32';
+            } else if (ndviAvg > 0.5) {
+                ndviStatusBox.className = 'status-box good';
+                ndviTitle.textContent = '🟢 Healthy Crop Condition';
+                ndviDesc.textContent = healthData && healthData.summary ? healthData.summary : 'Your crops show healthy vegetative development across the field polygon.';
+                ndviAction.style.display = 'none';
+                ndviHealthStatus.textContent = 'Good';
+                ndviHealthStatus.style.color = '#43A047';
+            } else if (ndviAvg > 0.3) {
+                ndviStatusBox.className = 'status-box warning';
+                ndviTitle.textContent = '🟡 Moderate Vegetation Stress';
+                ndviDesc.textContent = healthData && healthData.summary ? healthData.summary : 'NDVI shows reduced chlorophyll activity. Inspect for moisture deficit or nitrogen shortfall.';
+                ndviAction.style.display = 'inline-block';
+                ndviAction.textContent = '🔍 Analyze Stressed Zones';
+                ndviAction.className = 'action-btn btn-warning';
+                ndviAction.style.background = '#F57C00';
+                ndviAction.style.color = 'white';
+                ndviAction.onclick = function() { showToast('🔍 Cross-referencing soil NPK sensor readings...'); };
+                ndviHealthStatus.textContent = 'Moderate Stress';
+                ndviHealthStatus.style.color = '#F57C00';
+            } else {
+                ndviStatusBox.className = 'status-box danger';
+                ndviTitle.textContent = '🔴 Critical Vegetation Anomaly';
+                ndviDesc.textContent = healthData && healthData.summary ? healthData.summary : 'Severe leaf loss or severe vegetation distress detected in satellite imaging.';
+                ndviAction.style.display = 'inline-block';
+                ndviAction.textContent = '🚨 Emergency Soil Check';
+                ndviAction.className = 'action-btn btn-danger';
+                ndviAction.onclick = function() { showToast('🚨 Soil & Irrigation action plan generated!'); };
+                ndviHealthStatus.textContent = 'Critical';
+                ndviHealthStatus.style.color = '#E53935';
+            }
+
+            // NDWI Analysis
+            const ndwiStatusBox = document.getElementById('ndwiStatusBox');
+            const ndwiTitle = document.getElementById('ndwiStatusTitle');
+            const ndwiDesc = document.getElementById('ndwiStatusDesc');
+            const ndwiAction = document.getElementById('ndwiActionBtn');
+            const ndwiWaterStatus = document.getElementById('ndwiWaterStatus');
+
+            if (ndwiAvg > 0.3) {
+                ndwiStatusBox.className = 'status-box good';
+                ndwiTitle.textContent = '💧 Optimal Leaf Hydration';
+                ndwiDesc.textContent = 'Canopy water reflectance indicates adequate soil moisture and healthy transpiration.';
+                ndwiAction.style.display = 'none';
+                ndwiWaterStatus.textContent = 'Optimal';
+                ndwiWaterStatus.style.color = '#0D47A1';
+            } else if (ndwiAvg > 0.1) {
+                ndwiStatusBox.className = 'status-box warning';
+                ndwiTitle.textContent = '💧 Mild Water Deficit';
+                ndwiDesc.textContent = 'Water index is dropping. Schedule irrigation within the next 24-48 hours.';
+                ndwiAction.style.display = 'inline-block';
+                ndwiAction.textContent = '💧 Trigger Smart Watering';
+                ndwiAction.className = 'action-btn btn-blue';
+                ndwiAction.onclick = function() { window.location.href = 'smart-watering.html'; };
+                ndwiWaterStatus.textContent = 'Mild Stress';
+                ndwiWaterStatus.style.color = '#F57C00';
+            } else {
+                ndwiStatusBox.className = 'status-box danger';
+                ndwiTitle.textContent = '🔴 High Water Stress Detected';
+                ndwiDesc.textContent = 'Severe dehydration detected. Crops require immediate irrigation intervention.';
+                ndwiAction.style.display = 'inline-block';
+                ndwiAction.textContent = '💧 Open Irrigation';
+                ndwiAction.className = 'action-btn btn-danger';
+                ndwiAction.onclick = function() { window.location.href = 'smart-watering.html'; };
+                ndwiWaterStatus.textContent = 'Critical Stress';
+                ndwiWaterStatus.style.color = '#E53935';
+            }
+
+            // Solution Text
+            const solutionText = document.getElementById('solutionText');
+            if (healthData && healthData.action_required) {
+                solutionText.innerHTML = `<strong>Action Required:</strong> ${healthData.action_required}`;
+            } else if (ndviAvg > 0.6 && ndwiAvg > 0.25) {
+                solutionText.innerHTML = '✅ Field satellite data indicates excellent canopy vigor and optimal moisture retention. Maintain standard fertigation cycle.';
+            } else if (ndwiAvg <= 0.1) {
+                solutionText.innerHTML = '⚠️ Water deficit detected via NDWI. Recommend scheduling irrigation via Smart Watering portal.';
+            } else {
+                solutionText.innerHTML = '🟡 Soil moisture or nutrient adjustment recommended based on combined Sentinel-2 AOI analysis.';
+            }
+
+            document.getElementById('ndviRangeDisplay').textContent = `${(ndviAvg - 0.08).toFixed(2)} - ${(ndviAvg + 0.08).toFixed(2)}`;
+            document.getElementById('ndwiRangeDisplay').textContent = `${(ndwiAvg - 0.06).toFixed(2)} - ${(ndwiAvg + 0.06).toFixed(2)}`;
+            document.getElementById('ndviTrendDisplay').textContent = ndviAvg > 0.5 ? '📈 Vigorous' : '📉 Attentive';
+            document.getElementById('ndwiTrendDisplay').textContent = ndwiAvg > 0.2 ? '📈 Adequate' : '📉 Deficit';
+        }
+
+        // ===== 8. PREDICTIONS =====
+        function updatePredictions(ndviVal, ndwiVal) {
+            const ndviAvg = ndviVal != null ? ndviVal : parseFloat(document.getElementById('ndviAvg').textContent) || 0.72;
+            const ndwiAvg = ndwiVal != null ? ndwiVal : parseFloat(document.getElementById('ndwiAvg').textContent) || 0.38;
+            
+            const healthScore = Math.min(100, Math.max(10, Math.round(50 + (ndviAvg * 50))));
+            document.getElementById('healthPrediction').textContent = healthScore + '%';
+            document.getElementById('healthPredictionStatus').textContent = healthScore > 70 ? '✅ Robust' : '⚠️ Monitoring';
+            
+            const waterRisk = Math.max(5, Math.min(95, Math.round((1 - (ndwiAvg + 0.3)) * 100)));
+            document.getElementById('waterPrediction').textContent = waterRisk + '%';
+            document.getElementById('waterPredictionStatus').textContent = waterRisk < 35 ? '✅ Low Risk' : waterRisk < 60 ? '⚠️ Moderate' : '🔴 High Risk';
+            
+            const yieldImpact = Math.round((ndviAvg * 30) - 8);
+            document.getElementById('yieldPrediction').textContent = (yieldImpact > 0 ? '+' : '') + yieldImpact + '%';
+            document.getElementById('yieldPredictionStatus').textContent = yieldImpact > 10 ? '✅ Favorable' : yieldImpact >= 0 ? '🟡 Normal' : '🔴 At Risk';
+
+            document.getElementById('aiInsight').textContent = `Satellite analysis for current field boundary shows NDVI=${ndviAvg.toFixed(2)} and NDWI=${ndwiAvg.toFixed(2)}. Projected yield trend is ${yieldImpact >= 0 ? '+' : ''}${yieldImpact}%.`;
+        }
+
+        // ===== 9. INITIALIZE =====
+        window.addEventListener('DOMContentLoaded', () => {
+            initLeafletMaps();
+            loadUserFields();
+        });
+
+        // Periodic Health Poll
+        setInterval(() => {
+            fetchFieldHealth();
+        }, 15000);
+
+        // ===== 10. CONSOLE =====
+        console.log('%c🌾 Krishi - Sentinel-2 Satellite & Field AOI Boundary System Loaded', 'font-size:16px;font-weight:900;color:#1565C0;');
+    </script>
+</body>
+</html>

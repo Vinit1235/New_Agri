@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ESP32 Multi-Sensor Station — Complete Wiring Reference</title>
+<style>
+  :root{
+    --bg:#0B1E33; --bg2:#0F2A4A; --card:#14304F; --card2:#183A5E;
+    --line:rgba(127,216,232,0.25); --grid:rgba(255,255,255,0.04);
+    --text:#E8EEF5; --text-dim:#9FB4C9; --cyan:#7FD8E8;
+    --red:#E24B4A; --black:#0A0A0A; --blackline:#C9D3DC;
+    --orange:#F2A623; --green:#5DCAA5; --blue:#5B9BD5; --purple:#B08DE0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:32px 32px;
+    color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    line-height:1.6; padding:0 0 60px;
+  }
+  header{ padding:36px 24px 20px; max-width:1240px; margin:0 auto; }
+  h1{ font-size:26px; font-weight:600; margin:0 0 6px; color:#fff; letter-spacing:0.2px; }
+  header p{ color:var(--text-dim); margin:0; font-size:15px; }
+  .wrap{ max-width:1240px; margin:0 auto; padding:0 24px; }
+  .diagram-card{
+    background:var(--bg2); border:1px solid var(--line); border-radius:10px;
+    padding:20px; margin:20px 0 32px; overflow-x:auto;
+  }
+  svg{ display:block; min-width:1100px; }
+  .pin-mono{ font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace; }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:18px; margin:0 0 28px; font-size:13px; color:var(--text-dim); }
+  .legend span{ display:flex; align-items:center; gap:7px; }
+  .swatch{ width:22px; height:3px; border-radius:2px; display:inline-block; }
+
+  h2{ font-size:18px; font-weight:600; color:#fff; margin:40px 0 12px; scroll-margin-top:20px; }
+  h2 small{ display:block; font-size:12px; font-weight:400; color:var(--text-dim); margin-top:2px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; background:var(--card); border-radius:8px; overflow:hidden; }
+  th{ text-align:left; background:var(--card2); color:var(--cyan); font-weight:600; padding:10px 12px; border-bottom:1px solid var(--line); }
+  td{ padding:9px 12px; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  td.pin, td.wire{ font-family:'SFMono-Regular',Consolas,monospace; white-space:nowrap; }
+  .tag{ display:inline-block; padding:2px 8px; border-radius:4px; font-size:11.5px; font-weight:600; }
+  .tag-power{ background:rgba(226,75,74,0.15); color:#F49A99; }
+  .tag-gnd{ background:rgba(201,211,220,0.15); color:#C9D3DC; }
+  .tag-3v3{ background:rgba(242,166,35,0.15); color:#F7C368; }
+  .tag-analog{ background:rgba(93,202,165,0.15); color:#8FE0C0; }
+  .tag-digital{ background:rgba(91,155,213,0.15); color:#9DC3EA; }
+  .tag-ctrl{ background:rgba(176,141,224,0.15); color:#CBB6EE; }
+
+  .note{ background:var(--card); border-left:3px solid var(--orange); border-radius:0 8px 8px 0; padding:14px 18px; margin:18px 0; font-size:14px; color:var(--text-dim); }
+  .note b{ color:var(--text); }
+  ul.checklist{ list-style:none; padding:0; margin:0; }
+  ul.checklist li{ padding:6px 0 6px 26px; position:relative; font-size:14px; color:var(--text-dim); }
+  ul.checklist li::before{ content:"✓"; position:absolute; left:0; color:var(--green); font-weight:700; }
+
+  .divider-box{ background:var(--card); border:1px solid var(--line); border-radius:8px; padding:18px 20px; margin:16px 0; font-size:14px; }
+  .formula{ font-family:'SFMono-Regular',Consolas,monospace; font-size:15px; color:var(--cyan); margin:6px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ESP32 multi-sensor station — complete wiring reference</h1>
+  <p>Every physical wire, from the 12V input to each ESP32 GPIO pin. No connection is abstracted or summarized — the diagram and the tables below describe the same wires twice, in two formats, so nothing is lost between them.</p>
+</header>
+
+<div class="wrap">
+
+<div class="legend">
+  <span><span class="swatch" style="background:var(--red)"></span>Power (12V / 5V)</span>
+  <span><span class="swatch" style="background:var(--blackline)"></span>Ground</span>
+  <span><span class="swatch" style="background:var(--orange)"></span>3.3V</span>
+  <span><span class="swatch" style="background:var(--green)"></span>Analog signal (ADC1)</span>
+  <span><span class="swatch" style="background:var(--blue)"></span>Digital signal</span>
+  <span><span class="swatch" style="background:var(--purple)"></span>Control / switched power</span>
+</div>
+
+<div class="diagram-card">
+<svg viewBox="0 0 1240 940" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Complete wiring diagram</title>
+<desc>12V supply feeds an LM2596 buck converter and decoupling stage producing a 5V and ground rail. The rail feeds the ESP32 VIN, the pH module, and the EC module. The ESP32 also directly powers the soil moisture sensor via GPIO25 and the DHT11 via 3V3. Signal lines run from soil AO to GPIO32, DHT11 DATA to GPIO4, and pH and EC outputs through voltage dividers to GPIO34 and GPIO35 respectively.</desc>
+
+<!-- ================= POWER STAGE ================= -->
+<g font-family="SFMono-Regular,Consolas,monospace" font-size="12" fill="var(--text)">
+
+<rect x="40" y="40" width="150" height="110" rx="6" fill="#14304F" stroke="var(--line)"/>
+<text x="115" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">12V SUPPLY</text>
+<text x="115" y="84" text-anchor="middle" fill="#9FB4C9" font-size="11">battery / adapter</text>
+<text x="60" y="112" fill="#F49A99">+12V</text>
+<text x="60" y="132" fill="#C9D3DC">GND</text>
+
+<rect x="230" y="30" width="210" height="130" rx="6" fill="#14304F" stroke="var(--line)"/>
+<text x="335" y="54" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">LM2596 BUCK</text>
+<text x="335" y="70" text-anchor="middle" fill="#F7C368" font-size="11">trim to exactly 5.00V</text>
+<text x="245" y="112" fill="#F49A99">IN+</text>
+<text x="245" y="132" fill="#C9D3DC">IN−</text>
+<text x="400" y="112" text-anchor="end" fill="#F49A99">OUT+</text>
+<text x="400" y="132" text-anchor="end" fill="#C9D3DC">OUT−</text>
+
+<rect x="480" y="30" width="190" height="130" rx="6" fill="none" stroke="var(--cyan)" stroke-dasharray="4 3" stroke-width="1"/>
+<text x="575" y="50" text-anchor="middle" font-size="11" fill="var(--cyan)">decoupling</text>
+<line x1="500" y1="75" x2="650" y2="75" stroke="var(--red)" stroke-width="2"/>
+<line x1="500" y1="125" x2="650" y2="125" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="530" y1="75" x2="530" y2="125" stroke="var(--red)" stroke-width="1.5"/>
+<line x1="518" y1="98" x2="542" y2="98" stroke="var(--blackline)" stroke-width="2"/>
+<text x="530" y="145" text-anchor="middle" font-size="10.5" fill="#9FB4C9">100µF</text>
+<line x1="610" y1="75" x2="610" y2="125" stroke="var(--red)" stroke-width="1.5"/>
+<line x1="598" y1="102" x2="622" y2="102" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="598" y1="98" x2="622" y2="98" stroke="var(--blackline)" stroke-width="1"/>
+<text x="610" y="145" text-anchor="middle" font-size="10.5" fill="#9FB4C9">0.1µF</text>
+
+<!-- power wires -->
+<line x1="190" y1="75" x2="230" y2="75" stroke="var(--red)" stroke-width="2"/>
+<line x1="190" y1="125" x2="230" y2="125" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="440" y1="75" x2="480" y2="75" stroke="var(--red)" stroke-width="2"/>
+<line x1="440" y1="125" x2="480" y2="125" stroke="var(--blackline)" stroke-width="2"/>
+
+<!-- main rails -->
+<line x1="670" y1="75" x2="1200" y2="75" stroke="var(--red)" stroke-width="2.5"/>
+<text x="680" y="63" font-size="12" fill="#F49A99" font-weight="600">+5V RAIL</text>
+
+<!-- GND rail with 3 gaps at x=705,985,1145 -->
+<line x1="40"  y1="125" x2="695" y2="125" stroke="var(--blackline)" stroke-width="2.5"/>
+<line x1="715" y1="125" x2="975" y2="125" stroke="var(--blackline)" stroke-width="2.5"/>
+<line x1="995" y1="125" x2="1135" y2="125" stroke="var(--blackline)" stroke-width="2.5"/>
+<line x1="1155" y1="125" x2="1200" y2="125" stroke="var(--blackline)" stroke-width="2.5"/>
+<text x="680" y="145" font-size="12" fill="#C9D3DC" font-weight="600">GND (COMMON)</text>
+
+<!-- ================= MODULE ROW ================= -->
+
+<!-- Soil moisture -->
+<rect x="40" y="250" width="230" height="180" rx="6" fill="#14304F" stroke="var(--line)"/>
+<text x="155" y="274" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">SOIL MOISTURE (HW-103)</text>
+<text x="60" y="410" fill="#CBB6EE">VCC</text>
+<text x="140" y="290" fill="#C9D3DC">GND</text>
+<text x="200" y="410" fill="#8FE0C0">AO</text>
+
+<!-- DHT11 -->
+<rect x="310" y="250" width="230" height="180" rx="6" fill="#14304F" stroke="var(--line)"/>
+<text x="425" y="274" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">DHT11</text>
+<text x="330" y="290" fill="#C9D3DC">GND</text>
+<text x="440" y="410" fill="#F7C368">VCC (3V3)</text>
+<text x="440" y="392" fill="#9DC3EA">DATA</text>
+<line x1="465" y1="398" x2="490" y2="398" stroke="var(--orange)" stroke-width="1.2"/>
+<line x1="472" y1="392" x2="472" y2="404" stroke="var(--orange)" stroke-width="1"/>
+<line x1="480" y1="392" x2="480" y2="404" stroke="var(--orange)" stroke-width="1"/>
+<text x="477" y="380" text-anchor="middle" font-size="9.5" fill="#F7C368">10kΩ pull-up</text>
+
+<!-- pH -->
+<rect x="670" y="250" width="230" height="180" rx="6" fill="#14304F" stroke="var(--line)"/>
+<text x="785" y="274" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">pH MODULE (0–5V out)</text>
+<text x="695" y="290" fill="#F49A99">VCC (5V)</text>
+<text x="810" y="290" fill="#C9D3DC">GND</text>
+<text x="745" y="410" fill="#8FE0C0">PO</text>
+
+<!-- EC -->
+<rect x="950" y="250" width="230" height="180" rx="6" fill="#14304F" stroke="var(--line)"/>
+<text x="1065" y="274" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">EC MODULE (0–5V out)</text>
+<text x="975" y="290" fill="#F49A99">VCC (5V)</text>
+<text x="1090" y="290" fill="#C9D3DC">GND</text>
+<text x="1025" y="410" fill="#8FE0C0">AO</text>
+
+<!-- rail taps: +5V drops (cross GND gaps) -->
+<line x1="710" y1="75" x2="710" y2="250" stroke="var(--red)" stroke-width="2"/>
+<line x1="990" y1="75" x2="990" y2="250" stroke="var(--red)" stroke-width="2"/>
+<line x1="1150" y1="75" x2="1150" y2="640" stroke="var(--red)" stroke-width="2"/>
+
+<!-- GND drops (no crossing needed) -->
+<line x1="150" y1="125" x2="150" y2="250" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="340" y1="125" x2="340" y2="250" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="830" y1="125" x2="830" y2="250" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="1110" y1="125" x2="1110" y2="250" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="1170" y1="125" x2="1170" y2="670" stroke="var(--blackline)" stroke-width="2"/>
+
+<!-- ================= DIVIDERS ================= -->
+<!-- pH divider -->
+<line x1="760" y1="430" x2="760" y2="460" stroke="var(--green)" stroke-width="1.5"/>
+<path d="M755,460 L765,468 L755,476 L765,484 L760,490" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+<text x="775" y="478" font-size="10.5" fill="#8FE0C0">R1 5.6kΩ</text>
+<circle cx="760" cy="500" r="3" fill="var(--green)"/>
+<line x1="760" y1="500" x2="760" y2="510" stroke="var(--green)" stroke-width="1.5"/>
+<path d="M755,510 L765,518 L755,526 L765,534 L760,540" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+<text x="775" y="528" font-size="10.5" fill="#8FE0C0">R2 10kΩ</text>
+<line x1="760" y1="540" x2="760" y2="560" stroke="var(--blackline)" stroke-width="1.5"/>
+<line x1="748" y1="560" x2="772" y2="560" stroke="var(--blackline)" stroke-width="1.5"/>
+<line x1="753" y1="565" x2="767" y2="565" stroke="var(--blackline)" stroke-width="1"/>
+<line x1="760" y1="500" x2="810" y2="500" stroke="var(--green)" stroke-width="1.5"/>
+<line x1="810" y1="500" x2="810" y2="640" stroke="var(--green)" stroke-width="1.5"/>
+
+<!-- EC divider -->
+<line x1="1040" y1="430" x2="1040" y2="460" stroke="var(--green)" stroke-width="1.5"/>
+<path d="M1035,460 L1045,468 L1035,476 L1045,484 L1040,490" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+<text x="1055" y="478" font-size="10.5" fill="#8FE0C0">R1 5.6kΩ</text>
+<circle cx="1040" cy="500" r="3" fill="var(--green)"/>
+<line x1="1040" y1="500" x2="1040" y2="510" stroke="var(--green)" stroke-width="1.5"/>
+<path d="M1035,510 L1045,518 L1035,526 L1045,534 L1040,540" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+<text x="1055" y="528" font-size="10.5" fill="#8FE0C0">R2 10kΩ</text>
+<line x1="1040" y1="540" x2="1040" y2="560" stroke="var(--blackline)" stroke-width="1.5"/>
+<line x1="1028" y1="560" x2="1052" y2="560" stroke="var(--blackline)" stroke-width="1.5"/>
+<line x1="1033" y1="565" x2="1047" y2="565" stroke="var(--blackline)" stroke-width="1"/>
+<line x1="1040" y1="500" x2="1085" y2="500" stroke="var(--green)" stroke-width="1.5"/>
+<line x1="1085" y1="500" x2="1085" y2="660" stroke="var(--green)" stroke-width="1.5"/>
+
+<!-- ================= SIGNAL / CONTROL ROUTES TO ESP32 ================= -->
+<!-- soil VCC (GPIO25) -->
+<line x1="540" y1="700" x2="540" y2="470" stroke="var(--purple)" stroke-width="1.5"/>
+<line x1="250" y1="470" x2="540" y2="470" stroke="var(--purple)" stroke-width="1.5"/>
+<line x1="250" y1="430" x2="250" y2="470" stroke="var(--purple)" stroke-width="1.5"/>
+
+<!-- soil AO (GPIO32) -->
+<line x1="575" y1="700" x2="575" y2="490" stroke="var(--green)" stroke-width="1.5"/>
+<line x1="220" y1="490" x2="575" y2="490" stroke="var(--green)" stroke-width="1.5"/>
+<line x1="220" y1="430" x2="220" y2="490" stroke="var(--green)" stroke-width="1.5"/>
+
+<!-- DHT11 DATA (GPIO4) -->
+<line x1="610" y1="700" x2="610" y2="510" stroke="var(--blue)" stroke-width="1.5"/>
+<line x1="500" y1="510" x2="610" y2="510" stroke="var(--blue)" stroke-width="1.5"/>
+<line x1="500" y1="430" x2="500" y2="510" stroke="var(--blue)" stroke-width="1.5"/>
+
+<!-- DHT11 VCC (3V3) -->
+<line x1="645" y1="700" x2="645" y2="530" stroke="var(--orange)" stroke-width="1.5"/>
+<line x1="460" y1="530" x2="645" y2="530" stroke="var(--orange)" stroke-width="1.5"/>
+<line x1="460" y1="430" x2="460" y2="530" stroke="var(--orange)" stroke-width="1.5"/>
+
+<!-- pH tap to GPIO34 -->
+<line x1="680" y1="700" x2="680" y2="640" stroke="var(--green)" stroke-width="1.5"/>
+<line x1="680" y1="640" x2="810" y2="640" stroke="var(--green)" stroke-width="1.5"/>
+
+<!-- EC tap to GPIO35 -->
+<line x1="715" y1="700" x2="715" y2="660" stroke="var(--green)" stroke-width="1.5"/>
+<line x1="715" y1="660" x2="1085" y2="660" stroke="var(--green)" stroke-width="1.5"/>
+
+<!-- VIN from +5V rail -->
+<line x1="750" y1="700" x2="750" y2="650" stroke="var(--red)" stroke-width="2"/>
+<line x1="750" y1="650" x2="1150" y2="650" stroke="var(--red)" stroke-width="2"/>
+
+<!-- GND from rail -->
+<line x1="785" y1="700" x2="785" y2="670" stroke="var(--blackline)" stroke-width="2"/>
+<line x1="785" y1="670" x2="1170" y2="670" stroke="var(--blackline)" stroke-width="2"/>
+
+<!-- ================= ESP32 ================= -->
+<rect x="520" y="700" width="280" height="200" rx="8" fill="#183A5E" stroke="var(--cyan)" stroke-width="1.2"/>
+<text x="660" y="730" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">ESP32 DEVKIT</text>
+<text x="660" y="748" text-anchor="middle" font-size="11" fill="#9FB4C9">ADC1: GPIO32 / 34 / 35 only</text>
+
+<g font-size="10.5" text-anchor="middle">
+<text x="540" y="768" fill="#CBB6EE">25</text>
+<text x="575" y="768" fill="#8FE0C0">32</text>
+<text x="610" y="768" fill="#9DC3EA">4</text>
+<text x="645" y="768" fill="#F7C368">3V3</text>
+<text x="680" y="768" fill="#8FE0C0">34</text>
+<text x="715" y="768" fill="#8FE0C0">35</text>
+<text x="750" y="768" fill="#F49A99">VIN</text>
+<text x="785" y="768" fill="#C9D3DC">GND</text>
+</g>
+</g>
+</svg>
+</div>
+
+<div class="note">
+  <b>Reading this diagram:</b> a small gap in the black GND line marks a crossing, not a connection — three +5V drops (to the pH module, the EC module, and ESP32 VIN) physically pass over the GND rail on their way down without touching it. Every other line junction shown is a real electrical connection.
+</div>
+
+<h2 id="power">1. Power stage — every wire<small>12V input through to the regulated 5V/GND rail</small></h2>
+<table>
+<tr><th>From</th><th>To</th><th>Wire</th><th>Notes</th></tr>
+<tr><td class="pin">12V supply +</td><td class="pin">LM2596 IN+</td><td class="wire"><span class="tag tag-power">Power</span></td><td>Red wire, 12V</td></tr>
+<tr><td class="pin">12V supply −</td><td class="pin">LM2596 IN−</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td>Black wire</td></tr>
+<tr><td class="pin">LM2596 OUT+</td><td class="pin">Decoupling stage in</td><td class="wire"><span class="tag tag-power">Power</span></td><td>Trim pot set to exactly 5.00V before anything else is connected</td></tr>
+<tr><td class="pin">LM2596 OUT−</td><td class="pin">Decoupling stage in</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">100µF cap +</td><td class="pin">+5V rail</td><td class="wire"><span class="tag tag-power">Power</span></td><td>Bridges 5V–GND right at the converter output</td></tr>
+<tr><td class="pin">100µF cap −</td><td class="pin">GND rail</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">0.1µF cap</td><td class="pin">+5V rail / GND rail</td><td class="wire"><span class="tag tag-power">Power</span></td><td>In parallel with the 100µF cap, filters high-frequency noise</td></tr>
+<tr><td class="pin">+5V rail</td><td class="pin">ESP32 VIN</td><td class="wire"><span class="tag tag-power">Power</span></td><td></td></tr>
+<tr><td class="pin">+5V rail</td><td class="pin">pH module VCC</td><td class="wire"><span class="tag tag-power">Power</span></td><td></td></tr>
+<tr><td class="pin">+5V rail</td><td class="pin">EC module VCC</td><td class="wire"><span class="tag tag-power">Power</span></td><td></td></tr>
+<tr><td class="pin">GND rail</td><td class="pin">ESP32 GND</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td>Single common ground point — see note below</td></tr>
+<tr><td class="pin">GND rail</td><td class="pin">Soil sensor GND</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">GND rail</td><td class="pin">DHT11 GND</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">GND rail</td><td class="pin">pH module GND</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">GND rail</td><td class="pin">EC module GND</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+</table>
+
+<h2 id="soil">2. Soil moisture sensor (HW-103)</h2>
+<table>
+<tr><th>Sensor pin</th><th>ESP32 pin</th><th>Wire</th><th>Notes</th></tr>
+<tr><td class="pin">VCC</td><td class="pin">GPIO25</td><td class="wire"><span class="tag tag-ctrl">Control</span></td><td>GPIO25 driven HIGH (3.3V) only while taking a reading, then LOW to reduce probe corrosion. If the sensor draws more than a few mA, switch it with a small transistor rather than sourcing current straight from the GPIO.</td></tr>
+<tr><td class="pin">GND</td><td class="pin">GND rail</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">AO</td><td class="pin">GPIO32 (ADC1_CH4)</td><td class="wire"><span class="tag tag-analog">Analog</span></td><td>0–3.3V range, safe direct into the ADC — no divider needed</td></tr>
+</table>
+
+<h2 id="dht11">3. DHT11 temperature &amp; humidity sensor</h2>
+<table>
+<tr><th>Sensor pin</th><th>ESP32 pin</th><th>Wire</th><th>Notes</th></tr>
+<tr><td class="pin">VCC</td><td class="pin">3V3</td><td class="wire"><span class="tag tag-3v3">3.3V</span></td><td>Never connect this to the 5V rail</td></tr>
+<tr><td class="pin">GND</td><td class="pin">GND rail</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">DATA</td><td class="pin">GPIO4</td><td class="wire"><span class="tag tag-digital">Digital</span></td><td>Single-wire digital protocol</td></tr>
+<tr><td class="pin">DATA</td><td class="pin">VCC (internal)</td><td class="wire"><span class="tag tag-3v3">3.3V</span></td><td>10kΩ pull-up resistor between DATA and VCC — required if using a bare 4-pin DHT11 without an onboard pull-up</td></tr>
+</table>
+
+<h2 id="ph">4. pH module (0–5V analog output)</h2>
+<table>
+<tr><th>Module pin</th><th>Connects to</th><th>Wire</th><th>Notes</th></tr>
+<tr><td class="pin">VCC</td><td class="pin">+5V rail</td><td class="wire"><span class="tag tag-power">Power</span></td><td></td></tr>
+<tr><td class="pin">GND</td><td class="pin">GND rail</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">PO (output)</td><td class="pin">R1 (5.6kΩ)</td><td class="wire"><span class="tag tag-analog">Analog</span></td><td>First leg of this module's own dedicated divider</td></tr>
+<tr><td class="pin">R1–R2 junction</td><td class="pin">GPIO34 (ADC1_CH6)</td><td class="wire"><span class="tag tag-analog">Analog</span></td><td>Tap point — scaled to 0–3.21V max</td></tr>
+<tr><td class="pin">R2 (10kΩ)</td><td class="pin">GND</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td>Divider's second leg returns to common ground</td></tr>
+</table>
+
+<h2 id="ec">5. EC / salinity module (0–5V analog output)</h2>
+<table>
+<tr><th>Module pin</th><th>Connects to</th><th>Wire</th><th>Notes</th></tr>
+<tr><td class="pin">VCC</td><td class="pin">+5V rail</td><td class="wire"><span class="tag tag-power">Power</span></td><td></td></tr>
+<tr><td class="pin">GND</td><td class="pin">GND rail</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+<tr><td class="pin">AO (output)</td><td class="pin">R1 (5.6kΩ)</td><td class="wire"><span class="tag tag-analog">Analog</span></td><td>Its own separate divider — not shared with the pH module's divider</td></tr>
+<tr><td class="pin">R1–R2 junction</td><td class="pin">GPIO35 (ADC1_CH7)</td><td class="wire"><span class="tag tag-analog">Analog</span></td><td>Tap point — scaled to 0–3.21V max</td></tr>
+<tr><td class="pin">R2 (10kΩ)</td><td class="pin">GND</td><td class="wire"><span class="tag tag-gnd">GND</span></td><td></td></tr>
+</table>
+
+<div class="divider-box">
+  <b>Voltage divider reference</b> (used identically for both pH and EC, as two separate circuits):
+  <div class="formula">V<sub>out</sub> = V<sub>in</sub> × R2 / (R1 + R2)</div>
+  <div class="formula">With R1 = 5.6kΩ, R2 = 10kΩ: V<sub>out</sub> = 5V × 10/(15.6) ≈ 3.21V max</div>
+  In firmware, multiply the raw ADC voltage back by 1.56 to reconstruct the sensor's true 0–5V output.
+</div>
+
+<h2 id="esp32">6. ESP32 pin-out summary</h2>
+<table>
+<tr><th>Pin</th><th>Function here</th><th>Wire</th></tr>
+<tr><td class="pin">GPIO25</td><td>Switches soil sensor VCC on/off</td><td><span class="tag tag-ctrl">Control</span></td></tr>
+<tr><td class="pin">GPIO32</td><td>Soil moisture analog input (ADC1_CH4)</td><td><span class="tag tag-analog">Analog</span></td></tr>
+<tr><td class="pin">GPIO4</td><td>DHT11 data line</td><td><span class="tag tag-digital">Digital</span></td></tr>
+<tr><td class="pin">3V3</td><td>Powers DHT11 only</td><td><span class="tag tag-3v3">3.3V</span></td></tr>
+<tr><td class="pin">GPIO34</td><td>pH analog input, via divider (ADC1_CH6)</td><td><span class="tag tag-analog">Analog</span></td></tr>
+<tr><td class="pin">GPIO35</td><td>EC analog input, via divider (ADC1_CH7)</td><td><span class="tag tag-analog">Analog</span></td></tr>
+<tr><td class="pin">VIN</td><td>5V in from the LM2596 rail</td><td><span class="tag tag-power">Power</span></td></tr>
+<tr><td class="pin">GND</td><td>Common ground — every other GND ties here</td><td><span class="tag tag-gnd">GND</span></td></tr>
+</table>
+
+<h2 id="checklist">7. Before you power it on</h2>
+<div class="divider-box">
+<ul class="checklist">
+  <li>LM2596 trimmed to exactly 5.00V, measured with a multimeter, before the ESP32 or any sensor is connected</li>
+  <li>5V rail never touches the ESP32 3V3 pin</li>
+  <li>pH and EC each have their own separate 5.6kΩ/10kΩ divider — they are not sharing one</li>
+  <li>10kΩ pull-up fitted between DHT11 DATA and VCC if using a bare 4-pin sensor</li>
+  <li>Every GND pin — supply, LM2596, ESP32, and all four sensors — ties to one common ground point</li>
+  <li>Only GPIO32, 34, and 35 are used for analog reads (all ADC1, safe with Wi-Fi active)</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

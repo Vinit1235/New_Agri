@@ -1,0 +1,318 @@
+{
+  "generated_at": "2026-09-01T07:58:15.048735Z",
+  "source_datasets": [
+    "WUR-AI/AgML-CY-Bench (sample_data) \u2014 wheat+maize NDVI, ES+NL, 2001-2023",
+    "https://github.com/WUR-AI/sample_data (NDVI: MOD09CMG, ~weekly)"
+  ],
+  "scaling": "Raw CY-Bench NDVI is rescaled so the per-crop p05 maps to 0.20 (fallow / bare soil) and p95 to 0.85 (typical peak NDVI). This removes the background-vegetation contamination present in the raw values. The stage band is then (p25, p75) inside the stage's day-of-year window.",
+  "profiles": {
+    "wheat": {
+      "source": "CY-Bench wheat (ES+NL, 2001-2023, MODIS NDVI)",
+      "stages": [
+        {
+          "stage": "seedling",
+          "doy_window": [
+            1,
+            60
+          ],
+          "ndvi_low": 0.253,
+          "ndvi_high": 0.536
+        },
+        {
+          "stage": "vegetative",
+          "doy_window": [
+            61,
+            130
+          ],
+          "ndvi_low": 0.356,
+          "ndvi_high": 0.616
+        },
+        {
+          "stage": "flowering",
+          "doy_window": [
+            131,
+            180
+          ],
+          "ndvi_low": 0.618,
+          "ndvi_high": 0.776
+        },
+        {
+          "stage": "ripening",
+          "doy_window": [
+            181,
+            240
+          ],
+          "ndvi_low": 0.631,
+          "ndvi_high": 0.811
+        },
+        {
+          "stage": "fallow",
+          "doy_window": [
+            241,
+            365
+          ],
+          "ndvi_low": 0.49,
+          "ndvi_high": 0.702
+        }
+      ]
+    },
+    "maize": {
+      "source": "CY-Bench maize (ES+NL, 2001-2023, MODIS NDVI)",
+      "stages": [
+        {
+          "stage": "seedling",
+          "doy_window": [
+            90,
+            140
+          ],
+          "ndvi_low": 0.488,
+          "ndvi_high": 0.688
+        },
+        {
+          "stage": "vegetative",
+          "doy_window": [
+            141,
+            195
+          ],
+          "ndvi_low": 0.638,
+          "ndvi_high": 0.784
+        },
+        {
+          "stage": "flowering",
+          "doy_window": [
+            196,
+            230
+          ],
+          "ndvi_low": 0.653,
+          "ndvi_high": 0.82
+        },
+        {
+          "stage": "ripening",
+          "doy_window": [
+            231,
+            275
+          ],
+          "ndvi_low": 0.624,
+          "ndvi_high": 0.801
+        },
+        {
+          "stage": "fallow",
+          "doy_window": [
+            276,
+            365,
+            1,
+            89
+          ],
+          "ndvi_low": 0.352,
+          "ndvi_high": 0.628
+        }
+      ]
+    },
+    "rice": {
+      "source": "extrapolated from maize (similar C4 summer crop)",
+      "stages": [
+        {
+          "stage": "seedling",
+          "doy_window": [
+            90,
+            140
+          ],
+          "ndvi_low": 0.471,
+          "ndvi_high": 0.672
+        },
+        {
+          "stage": "vegetative",
+          "doy_window": [
+            141,
+            195
+          ],
+          "ndvi_low": 0.658,
+          "ndvi_high": 0.8
+        },
+        {
+          "stage": "flowering",
+          "doy_window": [
+            196,
+            230
+          ],
+          "ndvi_low": 0.612,
+          "ndvi_high": 0.801
+        },
+        {
+          "stage": "ripening",
+          "doy_window": [
+            231,
+            275
+          ],
+          "ndvi_low": 0.578,
+          "ndvi_high": 0.773
+        },
+        {
+          "stage": "fallow",
+          "doy_window": [
+            276,
+            365,
+            1,
+            89
+          ],
+          "ndvi_low": 0.325,
+          "ndvi_high": 0.609
+        }
+      ]
+    },
+    "vegetables": {
+      "source": "extrapolated from wheat (spring-sown broadleaf)",
+      "stages": [
+        {
+          "stage": "seedling",
+          "doy_window": [
+            60,
+            90
+          ],
+          "ndvi_low": 0.258,
+          "ndvi_high": 0.514
+        },
+        {
+          "stage": "vegetative",
+          "doy_window": [
+            91,
+            150
+          ],
+          "ndvi_low": 0.483,
+          "ndvi_high": 0.679
+        },
+        {
+          "stage": "flowering",
+          "doy_window": [
+            151,
+            210
+          ],
+          "ndvi_low": 0.668,
+          "ndvi_high": 0.808
+        },
+        {
+          "stage": "ripening",
+          "doy_window": [
+            211,
+            270
+          ],
+          "ndvi_low": 0.584,
+          "ndvi_high": 0.785
+        },
+        {
+          "stage": "fallow",
+          "doy_window": [
+            271,
+            365,
+            1,
+            59
+          ],
+          "ndvi_low": 0.358,
+          "ndvi_high": 0.638
+        }
+      ]
+    },
+    "cereals": {
+      "source": "from wheat (representative cereal)",
+      "stages": [
+        {
+          "stage": "seedling",
+          "doy_window": [
+            1,
+            60
+          ],
+          "ndvi_low": 0.253,
+          "ndvi_high": 0.536
+        },
+        {
+          "stage": "vegetative",
+          "doy_window": [
+            61,
+            130
+          ],
+          "ndvi_low": 0.356,
+          "ndvi_high": 0.616
+        },
+        {
+          "stage": "flowering",
+          "doy_window": [
+            131,
+            180
+          ],
+          "ndvi_low": 0.618,
+          "ndvi_high": 0.776
+        },
+        {
+          "stage": "ripening",
+          "doy_window": [
+            181,
+            240
+          ],
+          "ndvi_low": 0.631,
+          "ndvi_high": 0.811
+        },
+        {
+          "stage": "fallow",
+          "doy_window": [
+            241,
+            365
+          ],
+          "ndvi_low": 0.49,
+          "ndvi_high": 0.702
+        }
+      ]
+    },
+    "pulses": {
+      "source": "extrapolated from wheat (shorter spring cycle)",
+      "stages": [
+        {
+          "stage": "seedling",
+          "doy_window": [
+            60,
+            110
+          ],
+          "ndvi_low": 0.298,
+          "ndvi_high": 0.555
+        },
+        {
+          "stage": "vegetative",
+          "doy_window": [
+            111,
+            150
+          ],
+          "ndvi_low": 0.517,
+          "ndvi_high": 0.691
+        },
+        {
+          "stage": "flowering",
+          "doy_window": [
+            151,
+            190
+          ],
+          "ndvi_low": 0.679,
+          "ndvi_high": 0.808
+        },
+        {
+          "stage": "ripening",
+          "doy_window": [
+            191,
+            230
+          ],
+          "ndvi_low": 0.626,
+          "ndvi_high": 0.805
+        },
+        {
+          "stage": "fallow",
+          "doy_window": [
+            231,
+            365,
+            1,
+            59
+          ],
+          "ndvi_low": 0.409,
+          "ndvi_high": 0.674
+        }
+      ]
+    }
+  }
+}

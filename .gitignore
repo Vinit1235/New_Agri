@@ -1,0 +1,28 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env.local
+
+# Databases & logs
+*.db
+*.sqlite3
+*.log
+
+# Sensitive environment variables
+.env
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Agent / temporary files
+.gemini/
+.system_generated/

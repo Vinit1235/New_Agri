@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - Krishi Smart Farming Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            background: #f0f4f8;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        /* ===== TOAST ===== */
+        .toast-notification {
+            position: fixed; top: 20px; right: 20px;
+            background: #1a1a2e; color: white;
+            padding: 16px 24px; border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            max-width: 380px;
+            display: none;
+            align-items: center; gap: 12px;
+        }
+        .toast-notification.show { display: flex; }
+        .toast-notification .close {
+            cursor: pointer; opacity: 0.7; transition: all 0.3s ease;
+        }
+        .toast-notification .close:hover { opacity: 1; }
+
+        /* ===== SIGNUP CONTAINER ===== */
+        .signup-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.12);
+            overflow: hidden;
+            margin: 20px;
+        }
+
+        /* ===== LEFT PANEL - BRAND ===== */
+        .signup-brand {
+            background: linear-gradient(160deg, #1a0a2e 0%, #3a1a5a 40%, #6A1B9A 70%, #8E24AA 100%);
+            padding: 50px 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        .signup-brand::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(142,36,170,0.08) 0%, transparent 70%);
+        }
+        .signup-brand .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+        .signup-brand .brand-logo .logo-icon { font-size: 36px; }
+        .signup-brand .brand-content {
+            position: relative;
+            z-index: 1;
+        }
+        .signup-brand .brand-content h2 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        .signup-brand .brand-content h2 .highlight {
+            background: linear-gradient(135deg, #CE93D8, #E1BEE7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .signup-brand .brand-content p {
+            font-size: 16px;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.8;
+            max-width: 340px;
+        }
+        .signup-brand .brand-features {
+            display: grid;
+            gap: 14px;
+            margin-top: 24px;
+        }
+        .signup-brand .brand-features .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.85);
+        }
+        .signup-brand .brand-features .feature i {
+            color: #CE93D8;
+            font-size: 18px;
+            width: 24px;
+        }
+        .signup-brand .brand-footer {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            position: relative;
+            z-index: 1;
+            margin-top: 20px;
+        }
+
+        /* ===== RIGHT PANEL - SIGNUP FORM ===== */
+        .signup-form {
+            padding: 40px 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .signup-form::-webkit-scrollbar {
+            width: 4px;
+        }
+        .signup-form::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+        .signup-form::-webkit-scrollbar-thumb {
+            background: #6A1B9A;
+            border-radius: 10px;
+        }
+        .signup-form .form-header {
+            margin-bottom: 24px;
+        }
+        .signup-form .form-header h3 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a1a2e;
+        }
+        .signup-form .form-header p {
+            font-size: 15px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Form Group */
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+        .form-group label i { color: #6A1B9A; margin-right: 6px; }
+        .form-group .input-wrapper {
+            position: relative;
+        }
+        .form-group .input-wrapper input,
+        .form-group .input-wrapper select {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border-radius: 10px;
+            border: 2px solid #e8ecf0;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+        .form-group .input-wrapper input:focus,
+        .form-group .input-wrapper select:focus {
+            border-color: #6A1B9A;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(106,27,154,0.08);
+        }
+        .form-group .input-wrapper .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .form-group .input-wrapper input:focus + .input-icon,
+        .form-group .input-wrapper input:focus ~ .input-icon {
+            color: #6A1B9A;
+        }
+        .form-group .input-wrapper select {
+            appearance: none;
+            padding-right: 36px;
+        }
+        .form-group .input-wrapper select + .input-icon {
+            position: absolute;
+            right: 12px;
+            left: auto;
+            pointer-events: none;
+        }
+        .form-group .input-wrapper .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+        }
+        .form-group .input-wrapper .toggle-password:hover { color: #1a1a2e; }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 6px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .password-strength .strength-bar {
+            flex: 1;
+            height: 4px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            gap: 2px;
+        }
+        .password-strength .strength-bar .bar {
+            flex: 1;
+            height: 100%;
+            background: #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .password-strength .strength-bar .bar.active.weak { background: #E53935; }
+        .password-strength .strength-bar .bar.active.medium { background: #F57C00; }
+        .password-strength .strength-bar .bar.active.strong { background: #2E7D32; }
+        .password-strength .strength-text {
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* Form Row */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* Terms */
+        .terms-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 12px 0 16px;
+            font-size: 13px;
+            color: #666;
+        }
+        .terms-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #6A1B9A;
+            margin-top: 2px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .terms-check a {
+            color: #6A1B9A;
+            font-weight: 600;
+        }
+        .terms-check a:hover { color: #4A148C; }
+
+        /* Signup Button */
+        .btn-signup {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6A1B9A, #8E24AA);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+            box-shadow: 0 4px 20px rgba(106,27,154,0.3);
+        }
+        .btn-signup:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(106,27,154,0.4);
+        }
+        .btn-signup:active { transform: translateY(0); }
+        .btn-signup i { font-size: 18px; }
+
+        /* Social Login */
+        .social-login {
+            margin-top: 18px;
+            text-align: center;
+        }
+        .social-login .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .social-login .divider::before,
+        .social-login .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e8ecf0;
+        }
+        .social-login .divider span {
+            font-size: 13px;
+            color: #888;
+            white-space: nowrap;
+        }
+        .social-login .social-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .social-login .social-buttons .btn-social {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            border: 2px solid #e8ecf0;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+        }
+        .social-login .social-buttons .btn-social:hover {
+            border-color: #6A1B9A;
+            color: #6A1B9A;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .social-login .social-buttons .btn-social.google:hover { border-color: #DB4437; color: #DB4437; }
+        .social-login .social-buttons .btn-social.facebook:hover { border-color: #1877F2; color: #1877F2; }
+        .social-login .social-buttons .btn-social.microsoft:hover { border-color: #00A4EF; color: #00A4EF; }
+
+        /* Login Link */
+        .login-link {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 14px;
+            color: #888;
+        }
+        .login-link a {
+            color: #6A1B9A;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .login-link a:hover { color: #4A148C; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .signup-container {
+                grid-template-columns: 1fr;
+                max-width: 520px;
+                margin: 20px;
+                border-radius: 20px;
+            }
+            .signup-brand {
+                padding: 30px 28px;
+                border-radius: 20px 20px 0 0;
+            }
+            .signup-brand .brand-content h2 { font-size: 26px; }
+            .signup-brand .brand-features { grid-template-columns: 1fr 1fr; }
+            .signup-form { padding: 30px 28px; max-height: none; }
+        }
+
+        @media (max-width: 768px) {
+            .signup-container { max-width: 460px; }
+            .form-row { grid-template-columns: 1fr; }
+            .signup-brand .brand-features { grid-template-columns: 1fr; }
+            .signup-brand .brand-content h2 { font-size: 22px; }
+            .signup-brand .brand-content p { font-size: 14px; }
+            .signup-form .form-header h3 { font-size: 24px; }
+            .signup-form { padding: 24px 20px; }
+            .signup-brand { padding: 24px 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .signup-container { margin: 12px; border-radius: 16px; }
+            .signup-brand { padding: 20px 16px; }
+            .signup-form { padding: 20px 16px; }
+            .signup-form .form-header h3 { font-size: 20px; }
+            .form-group .input-wrapper input,
+            .form-group .input-wrapper select { padding: 10px 12px 10px 34px; font-size: 13px; }
+            .btn-signup { font-size: 14px; padding: 12px; }
+            .social-login .social-buttons .btn-social { width: 38px; height: 38px; font-size: 15px; }
+            .terms-check { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOAST NOTIFICATION ===== -->
+    <div class="toast-notification" id="toastNotification">
+        <i class="fas fa-check-circle" style="color:#4CAF50;font-size:20px;"></i>
+        <span id="toastMessage">Welcome to Krishi!</span>
+        <span class="close" onclick="closeToast()"><i class="fas fa-times"></i></span>
+    </div>
+
+    <!-- ===== SIGNUP CONTAINER ===== -->
+    <div class="signup-container">
+
+        <!-- ===== LEFT PANEL - BRAND ===== -->
+        <div class="signup-brand">
+            <div class="brand-logo">
+                <span class="logo-icon">🌾</span>
+                <span>Krishi</span>
+            </div>
+
+            <div class="brand-content">
+                <h2>Create <span class="highlight">Account</span></h2>
+                <p>Join thousands of farmers already using Krishi to grow smarter.</p>
+
+                <div class="brand-features">
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Free 14-day trial</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>No credit card required</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Cancel anytime</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Full access to all features</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-footer">
+                <i class="fas fa-shield-alt"></i> 100% secure • 256-bit encryption
+            </div>
+        </div>
+
+        <!-- ===== RIGHT PANEL - SIGNUP FORM ===== -->
+        <div class="signup-form">
+            <div class="form-header">
+                <h3>📝 Create Account</h3>
+                <p>Fill in the details to get started with Krishi</p>
+            </div>
+
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="fullName"><i class="fas fa-user"></i> Full Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="fullName" placeholder="Enter your full name" required />
+                        <span class="input-icon"><i class="fas fa-user"></i></span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" placeholder="Enter your email" required />
+                        <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="Create a password" required oninput="checkPasswordStrength(this.value)" />
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="bar" id="strength1"></div>
+                            <div class="bar" id="strength2"></div>
+                            <div class="bar" id="strength3"></div>
+                            <div class="bar" id="strength4"></div>
+                        </div>
+                        <span class="strength-text" id="strengthText">Weak</span>
+                    </div>
+                </div>
+
+                <!-- Farm Details Row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="farmName"><i class="fas fa-tractor"></i> Farm Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="farmName" placeholder="Your farm name" />
+                            <span class="input-icon"><i class="fas fa-tractor"></i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="farmSize"><i class="fas fa-ruler-combined"></i> Farm Size (Acres)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="farmSize" placeholder="e.g. 10" min="1" />
+                            <span class="input-icon"><i class="fas fa-ruler-combined"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="form-group">
+                    <label for="location"><i class="fas fa-location-dot"></i> Location</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="location" placeholder="City, State" />
+                        <span class="input-icon"><i class="fas fa-location-dot"></i></span>
+                    </div>
+                </div>
+
+                <!-- Crop Type -->
+                <div class="form-group">
+                    <label for="cropType"><i class="fas fa-seedling"></i> Primary Crop</label>
+                    <div class="input-wrapper">
+                        <select id="cropType">
+                            <option value="">Select your primary crop</option>
+                            <option value="wheat">🌾 Wheat</option>
+                            <option value="rice">🌾 Rice</option>
+                            <option value="corn">🌽 Corn</option>
+                            <option value="vegetables">🥬 Vegetables</option>
+                            <option value="fruits">🍎 Fruits</option>
+                            <option value="pulses">🫘 Pulses</option>
+                            <option value="oilseeds">🫚 Oilseeds</option>
+                            <option value="mixed">🌿 Mixed Crops</option>
+                        </select>
+                        <span class="input-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <div class="terms-check">
+                    <input type="checkbox" id="terms" required />
+                    <label for="terms">
+                        I agree to the <a href="terms-of-service.html">Terms of Service</a> and 
+                        <a href="privacy-policy.html">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <!-- Signup Button -->
+                <button type="submit" class="btn-signup">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+
+                <!-- Social Login -->
+                <div class="social-login">
+                    <div class="divider">
+                        <span>Or sign up with</span>
+                    </div>
+                    <div class="social-buttons">
+                        <button type="button" class="btn-social google" onclick="showToast('🔵 Google signup coming soon...')">
+                            <i class="fab fa-google"></i>
+                        </button>
+                        <button type="button" class="btn-social facebook" onclick="showToast('🔵 Facebook signup coming soon...')">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button type="button" class="btn-social microsoft" onclick="showToast('🔵 Microsoft signup coming soon...')">
+                            <i class="fab fa-microsoft"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Login Link -->
+                <div class="login-link">
+                    Already have an account? <a href="login.html">Sign In</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================
+    JAVASCRIPT - ALL WORKING
+    ============================================ -->
+    <script>
+        // ===== 1. TOAST NOTIFICATION =====
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function closeToast() {
+            document.getElementById('toastNotification').classList.remove('show');
+        }
+
+        // ===== 2. TOGGLE PASSWORD =====
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('toggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // ===== 3. PASSWORD STRENGTH =====
+        function checkPasswordStrength(password) {
+            const bars = [
+                document.getElementById('strength1'),
+                document.getElementById('strength2'),
+                document.getElementById('strength3'),
+                document.getElementById('strength4')
+            ];
+            const text = document.getElementById('strengthText');
+
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+            if (/\d/.test(password) && /[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+            // Reset all bars
+            bars.forEach(bar => {
+                bar.className = 'bar';
+            });
+
+            // Set active bars
+            for (let i = 0; i < strength; i++) {
+                bars[i].classList.add('active');
+                if (strength <= 1) bars[i].classList.add('weak');
+                else if (strength <= 2) bars[i].classList.add('medium');
+                else bars[i].classList.add('strong');
+            }
+
+            // Set text
+            if (password.length === 0) {
+                text.textContent = '';
+                text.style.color = '#888';
+            } else if (strength <= 1) {
+                text.textContent = 'Weak';
+                text.style.color = '#E53935';
+            } else if (strength <= 2) {
+                text.textContent = 'Medium';
+                text.style.color = '#F57C00';
+            } else if (strength <= 3) {
+                text.textContent = 'Strong';
+                text.style.color = '#2E7D32';
+            } else {
+                text.textContent = 'Very Strong';
+                text.style.color = '#1B5E20';
+            }
+        }
+
+        // ===== 4. FORM SUBMISSION =====
+        function handleSignup(event) {
+            event.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const terms = document.getElementById('terms').checked;
+
+            // Validate name
+            if (!fullName || fullName.length < 2) {
+                showToast('⚠️ Please enter your full name');
+                document.getElementById('fullName').style.borderColor = '#E53935';
+                setTimeout(() => document.getElementById('fullName').style.borderColor = '#e8ecf0', 2000);
+                return;
+            }
+
+            // Validate email
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                showToast('⚠️ Please enter a valid email address');
+                document.getElementById('email').style.borderColor = '#E53935';
+                setTimeout(() => document.getElementById('email').style.borderColor = '#e8ecf0', 2000);
+                return;
+            }
+
+            // Validate password
+            if (!password || password.length < 6) {
+                showToast('⚠️ Password must be at least 6 characters');
+                document.getElementById('password').style.borderColor = '#E53935';
+                setTimeout(() => document.getElementById('password').style.borderColor = '#e8ecf0', 2000);
+                return;
+            }
+
+            // Validate terms
+            if (!terms) {
+                showToast('⚠️ Please accept the Terms of Service');
+                document.getElementById('terms').focus();
+                return;
+            }
+
+            // Real signup using fetch API
+            const signupBtn = document.querySelector('.btn-signup');
+            signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            signupBtn.disabled = true;
+
+            fetch('http://localhost:8000/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    email: email, 
+                    password: password,
+                    full_name: fullName,
+                    category: "farmer"
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.detail || 'Registration failed'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                localStorage.setItem('krishi_token', data.access_token);
+                localStorage.setItem('krishi_user', JSON.stringify(data.user));
+                
+                signupBtn.innerHTML = '<i class="fas fa-check-circle"></i> Account Created!';
+                signupBtn.style.background = 'linear-gradient(135deg, #1B5E20, #2E7D32)';
+
+                setTimeout(() => {
+                    showToast('✅ Account created successfully! Redirecting to dashboard...');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }, 500);
+            })
+            .catch(error => {
+                showToast('⚠️ ' + error.message);
+                signupBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+                signupBtn.disabled = false;
+            });
+        }
+
+        // ===== 5. ENTER KEY SUPPORT =====
+        document.getElementById('signupForm').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSignup(e);
+            }
+        });
+
+        // ===== 6. CONSOLE =====
+        console.log('%c🌾 Krishi - Sign Up Page', 'font-size:22px;font-weight:900;color:#6A1B9A;');
+        console.log('%c📝 Create your free account today', 'font-size:13px;color:#4CAF50;');
+        console.log('%c🔒 Secure registration with 256-bit encryption', 'font-size:13px;color:#0288D1;');
+    </script>
+</body>
+</html>

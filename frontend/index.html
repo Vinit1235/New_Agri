@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Krishi - Smart Farming Platform</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            background: #f0f4f8;
+            line-height: 1.6;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 12px 0; background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 2px solid rgba(46, 125, 50, 0.3);
+            transition: all 0.3s ease;
+        }
+        .header.scrolled {
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 2px 30px rgba(0,0,0,0.08);
+        }
+        .header.scrolled .nav-logo span { color: #1a1a2e; }
+        .header.scrolled .nav-links a { color: #1a1a2e; }
+        .header.scrolled .nav-links a:hover { color: #2E7D32; }
+        .header.scrolled .live-indicator { color: #2E7D32; border-color: #ddd; }
+        .header.scrolled .language-selector select { border-color: #ddd; color: #1a1a2e; background: white; }
+        .header.scrolled .language-selector::after { color: #999; }
+        .header.scrolled .mobile-menu-btn { color: #1a1a2e; }
+
+        .nav-container {
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1280px; margin: 0 auto; padding: 0 24px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 24px; font-weight: 800; color: white;
+        }
+        .nav-logo .logo-icon { font-size: 28px; }
+        .header.scrolled .nav-logo span { color: #1a1a2e; }
+
+        .nav-links {
+            display: flex; align-items: center; gap: 20px;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.85);
+            font-weight: 500; font-size: 14px;
+            transition: all 0.3s ease;
+            padding: 6px 0;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-links a:hover { color: #81C784; border-bottom-color: #81C784; }
+        .header.scrolled .nav-links a:hover { color: #2E7D32; border-bottom-color: #2E7D32; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 28px; border-radius: 8px;
+            font-weight: 600; font-size: 14px;
+            border: none; cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none; font-family: inherit;
+        }
+        .btn-primary {
+            background: #2E7D32; color: white;
+            box-shadow: 0 4px 20px rgba(46,125,50,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(46,125,50,0.4); }
+        .btn-outline {
+            background: transparent; color: rgba(255,255,255,0.85);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .btn-outline:hover { background: white; color: #2E7D32; border-color: white; }
+        .btn-white {
+            background: white; color: #2E7D32;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+        .btn-sm { padding: 8px 18px; font-size: 13px; }
+        .btn-lg { padding: 14px 36px; font-size: 16px; }
+
+        .btn-feature {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 12px 30px; border-radius: 50px;
+            font-weight: 700; font-size: 15px;
+            border: none; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none; font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #2E7D32, #43A047);
+            color: white;
+            box-shadow: 0 4px 20px rgba(46,125,50,0.3);
+        }
+        .btn-feature:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(46,125,50,0.4);
+        }
+        .btn-feature::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        .btn-feature:hover::after { opacity: 1; }
+        .btn-feature i {
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        .btn-feature:hover i {
+            transform: translateX(4px) scale(1.1);
+        }
+        .btn-feature-2 { background: linear-gradient(135deg, #1565C0, #1E88E5); box-shadow: 0 4px 20px rgba(21,101,192,0.3); }
+        .btn-feature-2:hover { box-shadow: 0 12px 40px rgba(21,101,192,0.4); }
+        .btn-feature-3 { background: linear-gradient(135deg, #E65100, #F57C00); box-shadow: 0 4px 20px rgba(230,81,0,0.3); }
+        .btn-feature-3:hover { box-shadow: 0 12px 40px rgba(230,81,0,0.4); }
+        .btn-feature-4 { background: linear-gradient(135deg, #6A1B9A, #8E24AA); box-shadow: 0 4px 20px rgba(106,27,154,0.3); }
+        .btn-feature-4:hover { box-shadow: 0 12px 40px rgba(106,27,154,0.4); }
+        .btn-feature-sm { padding: 8px 20px; font-size: 13px; border-radius: 50px; }
+
+        .mobile-menu-btn {
+            display: none; background: none; border: none;
+            color: white; font-size: 24px; cursor: pointer;
+        }
+        .header.scrolled .mobile-menu-btn { color: #1a1a2e; }
+
+        .language-selector {
+            position: relative; display: inline-block;
+        }
+        .language-selector select {
+            padding: 6px 32px 6px 14px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: white; font-size: 13px; font-weight: 500;
+            cursor: pointer; appearance: none;
+            transition: all 0.3s ease; font-family: inherit;
+        }
+        .language-selector select option { background: #1a1a2e; color: white; }
+        .language-selector::after {
+            content: '\f0d7';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute; right: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.4);
+            pointer-events: none; font-size: 12px;
+        }
+
+        .live-indicator {
+            display: flex; align-items: center; gap: 8px;
+            color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500;
+            padding: 4px 14px; border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .live-indicator .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center;
+            background: linear-gradient(160deg, #0a1a0a 0%, #1a3a1a 40%, #2E7D32 100%);
+            padding: 100px 0 60px;
+            position: relative; overflow: hidden;
+        }
+        .hero-pattern {
+            position: absolute; inset: 0; opacity: 0.05;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .hero-container {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 50px; align-items: center;
+            max-width: 1280px; margin: 0 auto; padding: 0 24px;
+            width: 100%; position: relative; z-index: 1;
+        }
+        .hero-content h1 {
+            font-size: 48px; font-weight: 900; color: white;
+            line-height: 1.08; margin-bottom: 16px;
+        }
+        .hero-content h1 .highlight {
+            background: linear-gradient(135deg, #81C784, #A5D6A7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-content p {
+            font-size: 18px; color: rgba(255,255,255,0.8);
+            margin-bottom: 24px; max-width: 520px; line-height: 1.8;
+        }
+        .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+
+        .hero-stats {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 12px; max-width: 520px;
+        }
+        .hero-stat {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            padding: 14px 16px; border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.3s ease;
+        }
+        .hero-stat:hover { background: rgba(255,255,255,0.12); transform: translateY(-3px); }
+        .hero-stat .number {
+            font-size: 24px; font-weight: 800; color: white; display: block;
+        }
+        .hero-stat .label {
+            font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px;
+        }
+
+        .hero-image-wrapper {
+            position: relative; width: 100%; max-width: 560px; margin: 0 auto;
+        }
+        .hero-image-wrapper .main-image {
+            border-radius: 20px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+            width: 100%; height: auto; aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #1B5E20, #43A047);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 60px; color: rgba(255,255,255,0.15);
+            position: relative; overflow: hidden;
+        }
+        .hero-image-wrapper .main-image img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .hero-image-wrapper .main-image::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(46,125,50,0.2));
+        }
+        .hero-image-badge {
+            position: absolute; bottom: -15px; right: -15px;
+            background: white; padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 10px;
+            z-index: 2; animation: floatBadge 3s ease-in-out infinite;
+        }
+        @keyframes floatBadge {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .hero-image-badge .badge-icon {
+            width: 40px; height: 40px;
+            background: #E8F5E9; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #2E7D32;
+        }
+        .hero-image-badge .badge-text {
+            font-weight: 700; font-size: 13px; color: #1a1a2e;
+        }
+        .hero-image-badge .badge-text small {
+            display: block; font-weight: 400; font-size: 11px; color: #999;
+        }
+
+        /* ===== SECTION HEADER ===== */
+        .section-header {
+            text-align: center; margin-bottom: 40px;
+        }
+        .section-badge {
+            display: inline-block;
+            background: #E8F5E9; color: #2E7D32;
+            padding: 4px 16px; border-radius: 50px;
+            font-size: 12px; font-weight: 600; margin-bottom: 8px;
+        }
+        .section-title {
+            font-size: 34px; font-weight: 800;
+            color: #1a1a2e; margin-bottom: 10px;
+        }
+        .section-title .highlight { color: #2E7D32; }
+        .section-subtitle {
+            font-size: 16px; color: #666; max-width: 550px; margin: 0 auto;
+        }
+
+        /* ============================================
+           DETAILED SOIL PARAMETERS SECTION
+           ============================================ */
+        .soil-parameters {
+            padding: 60px 0; background: white;
+        }
+        .parameter-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 24px; margin-top: 30px;
+        }
+        .parameter-card {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 28px 24px;
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .parameter-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            border-color: #A5D6A7;
+        }
+        .parameter-card .param-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .parameter-card .param-header .icon { font-size: 36px; }
+        .parameter-card .param-header .param-name {
+            font-weight: 700;
+            font-size: 20px;
+            color: #1a1a2e;
+        }
+        .parameter-card .param-header .param-symbol {
+            font-weight: 600;
+            font-size: 13px;
+            color: #888;
+            background: #eee;
+            padding: 2px 12px;
+            border-radius: 50px;
+        }
+        .parameter-card .param-range {
+            font-size: 14px;
+            color: #2E7D32;
+            font-weight: 600;
+            margin-bottom: 8px;
+            padding: 4px 12px;
+            background: #E8F5E9;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        .parameter-card .param-description {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+        .parameter-card .param-importance {
+            background: #FFF8E1;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 8px;
+            border-left: 3px solid #F9A825;
+        }
+        .parameter-card .param-importance strong {
+            color: #E65100;
+        }
+        .parameter-card .param-importance ul {
+            margin-top: 4px;
+        }
+        .parameter-card .param-importance ul li {
+            font-size: 13px;
+            color: #555;
+            padding: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .parameter-card .param-importance ul li i {
+            color: #2E7D32;
+            font-size: 12px;
+        }
+
+        .parameter-card .param-effect {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .parameter-card .param-effect .effect-item {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .effect-good { color: #2E7D32; background: #E8F5E9; }
+        .effect-bad { color: #E53935; background: #FFEBEE; }
+        .effect-warning { color: #F57C00; background: #FFF3E0; }
+
+        /* ===== FEATURE DETAILS ===== */
+        .feature-details {
+            padding: 60px 0; background: #f0f4f8;
+        }
+        .feature-detail-card {
+            background: white; border-radius: 16px;
+            padding: 35px; margin-bottom: 40px;
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .feature-detail-card:hover {
+            box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+            border-color: #A5D6A7;
+        }
+        .feature-detail-card .feature-header {
+            display: flex; align-items: center; gap: 24px;
+            margin-bottom: 20px;
+        }
+        .feature-detail-card .feature-header .icon {
+            width: 64px; height: 64px;
+            background: #E8F5E9; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; color: #2E7D32;
+            flex-shrink: 0;
+        }
+        .feature-detail-card .feature-header .title-area h3 {
+            font-size: 24px; font-weight: 700; color: #1a1a2e;
+        }
+        .feature-detail-card .feature-header .title-area .subtitle {
+            font-size: 14px; color: #888;
+        }
+
+        .feature-image {
+            width: 100%; max-height: 280px; border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+            background: #E8F5E9; position: relative; display: flex; align-items: center;
+            justify-content: center; min-height: 200px;
+        }
+        .feature-image img { width: 100%; height: 100%; object-fit: cover; min-height: 200px; }
+        .feature-image .fallback-icon { font-size: 80px; color: #2E7D32; opacity: 0.3; position: absolute; }
+
+        .feature-detail-card .feature-body {
+            display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;
+        }
+        .feature-detail-card .feature-body .description {
+            color: #444; font-size: 15px; line-height: 1.9;
+        }
+        .feature-detail-card .feature-body .description .simple-explanation {
+            background: #E8F5E9; border-radius: 10px; padding: 16px 20px;
+            border-left: 4px solid #2E7D32; margin: 12px 0;
+        }
+        .feature-detail-card .feature-body .description .simple-explanation strong { color: #2E7D32; }
+        .feature-detail-card .feature-body .description ul { margin-top: 10px; }
+        .feature-detail-card .feature-body .description ul li {
+            padding: 4px 0; display: flex; align-items: center; gap: 8px; font-size: 14px;
+        }
+        .feature-detail-card .feature-body .description ul li i { color: #2E7D32; width: 18px; }
+
+        .feature-detail-card .feature-side {
+            background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e8ecf0;
+        }
+        .feature-detail-card .feature-side .live-preview { text-align: center; }
+        .feature-detail-card .feature-side .live-preview .number {
+            font-size: 36px; font-weight: 900; color: #2E7D32;
+        }
+        .feature-detail-card .feature-side .live-preview .label { font-size: 13px; color: #888; }
+        .feature-detail-card .feature-side .live-preview .mini-bar {
+            width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; margin: 10px 0;
+        }
+        .feature-detail-card .feature-side .live-preview .mini-bar .fill {
+            height: 100%; border-radius: 10px; transition: width 1s ease;
+        }
+        .feature-detail-card .feature-side .feature-graph { margin-top: 16px; }
+        .feature-detail-card .feature-side .feature-graph canvas { max-height: 140px; width: 100% !important; }
+
+        .feature-actions { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .feature-actions .btn-feature { font-size: 14px; padding: 10px 24px; border-radius: 50px; }
+        .feature-actions .btn-feature-sm { font-size: 12px; padding: 8px 18px; }
+
+        /* ===== LIVE DATA ===== */
+        .live-data-section { padding: 60px 0; background: #f0f4f8; }
+        .live-data-grid {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 24px;
+        }
+        .live-data-grid .main-chart {
+            background: white; border-radius: 14px; padding: 24px; border: 1px solid #e8ecf0;
+        }
+        .live-data-grid .main-chart canvas { max-height: 220px; width: 100% !important; }
+        .live-data-grid .side-panel {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+        }
+        .live-data-grid .side-panel .info-card {
+            background: white; border-radius: 14px; padding: 16px; border: 1px solid #e8ecf0;
+            text-align: center; cursor: pointer; transition: all 0.3s ease;
+        }
+        .live-data-grid .side-panel .info-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .live-data-grid .side-panel .info-card .number {
+            font-size: 26px; font-weight: 800; color: #2E7D32;
+        }
+        .live-data-grid .side-panel .info-card .label { font-size: 12px; color: #888; }
+
+        .charts-row {
+            margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+        }
+        .charts-row .mini-chart {
+            background: white; border-radius: 14px; padding: 16px; border: 1px solid #e8ecf0;
+        }
+        .charts-row .mini-chart canvas { max-height: 100px; width: 100% !important; }
+
+        /* ===== REMOTE CONTROL ===== */
+        .remote-control {
+            margin-top: 30px; background: white; border-radius: 14px; padding: 24px; border: 1px solid #e8ecf0;
+        }
+        .remote-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+        }
+        .remote-item {
+            background: #f8fafc; border-radius: 12px; padding: 16px; text-align: center;
+            border: 1px solid #e8ecf0; transition: all 0.3s ease;
+        }
+        .remote-item .toggle-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 16px; border-radius: 50px; font-size: 12px; font-weight: 600;
+            border: none; cursor: pointer; transition: all 0.3s ease; font-family: inherit;
+        }
+        .toggle-btn.on { background: #E8F5E9; color: #2E7D32; }
+        .toggle-btn.off { background: #FFEBEE; color: #E53935; }
+
+        /* ===== CROP PRODUCTION ===== */
+        .crop-production { padding: 60px 0; background: white; }
+        .production-grid {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 30px;
+        }
+        .production-card {
+            background: #f8fafc; border-radius: 14px; padding: 28px; border: 1px solid #e8ecf0;
+        }
+        .crop-item {
+            display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+        }
+        .crop-item:last-child { border-bottom: none; }
+        .crop-item .crop-bar { width: 100px; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
+        .crop-item .crop-bar .fill { height: 100%; border-radius: 10px; }
+        .production-stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+        }
+        .production-stat {
+            background: white; border-radius: 10px; padding: 16px; text-align: center; border: 1px solid #e8ecf0;
+        }
+
+        /* ===== TESTIMONIALS ===== */
+        .testimonials { padding: 60px 0; background: white; }
+        .testimonials-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+        }
+        .testimonial-card {
+            background: #f8fafc; padding: 24px; border-radius: 14px; border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+        .testimonial-card .stars { color: #F9A825; margin-bottom: 8px; font-size: 13px; }
+        .testimonial-card blockquote {
+            font-size: 14px; line-height: 1.8; color: #444; margin-bottom: 12px; font-style: italic;
+        }
+        .testimonial-card .author { display: flex; align-items: center; gap: 12px; }
+        .testimonial-card .author .avatar {
+            width: 40px; height: 40px; border-radius: 50%; background: #2E7D32;
+            display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white;
+        }
+
+        /* ===== FAQ ===== */
+        .faq-section { padding: 60px 0; background: #f0f4f8; }
+        .faq-grid { max-width: 750px; margin: 0 auto; display: grid; gap: 12px; }
+        .faq-item {
+            background: white; border-radius: 12px; border: 1px solid #e8ecf0; overflow: hidden;
+        }
+        .faq-item .faq-question {
+            padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; font-weight: 600; color: #1a1a2e; transition: all 0.3s ease;
+        }
+        .faq-item .faq-question:hover { color: #2E7D32; }
+        .faq-item .faq-question .icon { transition: all 0.3s ease; color: #999; }
+        .faq-item.active .faq-question .icon { transform: rotate(180deg); color: #2E7D32; }
+        .faq-item .faq-answer { padding: 0 20px 20px; display: none; color: #666; line-height: 1.8; font-size: 14px; }
+        .faq-item.active .faq-answer { display: block; }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            padding: 60px 0; background: linear-gradient(160deg, #0a1a0a 0%, #1a3a1a 50%, #2E7D32 100%);
+            text-align: center; color: white;
+        }
+        .cta-section h2 { font-size: 34px; font-weight: 800; margin-bottom: 10px; }
+        .cta-section h2 .highlight { color: #81C784; }
+        .cta-section p { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 520px; margin: 0 auto 28px; }
+        .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0a0a12; color: rgba(255,255,255,0.6); padding: 40px 0 24px;
+        }
+        .footer-grid {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 30px; margin-bottom: 24px;
+        }
+        .footer-brand p { max-width: 300px; font-size: 14px; line-height: 1.8; }
+        .footer-links h4 { color: white; margin-bottom: 10px; font-size: 14px; }
+        .footer-links a {
+            display: block; margin-bottom: 6px; font-size: 13px; transition: all 0.3s ease; cursor: pointer;
+        }
+        .footer-links a:hover { color: white; padding-left: 4px; }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+            font-size: 13px;
+        }
+        .footer-social { display: flex; gap: 10px; }
+        .footer-social a {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .footer-social a:hover { background: #2E7D32; border-color: #2E7D32; color: white; }
+
+        /* ===== NOTIFICATION ===== */
+        .notification-toast {
+            position: fixed; top: 80px; right: 20px;
+            background: #1a1a2e; color: white; padding: 14px 20px; border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 9998; display: none;
+            align-items: center; gap: 12px; animation: slideIn 0.5s ease; max-width: 360px;
+        }
+        .notification-toast.show { display: flex; }
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== COOKIE ===== */
+        .cookie-consent {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #0a0a12; color: rgba(255,255,255,0.8);
+            padding: 12px 20px; z-index: 9999; display: none;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .cookie-consent.show { display: block; }
+
+        /* ===== BACK TO TOP ===== */
+        .back-to-top {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #2E7D32; color: white; border: none; cursor: pointer; font-size: 16px;
+            box-shadow: 0 4px 20px rgba(46,125,50,0.3); transition: all 0.3s ease;
+            opacity: 0; visibility: hidden; z-index: 999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .back-to-top.show { opacity: 1; visibility: visible; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .hero-container { grid-template-columns: 1fr; text-align: center; }
+            .hero-stats { margin: 0 auto; }
+            .hero-image-wrapper { max-width: 440px; }
+            .parameter-grid { grid-template-columns: repeat(2, 1fr); }
+            .feature-detail-card .feature-body { grid-template-columns: 1fr; }
+            .live-data-grid { grid-template-columns: 1fr; }
+            .charts-row { grid-template-columns: 1fr 1fr; }
+            .remote-grid { grid-template-columns: repeat(2, 1fr); }
+            .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+            .production-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; flex-direction: column;
+                position: absolute; top: 100%; left: 0; right: 0;
+                background: white; padding: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15); gap: 12px;
+            }
+            .nav-links.active { display: flex; }
+            .nav-links a { color: #1a1a2e !important; border-bottom: none !important; }
+            .mobile-menu-btn { display: block; }
+            .live-indicator { display: none; }
+
+            .hero-content h1 { font-size: 30px; }
+            .hero-stats { grid-template-columns: repeat(2, 1fr); }
+            .hero-stat .number { font-size: 20px; }
+            .section-title { font-size: 26px; }
+
+            .parameter-grid { grid-template-columns: 1fr 1fr; }
+            .charts-row { grid-template-columns: 1fr; }
+            .remote-grid { grid-template-columns: 1fr 1fr; }
+            .testimonials-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-brand p { margin: 0 auto; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .cta-section h2 { font-size: 26px; }
+            .cookie-consent .container { flex-direction: column; text-align: center; }
+            .back-to-top { bottom: 20px; right: 20px; width: 36px; height: 36px; font-size: 14px; }
+            .notification-toast { top: 70px; right: 10px; left: 10px; max-width: none; }
+            .live-data-grid .side-panel { grid-template-columns: 1fr 1fr; }
+            .feature-detail-card .feature-header { flex-direction: column; text-align: center; }
+            .feature-image { max-height: 180px; min-height: 150px; }
+            .feature-image img { min-height: 150px; }
+            .feature-actions { justify-content: center; }
+            .parameter-card .param-effect { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .hero-stats { grid-template-columns: 1fr 1fr; }
+            .hero-stat:last-child { grid-column: span 2; }
+            .parameter-grid { grid-template-columns: 1fr; }
+            .live-data-grid .side-panel { grid-template-columns: 1fr; }
+            .remote-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NOTIFICATION TOAST ===== -->
+    <div class="notification-toast" id="notificationToast">
+        <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+        <span id="toastMessage">Welcome to Krishi! 🌾</span>
+        <span class="close" onclick="closeToast()"><i class="fas fa-times"></i></span>
+    </div>
+
+    <!-- ===== COOKIE CONSENT ===== -->
+    <div class="cookie-consent" id="cookieConsent">
+        <div class="container">
+            <p>🌾 Krishi uses cookies. By continuing, you agree to our <a href="#" onclick="showToast('📜 Privacy Policy')">Privacy Policy</a>.</p>
+            <div class="cookie-buttons">
+                <button class="btn btn-primary btn-sm" onclick="acceptCookies()">Accept</button>
+                <button class="btn btn-outline btn-sm" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);" onclick="declineCookies()">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BACK TO TOP ===== -->
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header" id="header">
+        <nav class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-icon">🌾</span>
+                <span>Krishi</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#soil-parameters">Soil Parameters</a></li>
+                <li><a href="#feature-details">Smart Features</a></li>
+                <li><a href="#live-data">Live Data</a></li>
+                <li><a href="#crop-production">Crop Data</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="login.html" class="btn btn-outline btn-sm">Login</a></li>
+                <li><a href="signup.html" class="btn btn-primary btn-sm">Get Started</a></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="live-indicator">
+                    <span class="dot"></span>
+                    <span>Live Data</span>
+                </div>
+                <div class="language-selector">
+                    <select id="languageSelect" onchange="changeLanguage(this.value)">
+                        <option value="en">🌍 English</option>
+                        <option value="hi">🇮🇳 हिंदी</option>
+                        <option value="ta">🇮🇳 தமிழ்</option>
+                    </select>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+        <div class="hero-pattern"></div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <span class="section-badge" style="background:rgba(255,255,255,0.08);color:#81C784;border:1px solid rgba(255,255,255,0.08);">
+                    <i class="fas fa-robot"></i> AI-Powered Farming
+                </span>
+                <h1>Smart Farming <br /><span class="highlight">Grow Smarter</span> with AI</h1>
+                <p>Understand your soil better with detailed parameter information. Learn how Nitrogen, Phosphorus, Potassium, and other factors affect your crop production.</p>
+                <div class="hero-buttons">
+                    <a href="#soil-parameters" class="btn btn-primary btn-lg"><i class="fas fa-flask"></i> Soil Parameters</a>
+                    <a href="#feature-details" class="btn btn-white btn-lg"><i class="fas fa-cogs"></i> Smart Features</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><span class="number" id="heroCounter1">0</span><span class="label">Fields Monitored</span></div>
+                    <div class="hero-stat"><span class="number" id="heroCounter2">0</span><span class="label">% Uptime</span></div>
+                    <div class="hero-stat"><span class="number" id="heroCounter3">0</span><span class="label">% Water Savings</span></div>
+                    <div class="hero-stat"><span class="number" id="heroCounter4">0</span><span class="label">M Tonnes Production</span></div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-wrapper">
+                    <div class="main-image">
+                        <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=450&fit=crop" alt="Smart Farming" onerror="this.parentElement.innerHTML='<span style=font-size:60px;z-index:1;>🌾</span>'">
+                    </div>
+                    <div class="hero-image-badge">
+                        <div class="badge-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="badge-text">Live Analytics <small>Real-time data</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    DETAILED SOIL PARAMETERS - ENHANCED
+    ============================================ -->
+    <section class="soil-parameters" id="soil-parameters">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-flask"></i> Soil Parameters</span>
+                <h2 class="section-title">Understanding <span class="highlight">Soil Health</span></h2>
+                <p class="section-subtitle">Detailed information about each soil parameter and why it is critical for your crop production.</p>
+            </div>
+
+            <div class="parameter-grid">
+
+                <!-- ===== NITROGEN ===== -->
+                <div class="parameter-card">
+                    <div class="param-header">
+                        <span class="icon">🧪</span>
+                        <span class="param-name">Nitrogen</span>
+                        <span class="param-symbol">(N)</span>
+                    </div>
+                    <div class="param-range">Optimal: 280-560 kg/ha</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> Nitrogen is the most important nutrient for plant growth. It is the building block of proteins, enzymes, and chlorophyll - the green pigment that helps plants make food through photosynthesis.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> Without enough nitrogen, plants cannot produce food, leading to:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Pale yellow leaves (chlorosis) – sign of deficiency</li>
+                            <li><i class="fas fa-check-circle"></i> Stunted growth and low yield</li>
+                            <li><i class="fas fa-check-circle"></i> Poor grain quality and low protein content</li>
+                            <li><i class="fas fa-check-circle"></i> Weak stems that break easily in wind</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Dark green leaves</span>
+                        <span class="effect-bad">❌ Bad: Yellow leaves</span>
+                        <span class="effect-good">✅ Good: Strong stems</span>
+                        <span class="effect-bad">❌ Bad: Weak stems</span>
+                        <span class="effect-good">✅ Good: High protein grains</span>
+                        <span class="effect-bad">❌ Bad: Low quality grains</span>
+                    </div>
+                </div>
+
+                <!-- ===== PHOSPHORUS ===== -->
+                <div class="parameter-card">
+                    <div class="param-header">
+                        <span class="icon">🧪</span>
+                        <span class="param-name">Phosphorus</span>
+                        <span class="param-symbol">(P)</span>
+                    </div>
+                    <div class="param-range">Optimal: 20-40 kg/ha</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> Phosphorus is essential for energy transfer in plants. It helps convert sunlight into food and plays a critical role in root development, flowering, and seed formation.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> Phosphorus deficiency causes:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Poor root system – plants cannot absorb water</li>
+                            <li><i class="fas fa-check-circle"></i> Delayed flowering and poor fruit set</li>
+                            <li><i class="fas fa-check-circle"></i> Purple or dark green leaves (stress sign)</li>
+                            <li><i class="fas fa-check-circle"></i> Low seed production and poor quality</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Strong roots</span>
+                        <span class="effect-bad">❌ Bad: Weak roots</span>
+                        <span class="effect-good">✅ Good: Better flowers</span>
+                        <span class="effect-bad">❌ Bad: No flowers</span>
+                        <span class="effect-good">✅ Good: Faster maturity</span>
+                        <span class="effect-bad">❌ Bad: Delayed maturity</span>
+                    </div>
+                </div>
+
+                <!-- ===== POTASSIUM ===== -->
+                <div class="parameter-card">
+                    <div class="param-header">
+                        <span class="icon">🧪</span>
+                        <span class="param-name">Potassium</span>
+                        <span class="param-symbol">(K)</span>
+                    </div>
+                    <div class="param-range">Optimal: 120-180 kg/ha</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> Potassium regulates water movement in plants and activates many enzymes. It helps plants withstand drought, disease, and extreme temperatures.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> Potassium deficiency leads to:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Poor water efficiency – plants wilt easily</li>
+                            <li><i class="fas fa-check-circle"></i> Weak stalks and stems that fall over</li>
+                            <li><i class="fas fa-check-circle"></i> Increased disease and pest attacks</li>
+                            <li><i class="fas fa-check-circle"></i> Poor grain filling and low quality</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Water efficiency</span>
+                        <span class="effect-bad">❌ Bad: Wilting</span>
+                        <span class="effect-good">✅ Good: Disease resistance</span>
+                        <span class="effect-bad">❌ Bad: Disease prone</span>
+                        <span class="effect-good">✅ Good: Strong stems</span>
+                        <span class="effect-bad">❌ Bad: Lodging (falling)</span>
+                    </div>
+                </div>
+
+                <!-- ===== TEMPERATURE ===== -->
+                <div class="parameter-card">
+                    <div class="param-header">
+                        <span class="icon">🌡️</span>
+                        <span class="param-name">Temperature</span>
+                        <span class="param-symbol">(T)</span>
+                    </div>
+                    <div class="param-range">Optimal: 20-32°C</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> Soil temperature affects seed germination, root growth, and nutrient availability. Different crops have different temperature requirements for optimal growth.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> Wrong temperature causes:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Poor seed germination – seeds rot in cold soil</li>
+                            <li><i class="fas fa-check-circle"></i> Slow root growth and nutrient deficiency</li>
+                            <li><i class="fas fa-check-circle"></i> Heat stress – leaves burn and wilt</li>
+                            <li><i class="fas fa-check-circle"></i> Reduced crop yield and quality</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Fast germination</span>
+                        <span class="effect-bad">❌ Bad: Poor germination</span>
+                        <span class="effect-good">✅ Good: Healthy roots</span>
+                        <span class="effect-bad">❌ Bad: Stunted roots</span>
+                        <span class="effect-good">✅ Good: Good nutrient uptake</span>
+                        <span class="effect-bad">❌ Bad: Nutrient lockup</span>
+                    </div>
+                </div>
+
+                <!-- ===== SOIL pH ===== -->
+                <div class="parameter-card">
+                    <div class="param-header">
+                        <span class="icon">🧪</span>
+                        <span class="param-name">Soil pH</span>
+                        <span class="param-symbol">(pH)</span>
+                    </div>
+                    <div class="param-range">Optimal: 6.0-7.5</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> pH measures how acidic or alkaline your soil is. It affects how well plants can absorb nutrients from the soil. Most crops grow best in slightly acidic to neutral soil.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> Wrong pH causes:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Nutrient lock-up – plants starve even with fertilizer</li>
+                            <li><i class="fas fa-check-circle"></i> Toxic aluminum and manganese in acidic soil</li>
+                            <li><i class="fas fa-check-circle"></i> Poor beneficial bacteria activity</li>
+                            <li><i class="fas fa-check-circle"></i> Reduced fertilizer efficiency – waste of money</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Max nutrients</span>
+                        <span class="effect-bad">❌ Bad: Nutrient lock-up</span>
+                        <span class="effect-good">✅ Good: Healthy microbes</span>
+                        <span class="effect-bad">❌ Bad: Poor microbes</span>
+                        <span class="effect-good">✅ Good: Better fertilizer</span>
+                        <span class="effect-bad">❌ Bad: Waste fertilizer</span>
+                    </div>
+                </div>
+
+                <!-- ===== SOIL MOISTURE ===== -->
+                <div class="parameter-card">
+                    <div class="param-header">
+                        <span class="icon">💧</span>
+                        <span class="param-name">Soil Moisture</span>
+                        <span class="param-symbol">(H₂O)</span>
+                    </div>
+                    <div class="param-range">Optimal: 30-70%</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> Soil moisture is the water content present in your soil. It is essential for dissolving nutrients and making them available to plants through their roots.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> Improper moisture causes:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Dry soil – roots cannot absorb nutrients</li>
+                            <li><i class="fas fa-check-circle"></i> Waterlogged soil – roots rot and die</li>
+                            <li><i class="fas fa-check-circle"></i> Plant wilting and stunted growth</li>
+                            <li><i class="fas fa-check-circle"></i> Poor crop yield and quality</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Nutrients dissolved</span>
+                        <span class="effect-bad">❌ Bad: No nutrients</span>
+                        <span class="effect-good">✅ Good: Healthy roots</span>
+                        <span class="effect-bad">❌ Bad: Root rot</span>
+                        <span class="effect-good">✅ Good: Better yield</span>
+                        <span class="effect-bad">❌ Bad: Low yield</span>
+                    </div>
+                </div>
+
+                <!-- ===== EC (SALINITY) ===== -->
+                <div class="parameter-card">
+                    <div class="param-header">
+                        <span class="icon">⚡</span>
+                        <span class="param-name">EC (Salinity)</span>
+                        <span class="param-symbol">(EC)</span>
+                    </div>
+                    <div class="param-range">Safe: 0.5-2.5 dS/m</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> Electrical Conductivity measures the salt content in your soil. High salt levels can harm plants by making it difficult for roots to absorb water and nutrients.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> High salinity causes:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Roots cannot absorb water – plant dehydrates</li>
+                            <li><i class="fas fa-check-circle"></i> Leaf burn and yellowing</li>
+                            <li><i class="fas fa-check-circle"></i> Stunted growth and reduced yield</li>
+                            <li><i class="fas fa-check-circle"></i> Death of plants in severe cases</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Healthy water uptake</span>
+                        <span class="effect-bad">❌ Bad: No water uptake</span>
+                        <span class="effect-good">✅ Good: No salt stress</span>
+                        <span class="effect-bad">❌ Bad: Salt stress</span>
+                        <span class="effect-good">✅ Good: Root protection</span>
+                        <span class="effect-bad">❌ Bad: Root damage</span>
+                    </div>
+                </div>
+
+                <!-- ===== NPK BALANCE ===== -->
+                <div class="parameter-card" style="border-color:#2E7D32;background:#E8F5E9;">
+                    <div class="param-header">
+                        <span class="icon">🌱</span>
+                        <span class="param-name">NPK Balance</span>
+                        <span class="param-symbol">(N-P-K)</span>
+                    </div>
+                    <div class="param-range">Ideal Balance: 4:2:1</div>
+                    <div class="param-description">
+                        <strong>What it is:</strong> NPK represents the three main nutrients: Nitrogen (N), Phosphorus (P), and Potassium (K). The right balance is crucial for maximum crop production.
+                    </div>
+                    <div class="param-importance">
+                        <strong>🔴 Why It's Critical:</strong> Imbalance causes:
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Too much nitrogen – excessive leaves, no fruit</li>
+                            <li><i class="fas fa-check-circle"></i> Too little phosphorus – poor roots and flowering</li>
+                            <li><i class="fas fa-check-circle"></i> Too little potassium – weak plants, disease</li>
+                            <li><i class="fas fa-check-circle"></i> Overall poor yield and quality</li>
+                        </ul>
+                    </div>
+                    <div class="param-effect">
+                        <span class="effect-good">✅ Good: Balanced growth</span>
+                        <span class="effect-bad">❌ Bad: Unbalanced growth</span>
+                        <span class="effect-good">✅ Good: Max yield</span>
+                        <span class="effect-bad">❌ Bad: Low yield</span>
+                        <span class="effect-good">✅ Good: Better quality</span>
+                        <span class="effect-bad">❌ Bad: Poor quality</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== SOIL HEALTH SUMMARY ===== -->
+            <div style="margin-top:35px;background:linear-gradient(135deg,#1B5E20,#2E7D32);border-radius:16px;padding:30px 35px;color:white;">
+                <div style="display:grid;grid-template-columns:2fr 1fr;gap:30px;align-items:center;">
+                    <div>
+                        <h4 style="font-size:22px;font-weight:800;margin-bottom:10px;">🌱 The Key to High Production</h4>
+                        <p style="color:rgba(255,255,255,0.85);font-size:15px;line-height:1.8;">
+                            <strong>Healthy soil = Healthy crops = Higher Production</strong><br>
+                            Each parameter plays a vital role in your crop's growth. 
+                            <span style="color:#81C784;">Nitrogen (N)</span> for green leaves, 
+                            <span style="color:#81C784;">Phosphorus (P)</span> for strong roots, 
+                            <span style="color:#81C784;">Potassium (K)</span> for disease resistance.
+                            <br><br>
+                            Maintaining optimal levels of all parameters will help you achieve 
+                            <strong style="color:#F9A825;">maximum yield</strong> and 
+                            <strong style="color:#F9A825;">better quality</strong> produce.
+                        </p>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:20px;">
+                            <div style="font-size:48px;font-weight:900;color:#81C784;">4:2:1</div>
+                            <div style="font-size:14px;color:rgba(255,255,255,0.7);">Ideal NPK Balance</div>
+                            <div style="display:flex;justify-content:center;gap:8px;margin-top:8px;">
+                                <span style="background:#2E7D32;padding:2px 12px;border-radius:50px;font-size:12px;">N</span>
+                                <span style="background:#F57C00;padding:2px 12px;border-radius:50px;font-size:12px;">P</span>
+                                <span style="background:#0288D1;padding:2px 12px;border-radius:50px;font-size:12px;">K</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    FEATURE DETAILS
+    ============================================ -->
+    <section class="feature-details" id="feature-details">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-cogs"></i> Smart Features</span>
+                <h2 class="section-title">Farming <span class="highlight">Made Easy</span></h2>
+                <p class="section-subtitle">Simple, powerful features designed for Indian farmers with detailed explanations.</p>
+            </div>
+
+            <!-- ===== FEATURE 1: SMART WATERING ===== -->
+            <div class="feature-detail-card" id="feature-irrigation">
+                <div class="feature-header">
+                    <div class="icon"><i class="fas fa-water"></i></div>
+                    <div class="title-area">
+                        <h3>💧 Smart Watering System</h3>
+                        <div class="subtitle">Automated irrigation based on soil moisture</div>
+                    </div>
+                </div>
+                <div class="feature-image">
+                    <img src="https://images.unsplash.com/photo-1584795962384-dce385272216?w=800&h=400&fit=crop&crop=center" alt="Smart Watering System" onerror="this.parentElement.innerHTML='<div style=height:100%;display:flex;align-items:center;justify-content:center;font-size:80px;color:#2E7D32;>💧</div>'">
+                </div>
+                <div class="feature-body">
+                    <div class="description">
+                        <div class="simple-explanation">
+                            <strong>🌱 In Simple Words:</strong> This system automatically waters your crops when the soil becomes dry. It uses sensors to check moisture levels and turns on the water pump only when needed.
+                        </div>
+                        <p><strong>How it works:</strong></p>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Soil moisture sensors placed in your field</li>
+                            <li><i class="fas fa-check-circle"></i> System constantly monitors moisture levels</li>
+                            <li><i class="fas fa-check-circle"></i> Water pump turns ON when moisture drops below optimal</li>
+                            <li><i class="fas fa-check-circle"></i> Water pump turns OFF when moisture reaches ideal level</li>
+                            <li><i class="fas fa-check-circle"></i> Works even without internet - fully offline</li>
+                        </ul>
+                        <div style="background:#E8F5E9;padding:12px 16px;border-radius:8px;margin-top:12px;">
+                            <strong>🌱 For Farmers:</strong> No need to guess when to water. The system does it for you, saving time and water.
+                        </div>
+                    </div>
+                    <div class="feature-side">
+                        <div class="live-preview">
+                            <div class="number" id="irrigationStatus">Active</div>
+                            <div class="label">Current Status</div>
+                            <div class="mini-bar"><div class="fill" id="irrigationBar" style="width:65%;background:#2E7D32;"></div></div>
+                            <div style="font-size:13px;color:#666;">Water Saved: <strong id="waterSaved">35%</strong></div>
+                            <div style="font-size:12px;color:#888;margin-top:4px;">Last watered: <span id="lastWatered">2 hours ago</span></div>
+                        </div>
+                        <div class="feature-graph">
+                            <h5 style="font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;">📊 Water Usage Comparison</h5>
+                            <canvas id="waterUsageChart"></canvas>
+                        </div>
+                        <div class="feature-actions">
+                            <a href="smart-watering.html" class="btn-feature"><i class="fas fa-chart-simple"></i> View Details</a>
+                            <a href="smart-watering.html#analysis" class="btn-feature btn-feature-2 btn-feature-sm"><i class="fas fa-sliders"></i> Analysis</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== FEATURE 2: CROP HEALTH ===== -->
+            <div class="feature-detail-card" id="feature-health">
+                <div class="feature-header">
+                    <div class="icon"><i class="fas fa-satellite"></i></div>
+                    <div class="title-area">
+                        <h3>🛰️ Crop Health Monitoring</h3>
+                        <div class="subtitle">Satellite-based crop health tracking</div>
+                    </div>
+                </div>
+                <div class="feature-image">
+                    <img src="satellite-agriculture.jpg" alt="Satellite Crop Health Monitoring" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=400&fit=crop&crop=center'">
+                </div>
+                <div class="feature-body">
+                    <div class="description">
+                        <div class="simple-explanation">
+                            <strong>🌱 In Simple Words:</strong> This feature uses satellite images to check the health of your crops from space. It measures how green and healthy your plants are using NDVI technology.
+                        </div>
+                        <p><strong>How it works:</strong></p>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Satellite captures images of your field every 5 days</li>
+                            <li><i class="fas fa-check-circle"></i> NDVI measures the greenness of plants</li>
+                            <li><i class="fas fa-check-circle"></i> NDWI measures water stress in crops</li>
+                            <li><i class="fas fa-check-circle"></i> AI analyzes data and identifies problem areas</li>
+                            <li><i class="fas fa-check-circle"></i> You get alerts when crop health declines</li>
+                        </ul>
+                        <div style="background:#E8F5E9;padding:12px 16px;border-radius:8px;margin-top:12px;">
+                            <strong>🌱 For Farmers:</strong> Know which parts of your field need extra attention without walking the entire farm.
+                        </div>
+                    </div>
+                    <div class="feature-side">
+                        <div class="live-preview">
+                            <div class="number" id="healthStatus">78%</div>
+                            <div class="label">Crop Health Score</div>
+                            <div class="mini-bar"><div class="fill" id="healthBar" style="width:78%;background:#2E7D32;"></div></div>
+                            <div style="font-size:13px;color:#666;">NDVI: <strong id="ndviValue">0.72</strong></div>
+                            <div style="font-size:12px;color:#888;margin-top:4px;">Last scan: <span id="lastScan">2 days ago</span></div>
+                        </div>
+                        <div class="feature-graph">
+                            <h5 style="font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;">📊 NDVI Trend (Last 30 Days)</h5>
+                            <canvas id="ndviTrendChart"></canvas>
+                        </div>
+                        <div class="feature-actions">
+                            <a href="crop-health.html" class="btn-feature btn-feature-2"><i class="fas fa-map"></i> View Map</a>
+                            <a href="crop-health.html#analysis" class="btn-feature btn-feature-4 btn-feature-sm"><i class="fas fa-chart-line"></i> Trends</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== FEATURE 3: FERTILIZER ===== -->
+            <div class="feature-detail-card" id="feature-fertilizer">
+                <div class="feature-header">
+                    <div class="icon"><i class="fas fa-flask"></i></div>
+                    <div class="title-area">
+                        <h3>🧪 Smart Fertilizer Management</h3>
+                        <div class="subtitle">Apply fertilizer only when needed</div>
+                    </div>
+                </div>
+                <div class="feature-image">
+                    <img src="https://images.unsplash.com/photo-1655130944329-b3a63166f6b5?w=800&h=400&fit=crop&crop=center" alt="Smart Fertilizer Management" onerror="this.parentElement.innerHTML='<div style=height:100%;display:flex;align-items:center;justify-content:center;font-size:80px;color:#2E7D32;>🧪</div>'">
+                </div>
+                <div class="feature-body">
+                    <div class="description">
+                        <div class="simple-explanation">
+                            <strong>🌱 In Simple Words:</strong> This system tests your soil and tells you exactly when and how much fertilizer to use. It prevents over-fertilizing which wastes money and harms the soil.
+                        </div>
+                        <p><strong>How it works:</strong></p>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Sensors measure EC (salinity) and pH levels</li>
+                            <li><i class="fas fa-check-circle"></i> System checks nutrient levels in soil</li>
+                            <li><i class="fas fa-check-circle"></i> AI recommends the right fertilizer type and amount</li>
+                            <li><i class="fas fa-check-circle"></i> Blocks fertilizer when soil is too salty</li>
+                            <li><i class="fas fa-check-circle"></i> Saves up to 40% on fertilizer costs</li>
+                        </ul>
+                        <div style="background:#E8F5E9;padding:12px 16px;border-radius:8px;margin-top:12px;">
+                            <strong>🌱 For Farmers:</strong> Only buy fertilizer when you need it. Save money and protect your soil health for future crops.
+                        </div>
+                    </div>
+                    <div class="feature-side">
+                        <div class="live-preview">
+                            <div class="number" id="fertStatus">Safe</div>
+                            <div class="label">Fertilizer Status</div>
+                            <div class="mini-bar"><div class="fill" id="fertBar" style="width:40%;background:#0288D1;"></div></div>
+                            <div style="font-size:13px;color:#666;">EC Level: <strong id="ecLevel">1.2 dS/m</strong></div>
+                            <div style="font-size:12px;color:#888;margin-top:4px;">Next recommended: <span id="nextFert">In 3 days</span></div>
+                        </div>
+                        <div class="feature-graph">
+                            <h5 style="font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;">📊 Nutrient Levels</h5>
+                            <canvas id="nutrientLevelChart"></canvas>
+                        </div>
+                        <div class="feature-actions">
+                            <a href="smart-fertilizer.html" class="btn-feature btn-feature-3"><i class="fas fa-flask"></i> Analyze Soil</a>
+                            <a href="smart-fertilizer.html#recommendations" class="btn-feature btn-feature-2 btn-feature-sm"><i class="fas fa-calendar"></i> Recommendations</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== FEATURE 4: AI YIELD ===== -->
+            <div class="feature-detail-card" id="feature-prediction">
+                <div class="feature-header">
+                    <div class="icon"><i class="fas fa-brain"></i></div>
+                    <div class="title-area">
+                        <h3>🧠 AI Yield Prediction</h3>
+                        <div class="subtitle">Know your harvest before it happens</div>
+                    </div>
+                </div>
+                <div class="feature-image">
+                    <img src="https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800&h=400&fit=crop&crop=center" alt="AI Yield Prediction" onerror="this.parentElement.innerHTML='<div style=height:100%;display:flex;align-items:center;justify-content:center;font-size:80px;color:#2E7D32;>🧠</div>'">
+                </div>
+                <div class="feature-body">
+                    <div class="description">
+                        <div class="simple-explanation">
+                            <strong>🌱 In Simple Words:</strong> This feature uses AI to predict how much crop you will harvest at the end of the season. It's like a weather forecast but for your crop yield.
+                        </div>
+                        <p><strong>How it works:</strong></p>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> AI analyzes historical and current data</li>
+                            <li><i class="fas fa-check-circle"></i> Considers weather patterns and soil conditions</li>
+                            <li><i class="fas fa-check-circle"></i> Predicts yield with over 90% accuracy</li>
+                            <li><i class="fas fa-check-circle"></i> Estimates harvest date</li>
+                            <li><i class="fas fa-check-circle"></i> Helps you plan storage and selling</li>
+                        </ul>
+                        <div style="background:#E8F5E9;padding:12px 16px;border-radius:8px;margin-top:12px;">
+                            <strong>🌱 For Farmers:</strong> Know your expected production months in advance. Plan your budget, storage, and sales better.
+                        </div>
+                    </div>
+                    <div class="feature-side">
+                        <div class="live-preview">
+                            <div class="number" id="yieldPrediction">4.2</div>
+                            <div class="label">Predicted Yield (tons/ha)</div>
+                            <div class="mini-bar"><div class="fill" id="yieldBar" style="width:70%;background:#F57C00;"></div></div>
+                            <div style="font-size:13px;color:#666;">Harvest in: <strong id="harvestDays">18 days</strong></div>
+                            <div style="font-size:12px;color:#888;margin-top:4px;">Confidence: <span id="confidenceLevel">92%</span></div>
+                        </div>
+                        <div class="feature-graph">
+                            <h5 style="font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;">📊 Yield Prediction Trend</h5>
+                            <canvas id="yieldPredictionChart"></canvas>
+                        </div>
+                        <div class="feature-actions">
+                            <a href="ai-yield-prediction.html" class="btn-feature btn-feature-4"><i class="fas fa-file-pdf"></i> Full Report</a>
+                            <a href="ai-yield-prediction.html#factors" class="btn-feature btn-feature-2 btn-feature-sm"><i class="fas fa-chart-line"></i> Trends</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    LIVE DATA SECTION
+    ============================================ -->
+    <section class="live-data-section" id="live-data">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-microchip"></i> Live Data</span>
+                <h2 class="section-title">Real-Time <span class="highlight">Soil Monitoring</span></h2>
+                <p class="section-subtitle">Live sensor readings with detailed parameter analysis and remote control.</p>
+            </div>
+
+            <div class="live-data-grid">
+                <div class="main-chart">
+                    <h4 style="font-size:16px;font-weight:700;margin-bottom:12px;"><i class="fas fa-chart-line" style="color:#2E7D32;"></i> Live Sensor Trends</h4>
+                    <canvas id="liveChart"></canvas>
+                </div>
+                <div class="side-panel">
+                    <div class="info-card" onclick="showToast('📊 Average moisture across all sensors')">
+                        <div class="number" id="avgMoisture">0%</div>
+                        <div class="label">Avg Moisture</div>
+                        <div class="trend up" style="color:#2E7D32;">↑ 3% vs yesterday</div>
+                    </div>
+                    <div class="info-card" onclick="showToast('🌡️ Average temperature across all sensors')">
+                        <div class="number" id="avgTemp">0°C</div>
+                        <div class="label">Avg Temperature</div>
+                        <div class="trend down" style="color:#E53935;">↓ 1°C vs yesterday</div>
+                    </div>
+                    <div class="info-card" onclick="showToast('🌱 Overall field health score based on all parameters')">
+                        <div class="number" id="fieldHealth">0%</div>
+                        <div class="label">Field Health Score</div>
+                        <div class="trend up" style="color:#2E7D32;">↑ 5% vs last week</div>
+                    </div>
+                    <div class="info-card" onclick="showToast('📈 Total data points collected from sensors')">
+                        <div class="number" id="dataPoints">0</div>
+                        <div class="label">Data Points Collected</div>
+                        <div class="trend up" style="color:#2E7D32;">↑ 120 today</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="mini-chart">
+                    <h5 style="font-size:13px;font-weight:600;margin-bottom:8px;"><i class="fas fa-chart-bar" style="color:#2E7D32;"></i> Nutrient Levels</h5>
+                    <canvas id="nutrientChart"></canvas>
+                </div>
+                <div class="mini-chart">
+                    <h5 style="font-size:13px;font-weight:600;margin-bottom:8px;"><i class="fas fa-chart-pie" style="color:#F57C00;"></i> Sensor Status</h5>
+                    <canvas id="sensorStatusChart"></canvas>
+                </div>
+                <div class="mini-chart">
+                    <h5 style="font-size:13px;font-weight:600;margin-bottom:8px;"><i class="fas fa-chart-area" style="color:#0288D1;"></i> Weekly Trend</h5>
+                    <canvas id="weeklyTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- REMOTE CONTROL -->
+            <div class="remote-control">
+                <h4 style="font-size:16px;font-weight:700;margin-bottom:16px;"><i class="fas fa-wifi" style="color:#2E7D32;"></i> Remote Control Panel</h4>
+                <div class="remote-grid">
+                    <div class="remote-item">
+                        <span class="remote-icon">💧</span>
+                        <div class="remote-name">Irrigation Pump</div>
+                        <div class="remote-status" id="pumpStatus">● Running</div>
+                        <button class="toggle-btn on" id="pumpBtn" onclick="togglePump()">⏹ Stop</button>
+                    </div>
+                    <div class="remote-item">
+                        <span class="remote-icon">🧪</span>
+                        <div class="remote-name">Fertilizer Valve</div>
+                        <div class="remote-status" id="fertValveStatus">● Closed</div>
+                        <button class="toggle-btn off" id="fertBtn" onclick="toggleFertilizer()">▶ Open</button>
+                    </div>
+                    <div class="remote-item">
+                        <span class="remote-icon">🌊</span>
+                        <div class="remote-name">Leaching System</div>
+                        <div class="remote-status" id="leachStatus">● Idle</div>
+                        <button class="toggle-btn off" id="leachBtn" onclick="toggleLeach()">▶ Start</button>
+                    </div>
+                    <div class="remote-item">
+                        <span class="remote-icon">📡</span>
+                        <div class="remote-name">Auto Mode</div>
+                        <div class="remote-status" id="autoModeStatus">● Active</div>
+                        <button class="toggle-btn on" id="autoBtn" onclick="toggleAutoMode()">⏹ Disable</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;background:#E8F5E9;border-radius:12px;padding:16px 20px;border-left:4px solid #2E7D32;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <i class="fas fa-info-circle" style="color:#2E7D32;font-size:20px;"></i>
+                <div style="flex:1;">
+                    <strong>💡 Understanding Your Soil Data:</strong> 
+                    <span style="color:#444;font-size:14px;">
+                        Nitrogen (N) for leaf growth • Phosphorus (P) for roots • Potassium (K) for disease resistance.
+                        Temperature affects nutrient uptake. Use remote controls to manage your farm.
+                    </span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="showToast('📊 Full data report loading...')">
+                    <i class="fas fa-file-pdf"></i> Full Report
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CROP PRODUCTION ===== -->
+    <section class="crop-production" id="crop-production">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-seedling"></i> Crop Production India</span>
+                <h2 class="section-title">India's <span class="highlight">Crop Production</span> Data</h2>
+                <p class="section-subtitle">Real-time crop production statistics and insights for Indian agriculture.</p>
+            </div>
+            <div class="production-grid">
+                <div class="production-card">
+                    <h3><i class="fas fa-chart-bar"></i> Major Crop Production (2024-25)</h3>
+                    <div class="crop-item">
+                        <span class="crop-icon">🌾</span>
+                        <div class="crop-info">
+                            <div class="name">Rice</div>
+                            <div class="detail">Kharif season • Major states: West Bengal, UP</div>
+                        </div>
+                        <div class="crop-value">135.5 MT</div>
+                        <div class="crop-bar"><div class="fill" style="width:100%;background:#2E7D32;"></div></div>
+                    </div>
+                    <div class="crop-item">
+                        <span class="crop-icon">🌾</span>
+                        <div class="crop-info">
+                            <div class="name">Wheat</div>
+                            <div class="detail">Rabi season • Major states: UP, Punjab</div>
+                        </div>
+                        <div class="crop-value">112.2 MT</div>
+                        <div class="crop-bar"><div class="fill" style="width:83%;background:#F57C00;"></div></div>
+                    </div>
+                    <div class="crop-item">
+                        <span class="crop-icon">🌽</span>
+                        <div class="crop-info">
+                            <div class="name">Maize</div>
+                            <div class="detail">Kharif & Rabi • Major states: Karnataka, Bihar</div>
+                        </div>
+                        <div class="crop-value">35.6 MT</div>
+                        <div class="crop-bar"><div class="fill" style="width:26%;background:#0288D1;"></div></div>
+                    </div>
+                    <div class="crop-item">
+                        <span class="crop-icon">🫘</span>
+                        <div class="crop-info">
+                            <div class="name">Pulses</div>
+                            <div class="detail">Total pulses • Major states: MP, Rajasthan</div>
+                        </div>
+                        <div class="crop-value">28.2 MT</div>
+                        <div class="crop-bar"><div class="fill" style="width:21%;background:#E53935;"></div></div>
+                    </div>
+                    <div class="crop-item">
+                        <span class="crop-icon">🫚</span>
+                        <div class="crop-info">
+                            <div class="name">Oilseeds</div>
+                            <div class="detail">Total oilseeds • Major states: Gujarat, MP</div>
+                        </div>
+                        <div class="crop-value">35.8 MT</div>
+                        <div class="crop-bar"><div class="fill" style="width:26%;background:#7B1FA2;"></div></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showToast('📊 Full crop production report loading...')" style="margin-top:12px;width:100%;justify-content:center;">
+                        <i class="fas fa-file-pdf"></i> View Full Report
+                    </button>
+                </div>
+                <div>
+                    <div class="production-card">
+                        <h3><i class="fas fa-chart-pie"></i> Production Share</h3>
+                        <canvas id="productionChart" style="max-height:200px;width:100%;"></canvas>
+                        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+                            <div><span style="display:inline-block;width:12px;height:12px;background:#2E7D32;border-radius:3px;"></span> Rice 35%</div>
+                            <div><span style="display:inline-block;width:12px;height:12px;background:#F57C00;border-radius:3px;"></span> Wheat 29%</div>
+                            <div><span style="display:inline-block;width:12px;height:12px;background:#0288D1;border-radius:3px;"></span> Maize 9%</div>
+                            <div><span style="display:inline-block;width:12px;height:12px;background:#E53935;border-radius:3px;"></span> Pulses 7%</div>
+                            <div><span style="display:inline-block;width:12px;height:12px;background:#7B1FA2;border-radius:3px;"></span> Oilseeds 9%</div>
+                            <div><span style="display:inline-block;width:12px;height:12px;background:#F9A825;border-radius:3px;"></span> Others 11%</div>
+                        </div>
+                    </div>
+                    <div class="production-stats" style="margin-top:12px;">
+                        <div class="production-stat">
+                            <div class="value">310.5 MT</div>
+                            <div class="label">Total Foodgrain Production</div>
+                        </div>
+                        <div class="production-stat">
+                            <div class="value">2.4%</div>
+                            <div class="label">Growth Rate (YoY)</div>
+                        </div>
+                        <div class="production-stat">
+                            <div class="value">195.7 M</div>
+                            <div class="label">Total Area (M Hectares)</div>
+                        </div>
+                        <div class="production-stat">
+                            <div class="value">16.5%</div>
+                            <div class="label">Agriculture GDP Share</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-quote-left"></i> Farmer Reviews</span>
+                <h2 class="section-title">What <span class="highlight">Farmers</span> Say</h2>
+                <p class="section-subtitle">Real stories from farmers who transformed their farms with Krishi.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card" onclick="showToast('⭐ Rajesh Kumar: Krishi increased my yield by 22%!')">
+                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <blockquote>"Krishi helped me reduce water usage by 35% while increasing my wheat yield by 22%."</blockquote>
+                    <div class="author">
+                        <div class="avatar">RK</div>
+                        <div><div class="name">Rajesh Kumar</div><div class="role">Wheat Farmer, Punjab</div></div>
+                    </div>
+                </div>
+                <div class="testimonial-card" onclick="showToast('⭐ Priya Sharma: Now I manage 50 acres from my phone!')">
+                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <blockquote>"The real-time monitoring and alerts have been a game-changer. I can now manage my 50-acre farm from my smartphone."</blockquote>
+                    <div class="author">
+                        <div class="avatar">PS</div>
+                        <div><div class="name">Priya Sharma</div><div class="role">Mixed Crop Farmer, Maharashtra</div></div>
+                    </div>
+                </div>
+                <div class="testimonial-card" onclick="showToast('⭐ Amit Singh: Saved 40% on fertilizer costs!')">
+                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <blockquote>"I've seen a 40% reduction in fertilizer costs thanks to Krishi's precision recommendations."</blockquote>
+                    <div class="author">
+                        <div class="avatar">AS</div>
+                        <div><div class="name">Amit Singh</div><div class="role">Corn Farmer, Uttar Pradesh</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-circle-question"></i> FAQ</span>
+                <h2 class="section-title">Frequently Asked <span class="highlight">Questions</span></h2>
+                <p class="section-subtitle">Find answers to the most common questions about Krishi.</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item active">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What is Krishi and how does it help farmers?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">Krishi is a smart farming platform that helps Indian farmers monitor their crops, save water, reduce fertilizer costs, and get better yields. It uses sensors and AI to give you real-time information about your farm.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Do I need technical knowledge to use Krishi?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">Not at all! Krishi is designed to be simple and easy to use for all farmers. Everything is explained in simple language and you can get started with basic training.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What sensors do I need to install on my farm?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">You'll need soil moisture, temperature, pH, and EC sensors. Krishi provides complete sensor kits that are easy to install in your fields.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How accurate are the predictions?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">Our AI models are over 90% accurate in predicting yields and giving recommendations. The accuracy improves as more data is collected from your farm.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Can I use Krishi without internet?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">Yes! The sensors work fully offline, making irrigation and fertilizer decisions locally. When internet is available, data syncs to your dashboard automatically.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta-section" id="cta">
+        <div class="container">
+            <h2>Ready to <span class="highlight">Transform</span> Your Farm?</h2>
+            <p>Join thousands of farmers already using Krishi to maximize production and reduce costs.</p>
+            <div class="cta-buttons">
+                <a href="signup.html" class="btn btn-white btn-lg"><i class="fas fa-rocket"></i> Start Free Trial</a>
+                <a href="login.html" class="btn btn-outline btn-lg" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>🌾 Krishi</h3>
+                    <p>Smart farming solutions powered by AI and IoT technology. Grow smarter with Krishi.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="#soil-parameters">Soil Parameters</a>
+                    <a href="smart-watering.html">Smart Watering</a>
+                    <a href="crop-health.html">Crop Health</a>
+                    <a href="smart-fertilizer.html">Fertilizer Management</a>
+                    <a href="ai-yield-prediction.html">Yield Prediction</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Account</h4>
+                    <a href="login.html">Login</a>
+                    <a href="signup.html">Register</a>
+                    <a href="privacy-policy.html">Privacy Policy</a>
+                    <a href="terms-of-service.html">Terms of Service</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="privacy-policy.html">Privacy Policy</a>
+                    <a href="terms-of-service.html">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Krishi Smart Farming. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="#" onclick="showToast('🐦 Twitter')"><i class="fab fa-twitter"></i></a>
+                    <a href="#" onclick="showToast('🔗 LinkedIn')"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" onclick="showToast('📺 YouTube')"><i class="fab fa-youtube"></i></a>
+                    <a href="#" onclick="showToast('📸 Instagram')"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================
+    JAVASCRIPT - ALL WORKING
+    ============================================ -->
+    <script>
+        // ===== 1. TOAST =====
+        function showToast(message) {
+            const toast = document.getElementById('notificationToast');
+            const msg = document.getElementById('toastMessage');
+            msg.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        function closeToast() { document.getElementById('notificationToast').classList.remove('show'); }
+
+        // ===== 2. MOBILE MENU =====
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('active');
+                const icon = document.querySelector('#mobileMenuBtn i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            });
+        });
+
+        // ===== 3. HEADER SCROLL =====
+        window.addEventListener('scroll', function() {
+            document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+            document.getElementById('backToTop').classList.toggle('show', window.scrollY > 500);
+        });
+
+        // ===== 4. COUNTERS =====
+        function animateHeroCounters() {
+            const targets = [10000, 99, 30, 310];
+            const ids = ['heroCounter1', 'heroCounter2', 'heroCounter3', 'heroCounter4'];
+            const suffixes = ['+', '%', '%', ' MT'];
+            ids.forEach((id, index) => {
+                const el = document.getElementById(id);
+                const target = targets[index];
+                const step = Math.max(1, Math.floor(target / 60));
+                let current = 0;
+                const update = () => {
+                    current += step;
+                    if (current >= target) { el.textContent = target + suffixes[index]; return; }
+                    el.textContent = current + suffixes[index];
+                    requestAnimationFrame(update);
+                };
+                update();
+            });
+        }
+
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) { animateHeroCounters(); heroObserver.disconnect(); } });
+        }, { threshold: 0.3 });
+        heroObserver.observe(document.querySelector('.hero'));
+
+        // ===== 5. LANGUAGE =====
+        function changeLanguage(lang) {
+            const t = {
+                en: { title: 'Smart Farming <span class="highlight">Grow Smarter</span> with AI', desc: 'Understand your soil better with detailed parameter information. Learn how Nitrogen, Phosphorus, Potassium, and other factors affect your crop production.', start: 'Soil Parameters', demo: 'Smart Features', fields: 'Fields Monitored', uptime: '% Uptime', water: '% Water Savings', prod: 'M Tonnes Production' },
+                hi: { title: 'स्मार्ट खेती <span class="highlight">AI के साथ</span> बेहतर उगाएं', desc: 'विस्तृत पैरामीटर जानकारी के साथ अपनी मिट्टी को बेहतर समझें। जानें कि नाइट्रोजन, फॉस्फोरस, पोटैशियम और अन्य कारक आपकी फसल उत्पादन को कैसे प्रभावित करते हैं।', start: 'मिट्टी पैरामीटर', demo: 'स्मार्ट सुविधाएँ', fields: 'निगरानी वाले खेत', uptime: '% उपलब्धता', water: '% पानी की बचत', prod: 'मिलियन टन उत्पादन' },
+                ta: { title: 'ஸ்மார்ட் விவசாயம் <span class="highlight">AI உடன்</span> சிறப்பாக வளர்க்கவும்', desc: 'விரிவான அளவுரு தகவல்களுடன் உங்கள் மண்ணை நன்கு புரிந்து கொள்ளுங்கள். நைட்ரஜன், பாஸ்பரஸ், பொட்டாசியம் மற்றும் பிற காரணிகள் உங்கள் பயிர் உற்பத்தியை எவ்வாறு பாதிக்கின்றன என்பதை அறிக.', start: 'மண் அளவுருக்கள்', demo: 'ஸ்மார்ட் அம்சங்கள்', fields: 'கண்காணிக்கப்பட்ட வயல்கள்', uptime: '% இயக்க நேரம்', water: '% நீர் சேமிப்பு', prod: 'மில்லியன் டன் உற்பத்தி' }
+            };
+            const tr = t[lang] || t.en;
+            document.querySelector('.hero-content h1').innerHTML = tr.title;
+            document.querySelector('.hero-content p').textContent = tr.desc;
+            const btns = document.querySelectorAll('.hero-buttons .btn');
+            if (btns.length >= 2) {
+                btns[0].innerHTML = `<i class="fas fa-flask"></i> ${tr.start}`;
+                btns[1].innerHTML = `<i class="fas fa-cogs"></i> ${tr.demo}`;
+            }
+            const stats = document.querySelectorAll('.hero-stat .label');
+            if (stats.length >= 4) {
+                stats[0].textContent = tr.fields;
+                stats[1].textContent = tr.uptime;
+                stats[2].textContent = tr.water;
+                stats[3].textContent = tr.prod;
+            }
+            showToast('🌍 Language changed');
+        }
+
+        // ===== 6. COOKIE =====
+        function checkCookieConsent() {
+            if (!localStorage.getItem('cookieConsent')) {
+                document.getElementById('cookieConsent').classList.add('show');
+            }
+        }
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'accepted');
+            document.getElementById('cookieConsent').classList.remove('show');
+            showToast('🍪 Cookies accepted!');
+        }
+        function declineCookies() {
+            localStorage.setItem('cookieConsent', 'declined');
+            document.getElementById('cookieConsent').classList.remove('show');
+            showToast('🍪 Cookies declined.');
+        }
+        document.addEventListener('DOMContentLoaded', checkCookieConsent);
+
+        // ===== 7. FAQ =====
+        function toggleFAQ(element) {
+            const item = element.closest('.faq-item');
+            const isActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+            if (!isActive) item.classList.add('active');
+        }
+
+        // ===== 8. PRODUCTION CHART =====
+        const prodCtx = document.getElementById('productionChart').getContext('2d');
+        new Chart(prodCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Rice', 'Wheat', 'Maize', 'Pulses', 'Oilseeds', 'Others'],
+                datasets: [{
+                    data: [35, 29, 9, 7, 9, 11],
+                    backgroundColor: ['#2E7D32', '#F57C00', '#0288D1', '#E53935', '#7B1FA2', '#F9A825'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '60%'
+            }
+        });
+
+        // ===== 9. FEATURE GRAPHS =====
+        const waterCtx = document.getElementById('waterUsageChart').getContext('2d');
+        new Chart(waterCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Manual', 'Smart'],
+                datasets: [
+                    { label: 'Water Used (Liters)', data: [3500, 2275], backgroundColor: ['#E53935', '#2E7D32'], borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 8 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } }
+            }
+        });
+
+        const ndviTrendCtx = document.getElementById('ndviTrendChart').getContext('2d');
+        new Chart(ndviTrendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'NDVI',
+                    data: [0.65, 0.70, 0.72, 0.78],
+                    borderColor: '#2E7D32',
+                    tension: 0.4,
+                    pointRadius: 3,
+                    fill: true,
+                    backgroundColor: 'rgba(46,125,50,0.1)'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { min: 0.5, max: 0.9, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 8 } } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } }
+            }
+        });
+
+        const nutrientLevelCtx = document.getElementById('nutrientLevelChart').getContext('2d');
+        new Chart(nutrientLevelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['N', 'P', 'K'],
+                datasets: [
+                    { label: 'Current', data: [400, 30, 150], backgroundColor: ['#2E7D32', '#F57C00', '#0288D1'], borderRadius: 4 },
+                    { label: 'Optimal', data: [420, 30, 150], backgroundColor: ['rgba(46,125,50,0.2)', 'rgba(245,124,0,0.2)', 'rgba(2,136,209,0.2)'], borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#666', font: { size: 8, weight: '500' }, boxWidth: 10, padding: 4 } } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 7 } } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } }
+            }
+        });
+
+        const yieldPredCtx = document.getElementById('yieldPredictionChart').getContext('2d');
+        new Chart(yieldPredCtx, {
+            type: 'line',
+            data: {
+                labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
+                datasets: [{
+                    label: 'Yield (tons/ha)',
+                    data: [3.2, 3.5, 3.8, 4.0, 4.1, 4.2],
+                    borderColor: '#F57C00',
+                    tension: 0.4,
+                    pointRadius: 3,
+                    fill: true,
+                    backgroundColor: 'rgba(245,124,0,0.1)'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 7 } } }, x: { grid: { display: false }, ticks: { font: { size: 7 } } } }
+            }
+        });
+
+        // ===== 10. SENSOR DATA =====
+        let updateCount = 0;
+        let dataPointCount = 0;
+
+        let currentFieldId = 1; // Default field
+
+        function updateSensorData() {
+            const token = localStorage.getItem('krishi_token');
+            if (!token) {
+                // If not logged in, just don't fetch or redirect
+                // window.location.href = 'login.html';
+                return;
+            }
+
+            fetch(`http://localhost:8000/api/fields/${currentFieldId}/readings/latest`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(r => {
+                if (r.status === 401) { window.location.href = 'login.html'; throw new Error('Unauthorized'); }
+                if (!r.ok) return null;
+                return r.json();
+            })
+            .then(data => {
+                if (!data) return;
+                
+                updateCount++;
+                dataPointCount++;
+                
+                const moisture = data.moisture;
+                const temp = data.temperature;
+                const ph = data.ph;
+                const ec = data.ec;
+                
+                // Assume static nutrients for now
+                const nitrogen = 400;
+                const phosphorus = 30;
+                const potassium = 150;
+                
+                document.getElementById('avgMoisture').textContent = Math.round(moisture) + '%';
+                document.getElementById('avgTemp').textContent = temp + '°C';
+                const health = Math.round(65 + (moisture / 100) * 25);
+                document.getElementById('fieldHealth').textContent = Math.min(health, 95) + '%';
+                document.getElementById('dataPoints').textContent = dataPointCount;
+
+                document.getElementById('irrigationBar').style.width = moisture + '%';
+                document.getElementById('waterSaved').textContent = '35%';
+                
+                document.getElementById('healthStatus').textContent = Math.min(health, 95) + '%';
+                document.getElementById('healthBar').style.width = Math.min(health, 95) + '%';
+                document.getElementById('ndviValue').textContent = (Math.min(health, 95) / 100).toFixed(2);
+
+                if (ec > 2.5) {
+                    document.getElementById('fertStatus').textContent = 'Blocked';
+                    document.getElementById('fertBar').style.width = '10%';
+                    document.getElementById('fertBar').style.background = '#E53935';
+                } else {
+                    document.getElementById('fertStatus').textContent = 'Safe';
+                    document.getElementById('fertBar').style.width = '40%';
+                    document.getElementById('fertBar').style.background = '#0288D1';
+                }
+                document.getElementById('ecLevel').textContent = ec.toFixed(1) + ' dS/m';
+
+                updateLiveChart(moisture, temp, ph, ec);
+                updateNutrientChart(nitrogen, phosphorus, potassium);
+                updateMiniCharts(moisture, temp, ph, ec);
+            })
+            .catch(console.error);
+        }
+
+        // ===== 11. REMOTE CONTROL =====
+        let pumpState = true, fertState = false, leachState = false, autoState = true;
+
+        function togglePump() {
+            pumpState = !pumpState;
+            const btn = document.getElementById('pumpBtn');
+            const status = document.getElementById('pumpStatus');
+            if (pumpState) {
+                btn.className = 'toggle-btn on'; btn.innerHTML = '⏹ Stop';
+                status.textContent = '● Running';
+                showToast('💧 Irrigation Pump Started');
+            } else {
+                btn.className = 'toggle-btn off'; btn.innerHTML = '▶ Start';
+                status.textContent = '● Stopped';
+                showToast('💧 Irrigation Pump Stopped');
+            }
+        }
+
+        function toggleFertilizer() {
+            fertState = !fertState;
+            const btn = document.getElementById('fertBtn');
+            const status = document.getElementById('fertValveStatus');
+            if (fertState) {
+                btn.className = 'toggle-btn on'; btn.innerHTML = '⏹ Close';
+                status.textContent = '● Open';
+                showToast('🧪 Fertilizer Valve Opened');
+            } else {
+                btn.className = 'toggle-btn off'; btn.innerHTML = '▶ Open';
+                status.textContent = '● Closed';
+                showToast('🧪 Fertilizer Valve Closed');
+            }
+        }
+
+        function toggleLeach() {
+            leachState = !leachState;
+            const btn = document.getElementById('leachBtn');
+            const status = document.getElementById('leachStatus');
+            if (leachState) {
+                btn.className = 'toggle-btn on'; btn.innerHTML = '⏹ Stop';
+                status.textContent = '● Running';
+                showToast('🌊 Leaching System Started');
+            } else {
+                btn.className = 'toggle-btn off'; btn.innerHTML = '▶ Start';
+                status.textContent = '● Idle';
+                showToast('🌊 Leaching System Stopped');
+            }
+        }
+
+        function toggleAutoMode() {
+            autoState = !autoState;
+            const btn = document.getElementById('autoBtn');
+            const status = document.getElementById('autoModeStatus');
+            if (autoState) {
+                btn.className = 'toggle-btn on'; btn.innerHTML = '⏹ Disable';
+                status.textContent = '● Active';
+                showToast('📡 Auto Mode Enabled');
+            } else {
+                btn.className = 'toggle-btn off'; btn.innerHTML = '▶ Enable';
+                status.textContent = '● Disabled';
+                showToast('📡 Auto Mode Disabled');
+            }
+        }
+
+        // ===== 12. LIVE CHART =====
+        const liveCtx = document.getElementById('liveChart').getContext('2d');
+        const liveLabels = [], liveMoisture = [], liveTemp = [], livePh = [], liveEc = [];
+
+        const liveChart = new Chart(liveCtx, {
+            type: 'line',
+            data: {
+                labels: liveLabels,
+                datasets: [
+                    { label: 'Moisture %', data: liveMoisture, borderColor: '#2E7D32', backgroundColor: 'rgba(46,125,50,0.1)', fill: true, tension: 0.4, pointRadius: 2 },
+                    { label: 'Temp °C', data: liveTemp, borderColor: '#F57C00', backgroundColor: 'rgba(245,124,0,0.1)', fill: true, tension: 0.4, pointRadius: 2 },
+                    { label: 'pH', data: livePh, borderColor: '#0288D1', backgroundColor: 'rgba(2,136,209,0.1)', fill: true, tension: 0.4, pointRadius: 2 },
+                    { label: 'EC dS/m', data: liveEc, borderColor: '#E53935', backgroundColor: 'rgba(229,57,53,0.1)', fill: true, tension: 0.4, pointRadius: 2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#666', font: { size: 9, weight: '500' }, boxWidth: 10, padding: 6 } } },
+                scales: { y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 8 } } }, x: { grid: { display: false }, ticks: { font: { size: 8 }, maxTicksLimit: 12 } } },
+                interaction: { intersect: false, mode: 'index' }
+            }
+        });
+
+        function updateLiveChart(moisture, temp, ph, ec) {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+            if (liveLabels.length > 20) { liveLabels.shift(); liveMoisture.shift(); liveTemp.shift(); livePh.shift(); liveEc.shift(); }
+            liveLabels.push(timeStr);
+            liveMoisture.push(moisture);
+            liveTemp.push(temp);
+            livePh.push(ph);
+            liveEc.push(ec);
+            liveChart.update();
+        }
+
+        // ===== 13. NUTRIENT CHART =====
+        const nutrientCtx = document.getElementById('nutrientChart').getContext('2d');
+        const nutrientChart = new Chart(nutrientCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Nitrogen (N)', 'Phosphorus (P)', 'Potassium (K)'],
+                datasets: [
+                    { label: 'Current Level', data: [400, 30, 150], backgroundColor: ['#2E7D32', '#F57C00', '#0288D1'], borderRadius: 4 },
+                    { label: 'Optimal Range', data: [420, 30, 150], backgroundColor: ['rgba(46,125,50,0.2)', 'rgba(245,124,0,0.2)', 'rgba(2,136,209,0.2)'], borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#666', font: { size: 8, weight: '500' }, boxWidth: 10, padding: 4 } } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 7 } } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } }
+            }
+        });
+
+        function updateNutrientChart(nitrogen, phosphorus, potassium) {
+            nutrientChart.data.datasets[0].data = [nitrogen, phosphorus, potassium];
+            nutrientChart.update();
+        }
+
+        // ===== 14. MINI CHARTS =====
+        const statusCtx = document.getElementById('sensorStatusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Online', 'Offline', 'Warning'],
+                datasets: [{ data: [85, 5, 10], backgroundColor: ['#2E7D32', '#E53935', '#F57C00'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: '#666', font: { size: 8, weight: '500' }, boxWidth: 8, padding: 4 } } },
+                cutout: '60%'
+            }
+        });
+
+        const weekCtx = document.getElementById('weeklyTrendChart').getContext('2d');
+        new Chart(weekCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [
+                    { label: 'Moisture', data: [55, 58, 62, 60, 65, 70, 68], borderColor: '#2E7D32', tension: 0.4, pointRadius: 2, fill: true, backgroundColor: 'rgba(46,125,50,0.1)' },
+                    { label: 'Temp', data: [22, 24, 23, 25, 26, 24, 23], borderColor: '#F57C00', tension: 0.4, pointRadius: 2, fill: true, backgroundColor: 'rgba(245,124,0,0.1)' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#666', font: { size: 8, weight: '500' }, boxWidth: 8, padding: 4 } } },
+                scales: { y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 7 } } }, x: { grid: { display: false }, ticks: { font: { size: 7 } } } }
+            }
+        });
+
+        function updateMiniCharts(moisture, temp, ph, ec) {
+            const nitrogen = getRandomValue(200, 600);
+            const phosphorus = getRandomValue(15, 50);
+            const potassium = getRandomValue(100, 220);
+            updateNutrientChart(nitrogen, phosphorus, potassium);
+        }
+
+        // ===== 15. INITIALIZE =====
+        for (let i = 0; i < 20; i++) {
+            const m = getRandomValue(25, 75), t = getRandomValue(18, 35), p = getRandomValue(5.8, 7.6), e = getRandomValue(0.8, 3.2);
+            liveLabels.push(`-${20-i}s`);
+            liveMoisture.push(m); liveTemp.push(t); livePh.push(p); liveEc.push(e);
+        }
+        liveChart.update();
+
+        // ===== 16. START UPDATES =====
+        updateSensorData();
+        setInterval(updateSensorData, 2000);
+
+        // ===== 17. SMOOTH SCROLL =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    const headerHeight = document.getElementById('header').offsetHeight;
+                    window.scrollTo({
+                        top: target.getBoundingClientRect().top + window.pageYOffset - headerHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // ===== 18. CONSOLE =====
+        console.log('%c🌾 Krishi Smart Farming Platform', 'font-size:22px;font-weight:900;color:#2E7D32;');
+        console.log('%c🧪 Enhanced Soil Parameters with detailed explanations!', 'font-size:13px;color:#4CAF50;');
+        console.log('%c📊 Each parameter shows why it\'s critical for crop production.', 'font-size:13px;color:#F57C00;');
+        console.log('%c✅ Good vs Bad effects for better understanding.', 'font-size:13px;color:#0288D1;');
+    </script>
+</body>
+</html>

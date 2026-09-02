@@ -1,0 +1,149 @@
+SoilEdge Frontend — Image Asset Mapping
+=======================================
+Stack: HTML + CSS + JS
+Asset folder: frontend/assets/
+
+RULES
+-----
+- Use only these 10 images for MVP.
+- Do not invent extra image files unless added later.
+- Icons for moisture/temp/pH/EC can be CSS or emoji if needed.
+- Charts: Chart.js (no image files).
+
+
+FILE LIST
+---------
+1. logo.png
+2. hero.png
+3. empty-fields.png
+4. status-healthy.png
+5. status-moderate.png
+6. status-stress.png
+7. sensor-soil.png
+8. action-water.png
+9. action-fertilizer.png
+10. satellite-health.png
+
+
+PAGE → IMAGE MAPPING
+--------------------
+
+1) login.html
+   - logo.png              → header / brand mark above form
+   - hero.png              → side panel or top banner background/illustration
+
+2) register.html
+   - logo.png              → header / brand mark
+   - hero.png              → optional same as login (or omit if one-column layout)
+
+3) dashboard.html  (fields overview)
+   - logo.png              → navbar brand
+   - empty-fields.png      → shown ONLY when user has zero fields
+   - status-healthy.png    → field card badge when health = Healthy
+   - status-moderate.png   → field card badge when health = Moderate stress
+   - status-stress.png     → field card badge when health = High stress
+
+4) field.html  (single field detail)
+   - logo.png              → navbar brand
+   - sensor-soil.png       → Live Soil section header / side visual
+   - action-water.png      → shown when last AI action is irrigate / leach / improve irrigation
+   - action-fertilizer.png → shown when last AI action allows fertilizer dose
+   - status-healthy.png    → Health tab status when Healthy
+   - status-moderate.png   → Health tab status when Moderate stress
+   - status-stress.png     → Health tab status when High stress
+   - satellite-health.png  → Health (Sentinel) section visual / chart header
+
+5) settings.html
+   - logo.png              → navbar brand
+   - (no other required images)
+
+
+CONDITIONAL LOGIC (for JS)
+--------------------------
+Health badge on dashboard / field page:
+  if health_status === "Healthy"        → status-healthy.png
+  if health_status === "Moderate stress" → status-moderate.png
+  if health_status === "High stress"     → status-stress.png
+  if health_status missing               → no status image (or status-moderate as neutral)
+
+Last AI action visual on field page:
+  if action needs water / irrigate / leach → action-water.png
+  if action allows fertilizer             → action-fertilizer.png
+  if action is monitor only               → sensor-soil.png (reuse) OR no action image
+  if fertilizer blocked                   → action-fertilizer.png + CSS red overlay/opacity
+                                           (optional; no extra asset required)
+
+Empty dashboard:
+  if fields.length === 0 → show empty-fields.png + "Add your first field" text
+
+
+HTML PATH EXAMPLES
+------------------
+  <img src="assets/logo.png" alt="SoilEdge" class="logo">
+  <img src="assets/hero.png" alt="" class="hero">
+  <img src="assets/empty-fields.png" alt="No fields yet">
+  <img src="assets/status-healthy.png" alt="Healthy">
+  <img src="assets/status-moderate.png" alt="Moderate stress">
+  <img src="assets/status-stress.png" alt="High stress">
+  <img src="assets/sensor-soil.png" alt="Soil sensors">
+  <img src="assets/action-water.png" alt="Irrigation action">
+  <img src="assets/action-fertilizer.png" alt="Fertilizer action">
+  <img src="assets/satellite-health.png" alt="Satellite crop health">
+
+
+SUGGESTED CSS CLASSES
+---------------------
+  .logo              → height 32–40px
+  .hero              → full width or half panel, object-fit cover
+  .empty-state-img   → max-width 280px, centered
+  .status-badge-img  → 40×40 or 48×48 on cards
+  .section-visual    → max-width 160–220px beside sensor/health panels
+  .action-img        → 56×56 near last-action text
+
+
+NOT MAPPED TO IMAGES (use CSS / text / Chart.js)
+------------------------------------------------
+  - moisture, temperature, pH, EC numeric cards
+  - pump on/off text
+  - online/offline text (green/gray dot in CSS)
+  - NDVI / NDWI charts
+  - automation log table
+  - forms and buttons
+
+
+FOLDER STRUCTURE
+----------------
+frontend/
+  assets/
+    logo.png
+    hero.png
+    empty-fields.png
+    status-healthy.png
+    status-moderate.png
+    status-stress.png
+    sensor-soil.png
+    action-water.png
+    action-fertilizer.png
+    satellite-health.png
+  login.html
+  register.html
+  dashboard.html
+  field.html
+  settings.html
+  css/
+  js/
+
+
+QUICK REFERENCE TABLE
+---------------------
+Image                  | login | register | dashboard | field | settings
+logo.png               |  Y    |    Y     |     Y     |   Y   |    Y
+hero.png               |  Y    |   opt    |     -     |   -   |    -
+empty-fields.png       |  -    |    -     |   if empty|   -   |    -
+status-healthy.png     |  -    |    -     |     Y     |   Y   |    -
+status-moderate.png    |  -    |    -     |     Y     |   Y   |    -
+status-stress.png      |  -    |    -     |     Y     |   Y   |    -
+sensor-soil.png        |  -    |    -     |     -     |   Y   |    -
+action-water.png       |  -    |    -     |     -     |   Y   |    -
+action-fertilizer.png  |  -    |    -     |     -     |   Y   |    -
+satellite-health.png   |  -    |    -     |     -     |   Y   |    -

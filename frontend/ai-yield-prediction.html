@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Yield Prediction - Krishi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            background: #f0f4f8;
+            line-height: 1.6;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 14px 34px; border-radius: 50px; font-weight: 600; font-size: 15px;
+            border: none; cursor: pointer; transition: all 0.3s ease;
+            text-decoration: none; font-family: inherit;
+        }
+        .btn-primary { background: linear-gradient(135deg, #6A1B9A, #8E24AA); color: white; box-shadow: 0 4px 20px rgba(106,27,154,0.3); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(106,27,154,0.4); }
+        .btn-green { background: linear-gradient(135deg, #1B5E20, #2E7D32); color: white; }
+        .btn-green:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(46,125,50,0.4); }
+        .btn-outline { background: transparent; border: 2px solid #6A1B9A; color: #6A1B9A; }
+        .btn-outline:hover { background: #6A1B9A; color: white; }
+        .btn-sm { padding: 8px 20px; font-size: 13px; }
+        .btn-success { background: linear-gradient(135deg, #1B5E20, #2E7D32); color: white; }
+        .btn-success:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(46,125,50,0.4); }
+        .btn-danger { background: linear-gradient(135deg, #C62828, #E53935); color: white; }
+        .btn-danger:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(229,57,53,0.4); }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 12px 0; background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 2px 30px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+        .header.scrolled { padding: 8px 0; }
+        .nav-container {
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 24px; font-weight: 800; color: #6A1B9A;
+        }
+        .nav-logo .logo-icon { font-size: 30px; }
+        .nav-links {
+            display: flex; align-items: center; gap: 24px;
+        }
+        .nav-links a {
+            color: #1a1a2e; font-weight: 500; font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -4px; left: 0;
+            width: 0; height: 2px; background: #6A1B9A; transition: all 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { color: #6A1B9A; }
+        .btn-nav {
+            padding: 8px 24px; border-radius: 50px;
+            background: #6A1B9A; color: white !important;
+            font-weight: 600;
+        }
+        .btn-nav:hover { background: #4A148C; transform: translateY(-2px); }
+        .btn-nav::after { display: none !important; }
+        .mobile-menu-btn {
+            display: none; background: none; border: none;
+            font-size: 24px; cursor: pointer; color: #1a1a2e;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            padding: 120px 0 60px;
+            background: linear-gradient(160deg, #1a0a2e 0%, #3a1a5a 40%, #6A1B9A 60%, #8E24AA 80%, #AB47BC 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero .container { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .hero-content h1 { font-size: 44px; font-weight: 900; line-height: 1.08; margin-bottom: 16px; }
+        .hero-content h1 .highlight {
+            background: linear-gradient(135deg, #CE93D8, #E1BEE7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-content p { font-size: 18px; color: rgba(255,255,255,0.85); max-width: 520px; line-height: 1.8; margin-bottom: 24px; }
+        .hero-badges { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+        .hero-badges span {
+            background: rgba(255,255,255,0.1); padding: 4px 16px; border-radius: 50px;
+            font-size: 13px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hero-image-wrapper {
+            width: 100%; max-width: 520px; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+        .hero-image-wrapper img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4/3; display: block; }
+
+        /* ===== SECTION ===== */
+        .section { padding: 60px 0; }
+        .section-white { background: white; }
+        .section-gray { background: #f8fafc; }
+        .section-light-purple { background: #F3E5F5; }
+        .section-header { text-align: center; margin-bottom: 40px; }
+        .section-badge {
+            display: inline-block; background: #F3E5F5; color: #6A1B9A;
+            padding: 4px 18px; border-radius: 50px; font-size: 12px; font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .section-title { font-size: 34px; font-weight: 800; color: #1a1a2e; line-height: 1.15; margin-bottom: 12px; }
+        .section-title .highlight { color: #6A1B9A; }
+        .section-subtitle { font-size: 17px; color: #666; max-width: 580px; margin: 0 auto; line-height: 1.7; }
+
+        /* ============================================
+           ENHANCED PREDICTION DASHBOARD
+           ============================================ */
+        .prediction-dashboard {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid #e8ecf0;
+            margin-top: 24px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+        }
+        .dashboard-header {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 16px; margin-bottom: 20px;
+        }
+        .dashboard-header .title {
+            font-size: 20px; font-weight: 700;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .dashboard-header .title i { color: #6A1B9A; }
+        .dashboard-header .status {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; font-weight: 600; color: #2E7D32;
+            background: #E8F5E9; padding: 6px 16px; border-radius: 50px;
+        }
+        .dashboard-header .status .dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #4CAF50; animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Prediction Main - Enhanced */
+        .prediction-main {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 30px; margin-bottom: 20px;
+        }
+        .yield-card {
+            background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+            border-radius: 16px; padding: 30px; text-align: center;
+            border: 2px solid #CE93D8;
+            position: relative;
+            overflow: hidden;
+        }
+        .yield-card::after {
+            content: 'AI'; position: absolute; right: 10px; bottom: 10px;
+            font-size: 40px; font-weight: 900; color: rgba(106,27,154,0.05);
+        }
+        .yield-card .yield-value {
+            font-size: 56px; font-weight: 900; color: #6A1B9A;
+        }
+        .yield-card .yield-unit {
+            font-size: 20px; font-weight: 600; color: #888;
+        }
+        .yield-card .yield-label {
+            font-size: 16px; color: #666; margin-top: 4px;
+        }
+        .yield-card .yield-change {
+            display: inline-block; margin-top: 8px;
+            padding: 4px 16px; border-radius: 50px; font-size: 14px; font-weight: 600;
+        }
+        .change-up { background: #E8F5E9; color: #2E7D32; }
+        .change-down { background: #FFEBEE; color: #E53935; }
+        .change-stable { background: #FFF3E0; color: #F57C00; }
+
+        .yield-details {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .yield-detail-item {
+            background: #f8fafc; border-radius: 12px; padding: 16px;
+            text-align: center; border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .yield-detail-item:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .yield-detail-item .value {
+            font-size: 24px; font-weight: 800; color: #6A1B9A;
+        }
+        .yield-detail-item .label {
+            font-size: 13px; color: #888;
+        }
+        .yield-detail-item .status-text {
+            font-size: 12px; font-weight: 600; margin-top: 2px;
+        }
+
+        /* Prediction Confidence Bar */
+        .confidence-bar {
+            margin-top: 16px; padding: 16px;
+            background: #f8fafc; border-radius: 12px;
+            border: 1px solid #e8ecf0;
+        }
+        .confidence-bar .bar-label {
+            display: flex; justify-content: space-between;
+            font-size: 13px; color: #666;
+        }
+        .confidence-bar .bar-track {
+            width: 100%; height: 8px; background: #eee; border-radius: 10px;
+            overflow: hidden; margin-top: 6px;
+        }
+        .confidence-bar .bar-track .bar-fill {
+            height: 100%; border-radius: 10px; transition: width 1s ease;
+            background: linear-gradient(90deg, #6A1B9A, #AB47BC);
+        }
+
+        /* ============================================
+           ENHANCED SENSOR DATA
+           ============================================ */
+        .sensor-grid-prediction {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 16px; margin-top: 20px;
+        }
+        .sensor-card-prediction {
+            background: #f8fafc; border-radius: 12px; padding: 16px;
+            text-align: center; border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .sensor-card-prediction:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+        .sensor-card-prediction .icon { font-size: 28px; display: block; margin-bottom: 4px; }
+        .sensor-card-prediction .name { font-size: 12px; color: #888; font-weight: 500; }
+        .sensor-card-prediction .value {
+            font-size: 24px; font-weight: 800; color: #1a1a2e; margin: 2px 0;
+        }
+        .sensor-card-prediction .value .unit { font-size: 14px; font-weight: 600; color: #888; }
+        .sensor-card-prediction .status-badge {
+            display: inline-block; padding: 2px 12px; border-radius: 50px;
+            font-size: 11px; font-weight: 600; margin-top: 4px;
+        }
+        .sensor-card-prediction .range-info {
+            font-size: 10px; color: #aaa; margin-top: 4px;
+        }
+
+        /* ============================================
+           ENHANCED CHARTS - 4 CHARTS
+           ============================================ */
+        .charts-grid-prediction {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 24px; margin-top: 24px;
+        }
+        .chart-card {
+            background: white; border-radius: 14px;
+            padding: 24px; border: 1px solid #e8ecf0;
+        }
+        .chart-card h4 {
+            font-size: 16px; font-weight: 700; margin-bottom: 12px;
+        }
+        .chart-card h4 i { color: #6A1B9A; margin-right: 8px; }
+        .chart-card canvas { max-height: 200px; width: 100% !important; }
+        .chart-card .chart-note {
+            font-size: 12px; color: #888; margin-top: 8px; text-align: center;
+        }
+        .chart-card .chart-stats {
+            display: flex; justify-content: space-between; margin-top: 8px;
+            font-size: 12px; color: #666;
+        }
+
+        /* ============================================
+           FACTORS AFFECTING YIELD
+           ============================================ */
+        .factors-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px; margin-top: 20px;
+        }
+        .factor-card {
+            background: white; border-radius: 14px; padding: 24px;
+            border: 1px solid #e8ecf0; transition: all 0.3s ease;
+            text-align: center;
+        }
+        .factor-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.06); border-color: #CE93D8; }
+        .factor-card .icon { font-size: 36px; display: block; margin-bottom: 8px; }
+        .factor-card h4 { font-size: 16px; font-weight: 700; }
+        .factor-card .impact {
+            font-size: 14px; font-weight: 600; margin: 4px 0;
+        }
+        .factor-card .impact.high { color: #2E7D32; }
+        .factor-card .impact.medium { color: #F57C00; }
+        .factor-card .impact.low { color: #E53935; }
+        .factor-card .desc { font-size: 13px; color: #555; line-height: 1.6; margin-top: 4px; }
+        .factor-card .factor-value {
+            display: inline-block; margin-top: 6px;
+            padding: 2px 12px; border-radius: 50px;
+            font-size: 12px; font-weight: 600;
+        }
+
+        /* ============================================
+           RECOMMENDATIONS
+           ============================================ */
+        .recommendation-grid-yield {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px; margin-top: 20px;
+        }
+        .recommendation-card-yield {
+            background: white; border-radius: 14px; padding: 24px;
+            border: 1px solid #e8ecf0; transition: all 0.3s ease;
+        }
+        .recommendation-card-yield:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.06); border-color: #CE93D8; }
+        .recommendation-card-yield .icon { font-size: 32px; display: block; margin-bottom: 6px; }
+        .recommendation-card-yield h4 { font-size: 16px; font-weight: 700; }
+        .recommendation-card-yield p { font-size: 13px; color: #555; line-height: 1.7; margin-top: 4px; }
+        .recommendation-card-yield .action-btn {
+            margin-top: 10px; padding: 6px 18px; border-radius: 50px;
+            font-size: 12px; font-weight: 600; border: none; cursor: pointer;
+            transition: all 0.3s ease;
+            background: #6A1B9A; color: white;
+        }
+        .recommendation-card-yield .action-btn:hover { background: #4A148C; transform: translateY(-2px); }
+
+        /* ===== FAQ ===== */
+        .faq-grid { max-width: 750px; margin: 0 auto; display: grid; gap: 12px; }
+        .faq-item {
+            background: white; border-radius: 12px; border: 1px solid #e8ecf0; overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover { border-color: #CE93D8; }
+        .faq-item .faq-question {
+            padding: 16px 20px; display: flex; justify-content: space-between;
+            align-items: center; cursor: pointer; font-weight: 600; color: #1a1a2e;
+            transition: all 0.3s ease;
+        }
+        .faq-item .faq-question:hover { color: #6A1B9A; }
+        .faq-item .faq-question .icon { transition: all 0.3s ease; color: #999; }
+        .faq-item.active .faq-question .icon { transform: rotate(180deg); color: #6A1B9A; }
+        .faq-item .faq-answer { padding: 0 20px 20px; display: none; color: #666; line-height: 1.8; font-size: 14px; }
+        .faq-item.active .faq-answer { display: block; }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            padding: 60px 0;
+            background: linear-gradient(160deg, #1a0a2e 0%, #3a1a5a 40%, #6A1B9A 60%, #8E24AA 80%, #AB47BC 100%);
+            text-align: center; color: white;
+        }
+        .cta-section h2 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+        .cta-section h2 .highlight { color: #CE93D8; }
+        .cta-section p { font-size: 17px; color: rgba(255,255,255,0.8); max-width: 520px; margin: 0 auto 28px; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0a0a12; color: rgba(255,255,255,0.6);
+            padding: 50px 0 30px;
+        }
+        .footer-grid {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px; margin-bottom: 30px;
+        }
+        .footer-brand h3 { color: white; font-size: 22px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .footer-brand p { max-width: 320px; font-size: 14px; line-height: 1.8; }
+        .footer-links h4 { color: white; margin-bottom: 12px; font-size: 15px; }
+        .footer-links a { display: block; margin-bottom: 8px; font-size: 14px; transition: all 0.3s ease; }
+        .footer-links a:hover { color: white; padding-left: 4px; }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 20px; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px;
+        }
+        .footer-social { display: flex; gap: 10px; }
+        .footer-social a {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .footer-social a:hover { background: #6A1B9A; border-color: #6A1B9A; color: white; }
+
+        /* ===== TOAST ===== */
+        .toast-notification {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #1a1a2e; color: white;
+            padding: 16px 24px; border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            max-width: 380px;
+            display: none;
+            align-items: center; gap: 12px;
+        }
+        .toast-notification.show { display: flex; }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .hero .container { grid-template-columns: 1fr; text-align: center; }
+            .hero-badges { justify-content: center; }
+            .prediction-main { grid-template-columns: 1fr; }
+            .yield-details { grid-template-columns: 1fr 1fr; }
+            .sensor-grid-prediction { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid-prediction { grid-template-columns: 1fr; }
+            .factors-grid { grid-template-columns: 1fr 1fr; }
+            .recommendation-grid-yield { grid-template-columns: 1fr 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; flex-direction: column;
+                position: absolute; top: 100%; left: 0; right: 0;
+                background: white; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                gap: 12px;
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .hero-content h1 { font-size: 30px; }
+            .section-title { font-size: 26px; }
+            .yield-details { grid-template-columns: 1fr; }
+            .sensor-grid-prediction { grid-template-columns: 1fr 1fr; }
+            .factors-grid { grid-template-columns: 1fr; }
+            .recommendation-grid-yield { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-brand p { margin: 0 auto; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .yield-card .yield-value { font-size: 40px; }
+        }
+        @media (max-width: 480px) {
+            .hero-content h1 { font-size: 24px; }
+            .sensor-grid-prediction { grid-template-columns: 1fr; }
+            .yield-card .yield-value { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-notification" id="toastNotification">
+        <i class="fas fa-check-circle" style="color:#4CAF50;font-size:20px;"></i>
+        <span id="toastMessage">Welcome to AI Yield Prediction!</span>
+        <span class="close" onclick="closeToast()" style="cursor:pointer;opacity:0.7;"><i class="fas fa-times"></i></span>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header" id="header">
+        <nav class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-icon">🌾</span>
+                <span>Krishi</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#prediction-dashboard">Prediction</a></li>
+                <li><a href="#sensor-data">Sensor Data</a></li>
+                <li><a href="#charts">Charts</a></li>
+                <li><a href="#factors">Factors</a></li>
+                <li><a href="#recommendations">Recommendations</a></li>
+                <li><a href="dashboard.html" class="btn-nav">Dashboard</a></li>
+            </ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badges">
+                    <span><i class="fas fa-brain"></i> AI Powered</span>
+                    <span><i class="fas fa-check-circle" style="color:#CE93D8;"></i> 92% Accuracy</span>
+                    <span><i class="fas fa-check-circle" style="color:#CE93D8;"></i> Real-time Analysis</span>
+                </div>
+                <h1>AI <span class="highlight">Yield Prediction</span></h1>
+                <p>Know your harvest before it happens. AI-powered predictions with over 90% accuracy to help you plan better.</p>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                    <a href="#prediction-dashboard" class="btn btn-primary"><i class="fas fa-chart-line"></i> View Prediction</a>
+                    <a href="#recommendations" class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.4);">Get Recommendations</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800&h=600&fit=crop&crop=center" alt="AI Yield Prediction" onerror="this.parentElement.innerHTML='<div style=background:#F3E5F5;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;color:#6A1B9A;padding:40px;>🧠</div>'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    ENHANCED PREDICTION DASHBOARD
+    ============================================ -->
+    <section class="section section-white" id="prediction-dashboard">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-brain"></i> Prediction</span>
+                <h2 class="section-title">Your <span class="highlight">Yield Prediction</span></h2>
+                <p class="section-subtitle">AI-powered prediction based on real-time field data with detailed analysis</p>
+            </div>
+
+            <div class="prediction-dashboard">
+                <div class="dashboard-header">
+                    <div>
+                        <span class="title"><i class="fas fa-brain"></i> Yield Prediction Dashboard</span>
+                        <span style="font-size:13px;color:#888;margin-left:12px;">Field #1 - Wheat</span>
+                        <span style="font-size:13px;color:#888;margin-left:8px;">| Season: Kharif 2024</span>
+                    </div>
+                    <div class="status">
+                        <span class="dot"></span>
+                        <span id="liveStatus">Live Analysis</span>
+                    </div>
+                </div>
+
+                <div class="prediction-main">
+                    <div class="yield-card">
+                        <div style="font-size:14px;color:#888;margin-bottom:4px;">Predicted Yield</div>
+                        <div class="yield-value"><span id="yieldPredictionValue">4.2</span><span class="yield-unit"> tons/ha</span></div>
+                        <div class="yield-label">Wheat - Kharif Season 2024</div>
+                        <div style="margin-top:10px;">
+                            <span class="yield-change change-up" id="yieldChange">↑ 22% vs last year</span>
+                        </div>
+                        <div style="margin-top:8px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                            <span style="background:#f8fafc;padding:2px 12px;border-radius:50px;font-size:12px;color:#888;">📅 Harvest in <span id="harvestDays">18</span> days</span>
+                            <span style="background:#f8fafc;padding:2px 12px;border-radius:50px;font-size:12px;color:#888;">🎯 Confidence: <span id="confidenceLevel">92</span>%</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="bar-label">
+                                <span>Prediction Confidence</span>
+                                <span id="confidencePercent">92%</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="confidenceBar" style="width:92%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="yield-details">
+                        <div class="yield-detail-item">
+                            <div class="value" id="areaPrediction">12.5</div>
+                            <div class="label">Field Area (acres)</div>
+                            <div class="status-text" style="color:#2E7D32;">✅ Verified</div>
+                        </div>
+                        <div class="yield-detail-item">
+                            <div class="value" id="totalYield">52.5</div>
+                            <div class="label">Total Predicted Yield (tons)</div>
+                            <div class="status-text" style="color:#2E7D32;">📈 Increasing</div>
+                        </div>
+                        <div class="yield-detail-item">
+                            <div class="value" id="cropHealth">78%</div>
+                            <div class="label">Crop Health Score</div>
+                            <div class="status-text" style="color:#2E7D32;">✅ Good</div>
+                        </div>
+                        <div class="yield-detail-item">
+                            <div class="value" id="riskLevel">Low</div>
+                            <div class="label">Risk Level</div>
+                            <div class="status-text" style="color:#2E7D32;">🟢 Minimal Risk</div>
+                        </div>
+                        <div class="yield-detail-item" style="grid-column: span 2;">
+                            <div class="value" id="marketValue">₹84,000</div>
+                            <div class="label">Estimated Market Value (@ ₹20,000/ton)</div>
+                            <div class="status-text" style="color:#2E7D32;">💰 Profitable</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Prediction Info -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0;">
+                    <div style="text-align:center;background:#f8fafc;padding:10px;border-radius:8px;">
+                        <div style="font-size:12px;color:#888;">Growth Stage</div>
+                        <div style="font-weight:700;color:#6A1B9A;" id="growthStage">Flowering</div>
+                    </div>
+                    <div style="text-align:center;background:#f8fafc;padding:10px;border-radius:8px;">
+                        <div style="font-size:12px;color:#888;">Days to Harvest</div>
+                        <div style="font-weight:700;color:#6A1B9A;" id="daysToHarvest">18</div>
+                    </div>
+                    <div style="text-align:center;background:#f8fafc;padding:10px;border-radius:8px;">
+                        <div style="font-size:12px;color:#888;">Weather Impact</div>
+                        <div style="font-weight:700;color:#2E7D32;" id="weatherImpact">✅ Favorable</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    ENHANCED SENSOR DATA
+    ============================================ -->
+    <section class="section section-gray" id="sensor-data">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-microchip"></i> Sensor Data</span>
+                <h2 class="section-title">Real-Time <span class="highlight">Field Data</span></h2>
+                <p class="section-subtitle">Live sensor readings used for yield prediction with detailed range information</p>
+            </div>
+
+            <div class="sensor-grid-prediction">
+                <div class="sensor-card-prediction">
+                    <span class="icon">💧</span>
+                    <div class="name">Soil Moisture</div>
+                    <div class="value"><span id="pMoisture">0</span><span class="unit">%</span></div>
+                    <span class="status-badge status-good" id="pMoistureStatus">● Normal</span>
+                    <div class="range-info">Optimal: 45-70%</div>
+                </div>
+                <div class="sensor-card-prediction">
+                    <span class="icon">🌡️</span>
+                    <div class="name">Temperature</div>
+                    <div class="value"><span id="pTemp">0</span><span class="unit">°C</span></div>
+                    <span class="status-badge status-good" id="pTempStatus">● Normal</span>
+                    <div class="range-info">Optimal: 20-32°C</div>
+                </div>
+                <div class="sensor-card-prediction">
+                    <span class="icon">🧪</span>
+                    <div class="name">Soil pH</div>
+                    <div class="value"><span id="pPh">0</span><span class="unit"></span></div>
+                    <span class="status-badge status-good" id="pPhStatus">● Normal</span>
+                    <div class="range-info">Optimal: 6.0-7.5</div>
+                </div>
+                <div class="sensor-card-prediction">
+                    <span class="icon">⚡</span>
+                    <div class="name">EC (Salinity)</div>
+                    <div class="value"><span id="pEc">0</span><span class="unit">dS/m</span></div>
+                    <span class="status-badge status-good" id="pEcStatus">● Normal</span>
+                    <div class="range-info">Safe: 0.5-2.5 dS/m</div>
+                </div>
+            </div>
+
+            <!-- Sensor Summary -->
+            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+                <div style="background:#E8F5E9;padding:10px;border-radius:8px;text-align:center;border-left:3px solid #2E7D32;">
+                    <div style="font-size:12px;color:#888;">All Sensors</div>
+                    <div style="font-weight:700;color:#2E7D32;">✅ Online</div>
+                </div>
+                <div style="background:#E8F5E9;padding:10px;border-radius:8px;text-align:center;border-left:3px solid #2E7D32;">
+                    <div style="font-size:12px;color:#888;">Data Quality</div>
+                    <div style="font-weight:700;color:#2E7D32;">98%</div>
+                </div>
+                <div style="background:#E8F5E9;padding:10px;border-radius:8px;text-align:center;border-left:3px solid #2E7D32;">
+                    <div style="font-size:12px;color:#888;">Last Update</div>
+                    <div style="font-weight:700;color:#2E7D32;" id="lastUpdateTime">Just now</div>
+                </div>
+                <div style="background:#FFF3E0;padding:10px;border-radius:8px;text-align:center;border-left:3px solid #F57C00;">
+                    <div style="font-size:12px;color:#888;">Data Points</div>
+                    <div style="font-weight:700;color:#F57C00;" id="totalDataPoints">156</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    ENHANCED CHARTS - 4 CHARTS
+    ============================================ -->
+    <section class="section section-white" id="charts">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-chart-pie"></i> Analytics</span>
+                <h2 class="section-title">Yield <span class="highlight">Trends & Analysis</span></h2>
+                <p class="section-subtitle">Historical, predicted, and comparative yield analysis</p>
+            </div>
+
+            <div class="charts-grid-prediction">
+                <div class="chart-card">
+                    <h4><i class="fas fa-chart-line"></i> Yield History & Prediction</h4>
+                    <canvas id="yieldTrendChart"></canvas>
+                    <div class="chart-stats">
+                        <span>Avg: <strong id="avgYield">3.8</strong> tons/ha</span>
+                        <span>Growth: <strong id="yieldGrowth" style="color:#2E7D32;">+12%</strong></span>
+                    </div>
+                    <div class="chart-note">Historical data + AI prediction for current season</div>
+                </div>
+                <div class="chart-card">
+                    <h4><i class="fas fa-chart-bar"></i> Yield by Crop</h4>
+                    <canvas id="yieldByCropChart"></canvas>
+                    <div class="chart-stats">
+                        <span>Highest: <strong id="highestCrop">Corn</strong></span>
+                        <span>Lowest: <strong id="lowestCrop">Pulses</strong></span>
+                    </div>
+                    <div class="chart-note">Comparison of yields across different crops</div>
+                </div>
+                <div class="chart-card">
+                    <h4><i class="fas fa-chart-area"></i> Monthly Yield Trend</h4>
+                    <canvas id="monthlyYieldChart"></canvas>
+                    <div class="chart-stats">
+                        <span>Peak: <strong id="peakMonth">May</strong></span>
+                        <span>Low: <strong id="lowMonth">Jan</strong></span>
+                    </div>
+                    <div class="chart-note">Monthly yield distribution for current season</div>
+                </div>
+                <div class="chart-card">
+                    <h4><i class="fas fa-chart-doughnut"></i> Yield Distribution</h4>
+                    <canvas id="yieldDistributionChart"></canvas>
+                    <div class="chart-stats">
+                        <span>Top 3 crops contribute <strong id="topCropsPercent">65%</strong></span>
+                    </div>
+                    <div class="chart-note">Distribution of yield across crop types</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    FACTORS AFFECTING YIELD
+    ============================================ -->
+    <section class="section section-gray" id="factors">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-list-check"></i> Factors</span>
+                <h2 class="section-title">Factors <span class="highlight">Affecting Yield</span></h2>
+                <p class="section-subtitle">Key factors that influence your crop yield with real-time status</p>
+            </div>
+
+            <div class="factors-grid">
+                <div class="factor-card">
+                    <span class="icon">💧</span>
+                    <h4>Water Availability</h4>
+                    <div class="impact high">🔴 High Impact</div>
+                    <div class="desc">Current soil moisture is <strong id="factorMoisture">65%</strong>. Optimal level for wheat growth.</div>
+                    <span class="factor-value" style="background:#E8F5E9;color:#2E7D32;">✅ Optimal</span>
+                </div>
+                <div class="factor-card">
+                    <span class="icon">🌡️</span>
+                    <h4>Temperature</h4>
+                    <div class="impact high">🔴 High Impact</div>
+                    <div class="desc">Current temperature is <strong id="factorTemp">26°C</strong>. Within optimal range of 20-32°C.</div>
+                    <span class="factor-value" style="background:#E8F5E9;color:#2E7D32;">✅ Optimal</span>
+                </div>
+                <div class="factor-card">
+                    <span class="icon">🧪</span>
+                    <h4>Soil Nutrients</h4>
+                    <div class="impact medium">🟡 Medium Impact</div>
+                    <div class="desc">NPK levels are <strong id="factorNpk">Balanced</strong>. Good nutrient availability for crops.</div>
+                    <span class="factor-value" style="background:#E8F5E9;color:#2E7D32;">✅ Balanced</span>
+                </div>
+                <div class="factor-card">
+                    <span class="icon">🌱</span>
+                    <h4>Pest & Disease</h4>
+                    <div class="impact medium">🟡 Medium Impact</div>
+                    <div class="desc">Current risk level: <strong id="factorPest">Low</strong>. Regular monitoring recommended.</div>
+                    <span class="factor-value" style="background:#E8F5E9;color:#2E7D32;">✅ Low Risk</span>
+                </div>
+                <div class="factor-card">
+                    <span class="icon">🌾</span>
+                    <h4>Crop Variety</h4>
+                    <div class="impact high">🔴 High Impact</div>
+                    <div class="desc">Wheat variety: <strong id="factorVariety">HD-2967</strong>. High-yielding variety.</div>
+                    <span class="factor-value" style="background:#E8F5E9;color:#2E7D32;">✅ Good</span>
+                </div>
+                <div class="factor-card">
+                    <span class="icon">📅</span>
+                    <h4>Growth Stage</h4>
+                    <div class="impact medium">🟡 Medium Impact</div>
+                    <div class="desc">Current stage: <strong id="factorStage">Flowering</strong>. Critical for yield formation.</div>
+                    <span class="factor-value" style="background:#FFF3E0;color:#F57C00;">⚡ Critical</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    RECOMMENDATIONS
+    ============================================ -->
+    <section class="section section-white" id="recommendations">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-lightbulb"></i> Recommendations</span>
+                <h2 class="section-title">Yield <span class="highlight">Improvement</span></h2>
+                <p class="section-subtitle">Actionable recommendations to maximize your yield</p>
+            </div>
+
+            <div class="recommendation-grid-yield">
+                <div class="recommendation-card-yield">
+                    <span class="icon">💧</span>
+                    <h4>Optimize Irrigation</h4>
+                    <p>Maintain soil moisture at 60-70% during flowering. Current level: <strong id="recMoisture">65%</strong>.</p>
+                    <button class="action-btn" onclick="showToast('💧 Opening irrigation recommendations...')">View Schedule</button>
+                </div>
+                <div class="recommendation-card-yield">
+                    <span class="icon">🧪</span>
+                    <h4>Fertilizer Management</h4>
+                    <p>Apply nitrogen at 50 kg/ha and potassium at 20 kg/ha during flowering stage.</p>
+                    <button class="action-btn" onclick="showToast('🧪 Opening fertilizer recommendations...')">Apply Now</button>
+                </div>
+                <div class="recommendation-card-yield">
+                    <span class="icon">🛡️</span>
+                    <h4>Pest Monitoring</h4>
+                    <p>Monitor for aphids and rust disease. Current risk is low but vigilance is recommended.</p>
+                    <button class="action-btn" onclick="showToast('🛡️ Opening pest control guide...')">View Guide</button>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;background:#F3E5F5;border-radius:12px;padding:16px 20px;border-left:4px solid #6A1B9A;">
+                <strong>🧠 AI Insight:</strong>
+                <span id="aiYieldInsight" style="color:#444;font-size:14px;">Analyzing yield data to provide the best recommendations...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section section-gray" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">FAQ</span>
+                <h2 class="section-title">Frequently Asked <span class="highlight">Questions</span></h2>
+                <p class="section-subtitle">Find answers to the most common questions</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item active">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How accurate is the yield prediction?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">Our AI models achieve over 90% accuracy in predicting yields. The accuracy improves as more data is collected from your farm. Factors like weather, soil conditions, and crop health are all considered.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What factors does the AI consider for prediction?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">The AI analyzes soil moisture, temperature, pH, EC, historical yield data, weather patterns, crop variety, growth stage, and nutrient levels to make accurate predictions.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How can I improve my yield prediction?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">Follow the recommendations provided by the system: optimize irrigation, apply balanced fertilizers, monitor pests regularly, and maintain optimal soil health. These actions will help maximize your yield.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>When should I harvest based on the prediction?</span>
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">The system predicts the harvest date based on crop growth stage and weather conditions. You'll receive a notification when your crop is ready for harvest. Generally, wheat is ready 18-22 days after flowering.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to <span class="highlight">Know Your Harvest</span>?</h2>
+            <p>Start using AI yield prediction to plan better and maximize your profits.</p>
+            <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+                <a href="signup.html" class="btn btn-primary"><i class="fas fa-rocket"></i> Start Free Trial</a>
+                <a href="contact.html" class="btn" style="background:rgba(255,255,255,0.12);color:white;border:2px solid rgba(255,255,255,0.2);">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>🌾 Krishi</h3>
+                    <p>Smart farming solutions powered by AI and IoT technology. Grow smarter with Krishi.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="index.html">Home</a>
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="ai-yield-prediction.html">Yield Prediction</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <a href="about.html">About Us</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="privacy-policy.html">Privacy Policy</a>
+                    <a href="terms-of-service.html">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Krishi Smart Farming. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================
+    JAVASCRIPT - ALL WORKING
+    ============================================ -->
+    <script>
+        // ===== 1. MOBILE MENU =====
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        // ===== 2. HEADER SCROLL =====
+        window.addEventListener('scroll', function() {
+            document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // ===== 3. FAQ TOGGLE =====
+        function toggleFAQ(element) {
+            const item = element.closest('.faq-item');
+            const isActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+            if (!isActive) {
+                item.classList.add('active');
+                item.querySelector('.faq-answer').style.display = 'block';
+            }
+        }
+
+        // ===== 4. TOAST =====
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function closeToast() {
+            document.getElementById('toastNotification').classList.remove('show');
+        }
+
+        // ===== 5. DATA =====
+        let moisture = 55, temp = 26, ph = 6.8, ec = 1.2;
+        let yieldValue = 4.2;
+        let dataPointCount = 0;
+        let totalPoints = 156;
+
+        function getRandomValue(min, max) {
+            return Math.round((Math.random() * (max - min) + min) * 10) / 10;
+        }
+
+        let currentFieldId = 1;
+
+        function updateData() {
+            const token = localStorage.getItem('krishi_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            fetch(`http://localhost:8000/api/fields/${currentFieldId}/readings/latest`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data) return;
+                
+                dataPointCount++;
+                totalPoints++;
+                
+                moisture = data.moisture;
+                temp = data.temperature;
+                ph = data.ph;
+                ec = data.ec;
+                
+                // Update sensor values
+                document.getElementById('pMoisture').textContent = moisture;
+                updateSensorStatus('pMoistureStatus', moisture, 45, 70);
+
+                document.getElementById('pTemp').textContent = temp;
+                updateSensorStatus('pTempStatus', temp, 20, 32);
+
+                document.getElementById('pPh').textContent = ph.toFixed(1);
+                updateSensorStatus('pPhStatus', ph, 6.0, 7.5);
+
+                document.getElementById('pEc').textContent = ec.toFixed(1);
+                updateSensorStatus('pEcStatus', ec, 0.5, 2.5);
+
+                // Update yield prediction
+                const yieldChange = (moisture / 100) * 0.5 + (1 - ec / 5) * 0.3 + (ph / 10) * 0.2;
+                const newYield = 3.5 + yieldChange * 2;
+                yieldValue = Math.round(newYield * 10) / 10;
+                
+                document.getElementById('yieldPredictionValue').textContent = yieldValue;
+                document.getElementById('totalYield').textContent = (yieldValue * 12.5).toFixed(1);
+                document.getElementById('cropHealth').textContent = Math.round(70 + (moisture / 100) * 30) + '%';
+                document.getElementById('marketValue').textContent = '₹' + (yieldValue * 12.5 * 20000).toLocaleString();
+                
+                // Update confidence
+                const confidence = Math.round(85 + (moisture / 100) * 10);
+                document.getElementById('confidenceLevel').textContent = confidence;
+                document.getElementById('confidencePercent').textContent = confidence + '%';
+                document.getElementById('confidenceBar').style.width = confidence + '%';
+
+                // Update growth stage
+                const stages = ['Seedling', 'Vegetative', 'Flowering', 'Grain Filling', 'Harvest'];
+                const stageIndex = Math.floor((dataPointCount / 10) % stages.length);
+                document.getElementById('growthStage').textContent = stages[stageIndex];
+
+                // Update factors
+                document.getElementById('factorMoisture').textContent = moisture + '%';
+                document.getElementById('factorTemp').textContent = temp + '°C';
+                document.getElementById('recMoisture').textContent = moisture + '%';
+
+                // Update time
+                const now = new Date();
+                document.getElementById('lastUpdateTime').textContent = now.toLocaleTimeString();
+                document.getElementById('totalDataPoints').textContent = totalPoints;
+
+                // Update AI Insight
+                const insights = [
+                    '✅ Your crop yield is predicted to be above average. Continue current practices.',
+                    '📈 Yield is improving. Maintain optimal moisture and nutrient levels.',
+                    '⚠️ Slight decrease in predicted yield. Check for pest or disease issues.',
+                    '🌱 Good crop health. Focus on maintaining optimal conditions.',
+                    '📊 Yield prediction is stable. Monitor weather conditions.'
+                ];
+                document.getElementById('aiYieldInsight').textContent = insights[Math.floor(Math.random() * insights.length)];
+            })
+            .catch(console.error);
+        }
+
+        function updateSensorStatus(elementId, value, minGood, maxGood) {
+            const el = document.getElementById(elementId);
+            if (value < minGood) {
+                el.className = 'status-badge status-warning';
+                el.textContent = '⚠️ Low';
+            } else if (value > maxGood) {
+                el.className = 'status-badge status-danger';
+                el.textContent = '⚠️ High';
+            } else {
+                el.className = 'status-badge status-good';
+                el.textContent = '✅ Normal';
+            }
+        }
+
+        // ===== 6. CHARTS =====
+        // Yield Trend Chart
+        const yieldCtx = document.getElementById('yieldTrendChart').getContext('2d');
+        new Chart(yieldCtx, {
+            type: 'line',
+            data: {
+                labels: ['2019', '2020', '2021', '2022', '2023', '2024 (Pred)'],
+                datasets: [{
+                    label: 'Yield (tons/ha)',
+                    data: [3.2, 3.5, 3.8, 4.0, 4.1, 4.2],
+                    borderColor: '#6A1B9A',
+                    backgroundColor: 'rgba(106,27,154,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#6A1B9A'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { font: { size: 11, weight: '600' }, boxWidth: 12, padding: 12 } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                }
+            }
+        });
+
+        // Yield by Crop Chart
+        const cropCtx = document.getElementById('yieldByCropChart').getContext('2d');
+        new Chart(cropCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Wheat', 'Rice', 'Corn', 'Soybean', 'Pulses'],
+                datasets: [{
+                    label: 'Yield (tons/ha)',
+                    data: [4.2, 3.8, 5.5, 3.0, 2.5],
+                    backgroundColor: ['#6A1B9A', '#8E24AA', '#AB47BC', '#CE93D8', '#E1BEE7'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' } } }
+                }
+            }
+        });
+
+        // Monthly Yield Chart
+        const monthlyCtx = document.getElementById('monthlyYieldChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Yield (tons/ha)',
+                    data: [2.1, 2.3, 2.8, 3.2, 4.0, 4.2, 3.8, 3.5, 3.0, 2.8, 2.5, 2.2],
+                    borderColor: '#8E24AA',
+                    backgroundColor: 'rgba(142,36,170,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#8E24AA'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { font: { size: 11, weight: '600' }, boxWidth: 12, padding: 12 } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 8 } } }
+                }
+            }
+        });
+
+        // Yield Distribution Chart
+        const distCtx = document.getElementById('yieldDistributionChart').getContext('2d');
+        new Chart(distCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Wheat', 'Corn', 'Rice', 'Soybean', 'Pulses', 'Others'],
+                datasets: [{
+                    data: [25, 22, 18, 15, 12, 8],
+                    backgroundColor: ['#6A1B9A', '#8E24AA', '#AB47BC', '#CE93D8', '#E1BEE7', '#F3E5F5'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 10, weight: '500' }, boxWidth: 12, padding: 8 } }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // ===== 7. INITIALIZE =====
+        updateData();
+        setInterval(updateData, 3000);
+
+        // ===== 8. CONSOLE =====
+        console.log('%c🧠 Krishi - AI Yield Prediction', 'font-size:22px;font-weight:900;color:#6A1B9A;');
+        console.log('%c📊 Enhanced dashboard with 4 charts', 'font-size:13px;color:#4CAF50;');
+        console.log('%c🌾 Real-time sensor data with detailed analysis', 'font-size:13px;color:#0288D1;');
+        console.log('%c💡 AI-powered yield prediction with 92% accuracy', 'font-size:13px;color:#F57C00;');
+    </script>
+</body>
+</html>

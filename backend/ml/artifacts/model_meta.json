@@ -1,0 +1,59 @@
+{
+  "trained_at": "2026-09-01T16:36:27.290915Z",
+  "source": "Smart-Agriculture.csv (10,000 samples, ramonjsi/Smart-Agriculture)",
+  "n_samples": 10000,
+  "n_features": 4,
+  "features": [
+    "ph",
+    "temperature",
+    "moisture",
+    "ec"
+  ],
+  "max_depth": 5,
+  "min_samples_leaf": 20,
+  "cv_accuracy_5fold": 0.9995,
+  "train_accuracy_full": 1.0,
+  "feature_importances": {
+    "ph": 0.0,
+    "temperature": 0.089,
+    "moisture": 0.652,
+    "ec": 0.259
+  },
+  "class_distribution": {
+    "0": 5225,
+    "1": 530,
+    "2": 1220,
+    "3": 3025
+  },
+  "action_names": {
+    "0": "Maintain regular soil monitoring",
+    "1": "Improve irrigation scheduling",
+    "2": "Use salt-tolerant crops / soil amendment",
+    "3": "Apply leaching and drainage control",
+    "4": "Immediate reclamation / salinity control"
+  },
+  "feature_ranges": {
+    "ph": [
+      0.0,
+      13.8
+    ],
+    "temperature": [
+      17.0,
+      32.9
+    ],
+    "moisture": [
+      0.0,
+      99.6
+    ],
+    "ec": [
+      1.1,
+      6.1
+    ]
+  },
+  "feature_units": {
+    "ph": "pH",
+    "temperature": "\u00b0C (air)",
+    "moisture": "% soil humidity",
+    "ec": "dS/m (milli-Siemens per cm; the source CSV header says uS/cm but the numeric range matches dS/m)"
+  }
+}

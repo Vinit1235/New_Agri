@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy - Krishi Smart Farming Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            background: #f8fafc;
+            line-height: 1.8;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(160deg, #0a1a0a 0%, #1a3a1a 40%, #2E7D32 70%, #43A047 100%);
+            padding: 60px 0 40px;
+            color: white;
+        }
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+        .header .logo .logo-icon { font-size: 36px; }
+        .header h1 { font-size: 32px; font-weight: 800; margin-top: 20px; }
+        .header p { color: rgba(255,255,255,0.7); font-size: 16px; }
+        .header .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+        }
+        .header .back-link:hover { color: white; }
+
+        /* ===== CONTENT ===== */
+        .content {
+            padding: 50px 0;
+        }
+        .content .last-updated {
+            background: #f0f4f8;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            border-left: 4px solid #2E7D32;
+            margin-bottom: 30px;
+        }
+        .content .section {
+            background: white;
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+        }
+        .content .section:hover {
+            border-color: #A5D6A7;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
+        .content .section h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .content .section h2 i { color: #2E7D32; font-size: 20px; }
+        .content .section p {
+            color: #444;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        .content .section ul {
+            padding-left: 24px;
+            margin: 10px 0;
+        }
+        .content .section ul li {
+            padding: 4px 0;
+            color: #555;
+            font-size: 14px;
+        }
+        .content .section ul li i {
+            color: #2E7D32;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        .content .section .highlight-box {
+            background: #E8F5E9;
+            padding: 14px 18px;
+            border-radius: 8px;
+            border-left: 4px solid #2E7D32;
+            margin-top: 12px;
+        }
+        .content .section .highlight-box strong { color: #2E7D32; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0a0a12;
+            color: rgba(255,255,255,0.6);
+            padding: 30px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer .links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .footer .links a {
+            color: rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+        }
+        .footer .links a:hover { color: white; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header { padding: 40px 0 30px; }
+            .header h1 { font-size: 26px; }
+            .content .section { padding: 20px; }
+            .content .section h2 { font-size: 19px; }
+            .header .container { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 22px; }
+            .content .section { padding: 16px; }
+            .content .section h2 { font-size: 17px; }
+            .footer .links { gap: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="container">
+            <div>
+                <div class="logo">
+                    <span class="logo-icon">🌾</span>
+                    <span>Krishi</span>
+                </div>
+                <h1>Privacy Policy</h1>
+                <p>Your privacy matters to us. Learn how we protect your data.</p>
+            </div>
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== CONTENT ===== -->
+    <section class="content">
+        <div class="container">
+
+            <div class="last-updated">
+                <i class="fas fa-calendar-alt" style="color:#2E7D32;margin-right:8px;"></i>
+                Last Updated: <strong>September 1, 2026</strong>
+            </div>
+
+            <!-- Section 1: Introduction -->
+            <div class="section">
+                <h2><i class="fas fa-info-circle"></i> Introduction</h2>
+                <p>Welcome to Krishi ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our smart farming platform.</p>
+                <div class="highlight-box">
+                    <strong>📌 Summary:</strong> We collect only the information necessary to provide you with our farming services. We never sell your personal data to third parties.
+                </div>
+            </div>
+
+            <!-- Section 2: Information We Collect -->
+            <div class="section">
+                <h2><i class="fas fa-database"></i> Information We Collect</h2>
+                <p>We collect the following types of information to provide and improve our services:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> <strong>Personal Information:</strong> Name, email address, phone number, farm location</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Farm Data:</strong> Soil sensor readings, crop information, field boundaries</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Usage Data:</strong> How you interact with our platform, features used</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Device Information:</strong> IP address, browser type, device type</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Cookies:</strong> We use cookies to enhance your experience</li>
+                </ul>
+                <p style="font-size:13px;color:#888;margin-top:6px;">We do not collect sensitive personal information such as financial or health data.</p>
+            </div>
+
+            <!-- Section 3: How We Use Your Information -->
+            <div class="section">
+                <h2><i class="fas fa-gears"></i> How We Use Your Information</h2>
+                <p>We use your information for the following purposes:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> <strong>Service Delivery:</strong> Provide, maintain, and improve our smart farming services</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Personalization:</strong> Tailor recommendations and insights for your farm</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Communication:</strong> Send you updates, alerts, and important notifications</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Analytics:</strong> Analyze usage patterns to improve our platform</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Legal Compliance:</strong> Comply with applicable laws and regulations</li>
+                </ul>
+                <div class="highlight-box">
+                    <strong>💡 Note:</strong> We process your farm data to provide AI-powered insights. Your data helps us make better recommendations for your crops.
+                </div>
+            </div>
+
+            <!-- Section 4: Data Sharing -->
+            <div class="section">
+                <h2><i class="fas fa-share-nodes"></i> Data Sharing</h2>
+                <p>We value your privacy and do not sell your personal information. We may share your data in the following cases:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> <strong>Service Providers:</strong> Trusted third parties who help us operate our platform</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Business Transfers:</strong> In case of merger, acquisition, or sale of assets</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>With Your Consent:</strong> When you give us explicit permission</li>
+                </ul>
+                <p style="font-size:13px;color:#888;margin-top:6px;">We require all third-party service providers to maintain the confidentiality of your data.</p>
+            </div>
+
+            <!-- Section 5: Data Security -->
+            <div class="section">
+                <h2><i class="fas fa-shield-halved"></i> Data Security</h2>
+                <p>We implement robust security measures to protect your data:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> <strong>Encryption:</strong> All data is encrypted in transit and at rest</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Access Control:</strong> Strict access controls and authentication protocols</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Regular Audits:</strong> We regularly review our security practices</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Secure Servers:</strong> Data is stored on secure, industry-standard servers</li>
+                </ul>
+                <div class="highlight-box">
+                    <strong>🔒 Security Commitment:</strong> We use 256-bit encryption and follow best practices to keep your farm data safe.
+                </div>
+            </div>
+
+            <!-- Section 6: Cookies -->
+            <div class="section">
+                <h2><i class="fas fa-cookie-bite"></i> Cookies</h2>
+                <p>We use cookies to enhance your experience on our platform. Cookies help us:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Remember your preferences and login status</li>
+                    <li><i class="fas fa-check-circle"></i> Analyze how you use our platform</li>
+                    <li><i class="fas fa-check-circle"></i> Provide personalized recommendations</li>
+                    <li><i class="fas fa-check-circle"></i> Improve our services based on usage patterns</li>
+                </ul>
+                <p style="font-size:13px;color:#888;margin-top:6px;">You can manage your cookie preferences through your browser settings. For more details, see our <a href="cookie-policy.html" style="color:#2E7D32;font-weight:600;">Cookie Policy</a>.</p>
+            </div>
+
+            <!-- Section 7: Your Rights -->
+            <div class="section">
+                <h2><i class="fas fa-gavel"></i> Your Rights</h2>
+                <p>You have the following rights regarding your data:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> <strong>Access:</strong> Request a copy of your personal data</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Correction:</strong> Update or correct your information</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Deletion:</strong> Request deletion of your data</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Opt-out:</strong> Withdraw consent for data processing</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Portability:</strong> Request your data in a portable format</li>
+                </ul>
+                <p style="font-size:13px;color:#888;margin-top:6px;">To exercise your rights, please contact us at <a href="mailto:support@krishi.com" style="color:#2E7D32;font-weight:600;">support@krishi.com</a>.</p>
+            </div>
+
+            <!-- Section 8: Data Retention -->
+            <div class="section">
+                <h2><i class="fas fa-clock"></i> Data Retention</h2>
+                <p>We retain your data for as long as necessary to provide our services. We may retain certain information for legal compliance, fraud prevention, and service improvement purposes.</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> <strong>Active Accounts:</strong> Data retained while your account is active</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Inactive Accounts:</strong> Data retained for up to 12 months after account closure</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Legal Requirements:</strong> Some data may be retained for legal compliance</li>
+                </ul>
+            </div>
+
+            <!-- Section 9: Children's Privacy -->
+            <div class="section">
+                <h2><i class="fas fa-child"></i> Children's Privacy</h2>
+                <p>Our platform is not intended for children under the age of 13. We do not knowingly collect personal information from children. If you believe we have inadvertently collected information from a child, please contact us immediately.</p>
+            </div>
+
+            <!-- Section 10: Changes to Policy -->
+            <div class="section">
+                <h2><i class="fas fa-pen-to-square"></i> Changes to This Policy</h2>
+                <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last Updated" date.</p>
+                <p style="font-size:13px;color:#888;margin-top:6px;">We encourage you to review this policy periodically for any changes.</p>
+            </div>
+
+            <!-- Section 11: Contact Us -->
+            <div class="section">
+                <h2><i class="fas fa-envelope"></i> Contact Us</h2>
+                <p>If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us:</p>
+                <div style="background:#f8fafc;padding:16px 20px;border-radius:8px;margin-top:10px;border:1px solid #e8ecf0;">
+                    <p style="margin-bottom:4px;"><i class="fas fa-envelope" style="color:#2E7D32;width:20px;"></i> <strong>Email:</strong> <a href="mailto:support@krishi.com" style="color:#2E7D32;">support@krishi.com</a></p>
+                    <p style="margin-bottom:4px;"><i class="fas fa-globe" style="color:#2E7D32;width:20px;"></i> <strong>Website:</strong> <a href="index.html" style="color:#2E7D32;">www.krishi.com</a></p>
+                    <p><i class="fas fa-map-pin" style="color:#2E7D32;width:20px;"></i> <strong>Address:</strong> Krishi Tech Pvt Ltd, Bengaluru, India</p>
+                </div>
+            </div>
+
+            <!-- Section 12: GDPR Compliance -->
+            <div class="section" style="border-color:#6A1B9A;">
+                <h2 style="color:#6A1B9A;"><i class="fas fa-flag" style="color:#6A1B9A;"></i> GDPR & CCPA Compliance</h2>
+                <p>We are committed to complying with the General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA). We ensure that:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> You have the right to access, correct, and delete your data</li>
+                    <li><i class="fas fa-check-circle"></i> We obtain explicit consent for data collection</li>
+                    <li><i class="fas fa-check-circle"></i> We implement data protection by design and by default</li>
+                    <li><i class="fas fa-check-circle"></i> We report data breaches within 72 hours</li>
+                </ul>
+                <div class="highlight-box" style="border-left-color:#6A1B9A;">
+                    <strong>🇪🇺 GDPR Compliant:</strong> We respect your privacy rights and handle your data responsibly.
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Krishi Smart Farming. All rights reserved.</p>
+            <div class="links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
+                <a href="cookie-policy.html">Cookie Policy</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
