@@ -2,14 +2,15 @@
 
 Handles voice queries in Hindi, Marathi, and English.
 Responds with soil context-aware answers using live farm data.
+Includes rate limiting and automatic failover to backup API key.
 """
 from __future__ import annotations
 
-import os
+import time
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, field_validator, ValidationError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -17,6 +18,15 @@ from ..models import SensorReading, Field
 from ..auth import get_current_user_optional
 
 router = APIRouter(prefix="/api/voice", tags=["voice"])
+
+# Rate limiting: {ip: [(timestamp, count), ...]}
+_rate_limiter: dict[str, list[float]] = {}
+MAX_REQUESTS_PER_MINUTE = 10
+MAX_REQUESTS_PER_HOUR = 50
+
+# API key failover tracking
+_api_key_failures: dict[str, int] = {"primary": 0, "backup": 0}
+_current_key_index = 0  # 0 = primary, 1 = backup
 
 
 class ChatRequest(BaseModel):
@@ -29,22 +39,93 @@ class ChatRequest(BaseModel):
     ec: Optional[float] = None
     temperature: Optional[float] = None
     last_action: Optional[str] = None
+    
+    @field_validator("text")
+    @classmethod
+    def validate_text_length(cls, v: str) -> str:
+        """Limit input text to 500 characters to prevent abuse."""
+        v = v.strip() if v else ""
+        if len(v) == 0:
+            raise ValueError("Question cannot be empty")
+        if len(v) > 500:
+            raise ValueError("Question too long - maximum 500 characters allowed")
+        return v
 
 
 class ChatResponse(BaseModel):
     """Voice chat response."""
     answer: str
     context_used: dict
+    api_key_used: Optional[str] = None  # "primary" or "backup"
+    rate_limit_remaining: Optional[int] = None
+
+
+def check_rate_limit(ip: str) -> tuple[bool, int]:
+    """
+    Check if IP is within rate limits.
+    Returns (is_allowed, remaining_requests).
+    """
+    now = time.time()
+    
+    # Clean old entries
+    if ip in _rate_limiter:
+        _rate_limiter[ip] = [t for t in _rate_limiter[ip] if now - t < 3600]  # Keep last hour
+    else:
+        _rate_limiter[ip] = []
+    
+    # Check per-minute limit
+    recent_minute = [t for t in _rate_limiter[ip] if now - t < 60]
+    if len(recent_minute) >= MAX_REQUESTS_PER_MINUTE:
+        return False, 0
+    
+    # Check per-hour limit
+    if len(_rate_limiter[ip]) >= MAX_REQUESTS_PER_HOUR:
+        return False, 0
+    
+    # Add current request
+    _rate_limiter[ip].append(now)
+    
+    remaining = MAX_REQUESTS_PER_HOUR - len(_rate_limiter[ip])
+    return True, remaining
 
 
 def get_gemini_client():
-    """Lazy-load Gemini client."""
+    """
+    Lazy-load Gemini client with automatic failover to backup key.
+    Tries primary key first, then backup if primary fails.
+    """
+    global _current_key_index
+    
     try:
         from google import genai
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key or api_key == "YOUR_GEMINI_API_KEY_HERE":
-            raise ValueError("GEMINI_API_KEY not configured in .env")
-        return genai.Client(api_key=api_key)
+        from ..config import get_settings
+        settings = get_settings()
+        
+        # Try primary key first
+        if _current_key_index == 0 or _api_key_failures["backup"] > 3:
+            api_key = settings.gemini_api_key
+            key_name = "primary"
+            
+            if not api_key or api_key in ["YOUR_GEMINI_API_KEY_HERE", ""]:
+                # Try backup immediately if primary not configured
+                api_key = settings.gemini_api_key_1
+                key_name = "backup"
+                _current_key_index = 1
+        else:
+            # Use backup key
+            api_key = settings.gemini_api_key_1
+            key_name = "backup"
+        
+        if not api_key or api_key in ["YOUR_GEMINI_API_KEY_HERE", ""]:
+            raise ValueError("No valid GEMINI_API_KEY configured in .env")
+        
+        client = genai.Client(api_key=api_key)
+        
+        # Reset failure count on successful creation
+        _api_key_failures[key_name] = 0
+        
+        return client, key_name
+        
     except ImportError:
         raise HTTPException(
             status_code=500,
@@ -55,6 +136,37 @@ def get_gemini_client():
             status_code=500,
             detail=f"Gemini setup error: {str(e)}"
         )
+
+
+def switch_to_backup_key():
+    """Switch to backup API key after primary fails."""
+    global _current_key_index
+    _api_key_failures["primary"] += 1
+    if _api_key_failures["primary"] >= 3:
+        _current_key_index = 1
+        print(f"⚠️ Switching to backup API key after {_api_key_failures['primary']} failures")
+
+
+def truncate_answer(text: str, max_words: int = 100) -> str:
+    """
+    Truncate answer to maximum word count to save API costs.
+    Preserves sentence boundaries when possible.
+    """
+    words = text.split()
+    if len(words) <= max_words:
+        return text
+    
+    # Try to end at a sentence
+    truncated = " ".join(words[:max_words])
+    
+    # Find last sentence-ending punctuation
+    for punct in ['.', '।', '?', '!']:
+        last_idx = truncated.rfind(punct)
+        if last_idx > len(truncated) * 0.7:  # If we found one in last 30%
+            return truncated[:last_idx + 1]
+    
+    # No good sentence boundary, just cut at word limit
+    return truncated + "..."
 
 
 def get_latest_reading(field_id: int, db: Session) -> Optional[SensorReading]:
@@ -76,11 +188,18 @@ def get_field_name(field_id: int, db: Session) -> str:
 @router.post("/chat", response_model=ChatResponse)
 async def voice_chat(
     request: ChatRequest,
+    http_request: Request,
     db: Session = Depends(get_db),
     current_user: Optional[dict] = Depends(get_current_user_optional)
 ):
     """
     Process voice/text query with Gemini AI using live soil context.
+    
+    Features:
+    - Rate limiting: 10 requests/minute, 50 requests/hour per IP
+    - Input validation: Max 500 characters
+    - Output truncation: Max 100 words to save costs
+    - Automatic API key failover to backup
     
     Works in 3 modes:
     1. With field_id: Fetches real sensor data from DB
@@ -88,8 +207,19 @@ async def voice_chat(
     3. Demo mode: Uses placeholder values
     """
     
-    # Get Gemini client
-    client = get_gemini_client()
+    # Rate limiting
+    client_ip = http_request.client.host
+    is_allowed, remaining = check_rate_limit(client_ip)
+    
+    if not is_allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded. Please wait before making more requests. "
+                   f"Limit: {MAX_REQUESTS_PER_MINUTE} requests/minute, {MAX_REQUESTS_PER_HOUR} requests/hour."
+        )
+    
+    # Get Gemini client (with failover support)
+    client, key_used = get_gemini_client()
     
     # Determine data source
     context = {}
@@ -172,25 +302,36 @@ Temperature: {context.get('temperature', 0)}°C
 **FARMER'S QUESTION:**
 {request.text}
 
-**YOUR ANSWER (in same language as question):**"""
+**YOUR ANSWER (in same language as question):**
+Keep your answer SHORT - maximum 2-3 sentences or 50 words."""
     
     try:
         # Call Gemini API
         response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",  # Fast model for voice
+            model="gemini-2.5-flash",  # Latest Flash model
             contents=prompt,
         )
         
         answer = response.text.strip()
         
+        # Truncate answer to save costs and reduce TTS time
+        answer = truncate_answer(answer, max_words=100)
+        
         return ChatResponse(
             answer=answer,
-            context_used=context
+            context_used=context,
+            api_key_used=key_used,
+            rate_limit_remaining=remaining
         )
     
     except Exception as e:
-        # Fallback response if Gemini fails
+        # Try to switch to backup key on primary failure
+        if key_used == "primary":
+            switch_to_backup_key()
+            
         error_msg = str(e)
+        
+        # Fallback response if Gemini fails
         if "hindi" in request.text.lower() or any(ord(c) > 2304 for c in request.text):
             # Hindi detected
             fallback = f"माफ़ करें, मैं अभी आपकी मदद नहीं कर सकता। तकनीकी समस्या है। आपकी मिट्टी का EC {context.get('ec', 0)} है और नमी {context.get('moisture', 0)}% है।"
@@ -199,5 +340,7 @@ Temperature: {context.get('temperature', 0)}°C
         
         return ChatResponse(
             answer=fallback,
-            context_used={**context, "error": error_msg}
+            context_used={**context, "error": error_msg},
+            api_key_used=key_used,
+            rate_limit_remaining=remaining
         )

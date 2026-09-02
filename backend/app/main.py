@@ -66,9 +66,21 @@ app.include_router(voice_router.router)
 # ---------------------------------------------------------------------------
 @app.exception_handler(RequestValidationError)
 async def validation_handler(request: Request, exc: RequestValidationError):
+    # Convert errors to JSON-serializable format
+    errors = []
+    for error in exc.errors():
+        error_dict = {
+            "type": error.get("type"),
+            "loc": error.get("loc"),
+            "msg": str(error.get("msg")),  # Convert to string for serialization
+        }
+        if "ctx" in error:
+            error_dict["ctx"] = {k: str(v) for k, v in error.get("ctx", {}).items()}
+        errors.append(error_dict)
+    
     return JSONResponse(
         status_code=422,
-        content={"ok": False, "error": "validation_error", "details": exc.errors()},
+        content={"ok": False, "error": "validation_error", "details": errors},
     )
 
 

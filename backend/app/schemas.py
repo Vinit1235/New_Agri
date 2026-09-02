@@ -14,7 +14,6 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=6, max_length=128)
     full_name: Optional[str] = Field(default=None, max_length=255)
-    category: Optional[str] = Field(default=None, max_length=60)
 
 
 class UserOut(BaseModel):
@@ -23,7 +22,6 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     full_name: Optional[str] = None
-    category: Optional[str] = None
     created_at: datetime
 
 

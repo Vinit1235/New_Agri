@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     # --- Rate limit ---
     telemetry_rate_per_min: int = 60
 
+    # --- Gemini ---
+    gemini_api_key: str = ""
+    gemini_api_key_1: str = ""  # Backup API key
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_csv(cls, v):

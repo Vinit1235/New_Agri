@@ -319,7 +319,7 @@ class CopernicusClient:
                     {"identifier": "default", "format": {"type": "application/json"}}
                 ],
             },
-            "evalscript": STAT_EVALSCRIPT,
+            "evalscript": EVALSCRIPT_NDVI_RASTER,
         }
 
         try:

@@ -1,0 +1,106 @@
+================================================================================
+  🎤 VOICE ASSISTANT - QUICK REFERENCE CARD
+================================================================================
+
+📍 LOCATION:
+   Bottom-right corner of every page (floating green button)
+
+🎯 PAGES INTEGRATED:
+   ✅ dashboard.html
+   ✅ index.html
+   ✅ crop-health.html
+   ✅ smart-watering.html
+   ✅ smart-fertilizer.html
+   ✅ ai-yield-prediction.html
+
+🚀 HOW TO USE:
+   1. Click green microphone button 🎤
+   2. Dialog opens automatically
+   3. Speak your question
+   4. Watch answer appear and hear it spoken
+
+🗣️ LANGUAGES SUPPORTED:
+   • Hindi (हिंदी) - Default
+   • Marathi (मराठी)
+   • English (India)
+   Change in dropdown at bottom of dialog
+
+📊 REAL DATA:
+   Widget automatically fetches:
+   • Soil Moisture (%)
+   • pH Level
+   • EC - Electrical Conductivity (dS/m)
+   • Temperature (°C)
+   
+   From: /api/fields/{field_id}/readings/latest
+
+💡 EXAMPLE QUESTIONS:
+
+   English:
+   - "What is my soil moisture?"
+   - "Why is fertilizer blocked?"
+   - "Should I irrigate now?"
+   - "What is the pH level?"
+
+   Hindi:
+   - "मिट्टी की नमी कितनी है?"
+   - "उर्वरक क्यों बंद है?"
+   - "मुझे पानी देना चाहिए क्या?"
+
+   Marathi:
+   - "माती ची ओलावा किती आहे?"
+   - "EC किती आहे?"
+   - "पाणी द्यावं का?"
+
+🔧 TROUBLESHOOTING:
+
+   No green button?
+   → Clear cache, refresh page (Ctrl+Shift+R)
+   
+   Microphone not working?
+   → Use Chrome browser, allow permission
+   
+   No sensor data?
+   → Backend must be running, user must be logged in
+   
+   Rate limit error?
+   → Wait 1 minute (10 requests/min limit)
+
+📱 MOBILE:
+   • Works on Chrome/Safari mobile
+   • HTTPS required for microphone
+   • Button auto-adjusts size
+   • Dialog becomes full-width
+
+🛡️ SECURITY:
+   • Rate Limited: 10 req/min, 50 req/hour
+   • Input Validated: Max 500 characters
+   • Output Truncated: Max 100 words
+   • JWT Authentication: Auto-detected
+
+💰 COST:
+   • ~$0.00015 per question
+   • Max $0.0075 per hour per user
+   • Rate limiting prevents abuse
+
+📈 STATUS:
+   • Backend: http://localhost:8000 ✅
+   • API Docs: http://localhost:8000/docs ✅
+   • Voice Widget: Integrated ✅
+   • Sensor Data: Live ✅
+
+🎯 TEST IT:
+   1. Open: http://localhost:8000/dashboard.html
+   2. Click: Green microphone button (bottom-right)
+   3. Say: "What is my soil moisture?"
+   4. Verify: Answer + sensor data shown
+
+🎉 DEMO SCRIPT (30 sec):
+   "Our platform has voice assistant on every page. I can click here
+   and ask in Hindi - 'मिट्टी की नमी कितनी है?' - and it instantly
+   responds using real sensor data from our IoT devices. Works in
+   Marathi and English too!"
+
+================================================================================
+  Need Help? Check VOICE_WIDGET_COMPLETE.md for full documentation
+================================================================================
