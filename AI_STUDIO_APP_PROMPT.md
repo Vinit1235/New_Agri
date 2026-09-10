@@ -264,23 +264,62 @@ The generated app must contain **every single feature** currently present across
 
 ---
 
-## 5. Backend API Integration Specification
+## 5. Backend API Integration Specification (Verified APK & Web Endpoints)
 
-The app must cleanly communicate with the FastAPI backend endpoints:
+The mobile APK and web client communicate with the FastAPI backend using standard REST endpoints:
 
-| Method | Endpoint | Purpose | Auth |
+### Complete Endpoint Directory for Mobile APK
+
+| Method | Exact Endpoint Path | Purpose / Description | Headers / Auth |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | Create user account | None |
-| `POST` | `/api/auth/token` | Login & receive Bearer JWT | None |
-| `GET` | `/api/fields` | List user's fields | Bearer JWT |
-| `POST` | `/api/fields` | Register field with GeoJSON polygon | Bearer JWT |
-| `POST` | `/api/devices/register` | Register ESP32 node & get token | Bearer JWT |
-| `GET` | `/api/devices` | List registered devices | Bearer JWT |
-| `POST` | `/api/telemetry` | ESP32 telemetry ingestion | Device Token |
-| `GET` | `/api/data/latest/{field_id}` | Get latest sensor reading & pump event | Bearer JWT |
-| `GET` | `/api/data/history/{field_id}` | Get 24h/7d telemetry series | Bearer JWT |
-| `GET` | `/api/health/field/{field_id}` | Get combined NDVI + sensor health score | Bearer JWT |
-| `POST` | `/api/voice/chat` | Send question to Gemini Voice Assistant | Bearer JWT |
+| `GET` | `/api/health` | Backend liveness probe & DB connection check | None |
+| `POST` | `/api/auth/register` | Register new user (`email`, `password`, `full_name`) | `Content-Type: application/json` |
+| `POST` | `/api/auth/login-json` | Mobile JSON login (`email`, `password`) $\rightarrow$ returns JWT `access_token` | `Content-Type: application/json` |
+| `POST` | `/api/auth/login` | OAuth2 form login (`username`, `password`) | `application/x-www-form-urlencoded` |
+| `GET` | `/api/auth/me` | Fetch authenticated farmer profile | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields` | List all registered fields with last event & device status | `Authorization: Bearer <token>` |
+| `POST` | `/api/fields` | Create new field with GeoJSON polygon (`name`, `crop_type`, `polygon`) | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields/{field_id}` | Fetch field metadata & boundary details | `Authorization: Bearer <token>` |
+| `DELETE` | `/api/fields/{field_id}` | Delete a field | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields/{field_id}/readings/latest` | **Latest live sensor telemetry** (`moisture`, `temp`, `humidity`) | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields/{field_id}/readings` | Historical telemetry series (Query: `?limit=500&from=...&to=...`) | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields/{field_id}/events` | Automation events & pump history (Query: `?limit=200`) | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields/{field_id}/health` | **Combined Health Score**, status verdict & soil moisture context | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields/{field_id}/satellite` | Sentinel-2 multispectral NDVI/NDWI observations list | `Authorization: Bearer <token>` |
+| `GET` | `/api/fields/{field_id}/health/trend` | Historical health scores & NDVI trends for charting | `Authorization: Bearer <token>` |
+| `POST` | `/api/fields/{field_id}/satellite/refresh`| Trigger on-demand Sentinel-2 satellite observation pull | `Authorization: Bearer <token>` |
+| `POST` | `/api/devices/register` | Register ESP32 field node (`device_id`, `field_id`, `name`) | `Authorization: Bearer <token>` |
+| `GET` | `/api/devices` | List registered ESP32 nodes and online status | `Authorization: Bearer <token>` |
+| `POST` | `/api/telemetry` | ESP32 hardware telemetry ingestion | `Authorization: Bearer <device_token>` |
+| `POST` | `/api/voice/chat` | Multilingual Gemini Voice Assistant query (`text`, `field_id`) | `Authorization: Bearer <token>` (optional) |
+| `GET` | `/api/model/info` | Edge Decision Tree AI metadata & accuracy report | `Authorization: Bearer <token>` |
+| `POST` | `/api/model/score` | Re-score moisture & temp on server (`moisture`, `temperature`) | `Authorization: Bearer <token>` |
+
+---
+
+### 📱 Android APK Networking & Setup Rules
+
+When packaging the app into an Android APK (via Flutter, React Native, Capacitor, or WebView wrapper), note these critical requirements:
+
+1. **Host Address Configuration**:
+   * **Android Emulator**: Use `http://10.0.2.2:8000` (points to the developer host PC).
+   * **Physical Android Device (Wi-Fi)**: Use your local IP: `http://10.235.221.52:8000` (ensure PC firewall allows incoming traffic on port 8000).
+   * **Production Cloud**: Use `https://your-api-domain.com`.
+   * **⚠️ Never use `http://localhost:8000` inside an APK**, because on Android `localhost` refers to the mobile phone itself!
+
+2. **Android Cleartext HTTP Traffic**:
+   Because the local development backend uses `http://` (not `https://`), add the following to `android/app/src/main/AndroidManifest.xml`:
+   ```xml
+   <application
+       android:usesCleartextTraffic="true"
+       ... >
+   ```
+3. **Required Android Permissions**:
+   ```xml
+   <uses-permission android:name="android.permission.INTERNET" />
+   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+   <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- For Voice Assistant -->
+   ```
 
 ### Telemetry Payload Shape (ESP32 $\rightarrow$ Backend)
 ```json
