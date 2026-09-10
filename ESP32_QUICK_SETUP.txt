@@ -1,0 +1,198 @@
+╔═══════════════════════════════════════════════════════════════╗
+║           ESP32 FIRMWARE UPLOAD - QUICK CHECKLIST            ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📋 BEFORE YOU START:
+[ ] Arduino IDE installed
+[ ] ESP32 board connected via USB
+[ ] Backend server running (port 8000)
+
+═══════════════════════════════════════════════════════════════
+
+STEP 1: CONFIGURE ARDUINO IDE (5 minutes)
+═══════════════════════════════════════════════════════════════
+[ ] File → Preferences → Add Board Manager URL:
+    https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+
+[ ] Tools → Board → Boards Manager → Search "esp32" → Install
+
+[ ] Tools → Board → ESP32 Arduino → ESP32 Dev Module
+
+═══════════════════════════════════════════════════════════════
+
+STEP 2: INSTALL LIBRARIES (3 minutes)
+═══════════════════════════════════════════════════════════════
+[ ] Sketch → Include Library → Manage Libraries
+    
+[ ] Search "DHT sensor library" → Install (by Adafruit)
+    → Click "Install All" for dependencies
+
+[ ] Search "Adafruit Unified Sensor" → Install
+
+═══════════════════════════════════════════════════════════════
+
+STEP 3: OPEN FIRMWARE (1 minute)
+═══════════════════════════════════════════════════════════════
+[ ] File → Open → Navigate to:
+    C:\Users\VINIT\Desktop\Smile_Clinc\New_Agri\esp32-firmware\SoilEdge_FieldNode\
+
+[ ] Open: SoilEdge_FieldNode.ino
+
+═══════════════════════════════════════════════════════════════
+
+STEP 4: CONFIGURE SETTINGS (5 minutes)
+═══════════════════════════════════════════════════════════════
+
+A) WiFi Credentials (around line 10):
+   ─────────────────────────────────────────────────────────
+   const char* WIFI_SSID     = "YOUR_WIFI_SSID";
+   const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+   
+   CHANGE TO:
+   const char* WIFI_SSID     = "YourActualWiFiName";
+   const char* WIFI_PASSWORD = "YourActualPassword";
+   ─────────────────────────────────────────────────────────
+
+B) Get Your PC's IP Address:
+   ─────────────────────────────────────────────────────────
+   Open PowerShell (Win + X → Windows PowerShell):
+   
+   > ipconfig
+   
+   Look for "IPv4 Address": 192.168.1.XXX
+   ─────────────────────────────────────────────────────────
+
+C) Backend URL (around line 17):
+   ─────────────────────────────────────────────────────────
+   const char* BACKEND_URL = "http://192.168.1.100:8000/api/telemetry";
+   
+   CHANGE TO:
+   const char* BACKEND_URL = "http://192.168.1.XXX:8000/api/telemetry";
+                                         ↑ Your actual IP
+   ─────────────────────────────────────────────────────────
+
+D) Device Token (around line 20):
+   ─────────────────────────────────────────────────────────
+   Option 1: Use existing device from dashboard
+   Option 2: Register new device via API (see full guide)
+   
+   const char* DEVICE_ID    = "ESP32_FIELD_NODE_001";
+   const char* DEVICE_TOKEN = "paste_your_token_here";
+   ─────────────────────────────────────────────────────────
+
+[ ] File → Save (Ctrl+S)
+
+═══════════════════════════════════════════════════════════════
+
+STEP 5: SELECT PORT (2 minutes)
+═══════════════════════════════════════════════════════════════
+[ ] Check Device Manager (Win + X → Device Manager)
+    → Ports (COM & LPT) → Note COM port (e.g., COM3)
+
+[ ] Arduino IDE → Tools → Port → Select COM3 (or your port)
+
+═══════════════════════════════════════════════════════════════
+
+STEP 6: UPLOAD SETTINGS
+═══════════════════════════════════════════════════════════════
+Tools Menu:
+[ ] Board: ESP32 Dev Module
+[ ] Upload Speed: 115200
+[ ] CPU Frequency: 240MHz (WiFi/BT)
+[ ] Flash Size: 4MB (32Mb)
+[ ] Port: COM3 (your port)
+
+═══════════════════════════════════════════════════════════════
+
+STEP 7: VERIFY & UPLOAD (3 minutes)
+═══════════════════════════════════════════════════════════════
+[ ] Click ✓ Verify button
+    → Wait for "Done compiling"
+
+[ ] Click → Upload button
+    → Wait for "Hard resetting via RTS pin..."
+    
+    If upload fails:
+    → Hold BOOT button on ESP32
+    → Click Upload
+    → Release BOOT when you see "Writing at..."
+
+═══════════════════════════════════════════════════════════════
+
+STEP 8: CHECK OUTPUT (2 minutes)
+═══════════════════════════════════════════════════════════════
+[ ] Tools → Serial Monitor (Ctrl+Shift+M)
+
+[ ] Set baud rate: 115200 (bottom-right)
+
+[ ] You should see:
+    ✓ "SoilEdge field node booting..."
+    ✓ "WiFi connected! IP: 192.168.1.XXX"
+    ✓ "=== Reading #1 ==="
+    ✓ "Telemetry: HTTP 200"
+
+═══════════════════════════════════════════════════════════════
+
+STEP 9: VERIFY IN DASHBOARD
+═══════════════════════════════════════════════════════════════
+[ ] Open browser → http://localhost:8000
+
+[ ] Login → Navigate to your field
+
+[ ] Check for:
+    ✓ Latest readings appearing
+    ✓ Pump status updating
+    ✓ Fertilizer status updating
+
+═══════════════════════════════════════════════════════════════
+
+✅ SUCCESS INDICATORS:
+═══════════════════════════════════════════════════════════════
+Serial Monitor shows:
+  ✓ "WiFi connected!"          → WiFi working
+  ✓ "HTTP 200"                 → Backend connected
+  ✓ "pump=0 fert=1"            → Automation working
+  ✓ Action codes (0-4)         → AI model working
+
+Dashboard shows:
+  ✓ Real-time sensor readings
+  ✓ Pump status changing
+  ✓ AI recommendations appearing
+
+═══════════════════════════════════════════════════════════════
+
+❌ TROUBLESHOOTING:
+═══════════════════════════════════════════════════════════════
+
+"No COM port detected"
+→ Install CP210x USB drivers from Silicon Labs
+→ Try different USB cable
+
+"Upload failed: Timed out"
+→ Hold BOOT button during upload
+→ Lower upload speed to 57600
+
+"WiFi connection failed"
+→ Check SSID/password (case-sensitive!)
+→ Use 2.4GHz WiFi (not 5GHz)
+
+"Telemetry failed: connection refused"
+→ Check backend is running: uvicorn app.main:app --reload
+→ Verify IP address with ipconfig
+→ Disable Windows Firewall temporarily
+
+"HTTP 401 Unauthorized"
+→ Device token is invalid
+→ Re-register device
+→ Update token in firmware
+
+═══════════════════════════════════════════════════════════════
+
+📞 NEED MORE HELP?
+═══════════════════════════════════════════════════════════════
+See detailed guide: ESP32_ARDUINO_SETUP_GUIDE.md
+
+═══════════════════════════════════════════════════════════════
+
+🎉 TOTAL TIME: ~20 minutes
+🎯 RESULT: ESP32 with Edge AI automation fully operational!

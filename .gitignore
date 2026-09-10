@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *.class
@@ -26,3 +26,6 @@ Thumbs.db
 # Agent / temporary files
 .gemini/
 .system_generated/
+
+# Large installers & binaries
+*.exe

@@ -35,8 +35,7 @@ class ChatRequest(BaseModel):
     field_id: Optional[int] = None
     # Optional manual overrides for demo (if no DB data available)
     moisture: Optional[float] = None
-    ph: Optional[float] = None
-    ec: Optional[float] = None
+    humidity: Optional[float] = None
     temperature: Optional[float] = None
     last_action: Optional[str] = None
     
@@ -232,10 +231,9 @@ async def voice_chat(
         if reading:
             context = {
                 "field_name": field_name,
-                "moisture": round(reading.moisture, 1),
-                "ph": round(reading.ph, 2),
-                "ec": round(reading.ec, 2),
-                "temperature": round(reading.temperature, 1),
+                "moisture": round(reading.moisture, 1) if reading.moisture else 0,
+                "humidity": round(reading.humidity, 1) if reading.humidity else 0,
+                "temperature": round(reading.temperature, 1) if reading.temperature else 0,
                 "timestamp": reading.timestamp.strftime("%Y-%m-%d %H:%M"),
                 "source": "live_database"
             }
@@ -243,19 +241,17 @@ async def voice_chat(
             context = {
                 "field_name": field_name,
                 "moisture": request.moisture or 0,
-                "ph": request.ph or 0,
-                "ec": request.ec or 0,
+                "humidity": request.humidity or 0,
                 "temperature": request.temperature or 0,
                 "source": "no_data_available"
             }
     
-    elif any([request.moisture, request.ph, request.ec, request.temperature]):
+    elif any([request.moisture, request.humidity, request.temperature]):
         # Mode 2: Use manual overrides
         context = {
             "field_name": "Demo Field",
             "moisture": request.moisture or 28.5,
-            "ph": request.ph or 6.7,
-            "ec": request.ec or 5.4,
+            "humidity": request.humidity or 60.0,
             "temperature": request.temperature or 28.0,
             "last_action": request.last_action or "Monitoring",
             "source": "manual_override"
@@ -266,10 +262,9 @@ async def voice_chat(
         context = {
             "field_name": "Demo Field",
             "moisture": 28.5,
-            "ph": 6.7,
-            "ec": 5.4,
+            "humidity": 60.0,
             "temperature": 28.0,
-            "last_action": "Fertilizer blocked (high EC)",
+            "last_action": "Monitoring",
             "source": "demo_mode"
         }
     
@@ -285,19 +280,19 @@ async def voice_chat(
 **CURRENT FARM DATA:**
 Field: {context.get('field_name', 'Farm')}
 Soil Moisture: {context.get('moisture', 0)}%
-pH Level: {context.get('ph', 0)}
-EC (Salinity): {context.get('ec', 0)} dS/m
+Air Humidity: {context.get('humidity', 0)}%
 Temperature: {context.get('temperature', 0)}°C
 {f"Last Action: {context.get('last_action', 'Monitoring')}" if 'last_action' in context else ""}
 {f"Data from: {context.get('timestamp', 'Now')}" if 'timestamp' in context else ""}
 
 **AGRICULTURAL RULES YOU MUST FOLLOW:**
-1. High EC (>4.0) means soil is too salty → BLOCK fertilizer, recommend leaching/drainage
-2. Low moisture (<20%) → Recommend irrigation
-3. Optimal pH for most crops: 6.0-7.5
-4. EC 0-2: Low salinity (good); 2-4: Medium; 4-8: High (problem); >8: Very high (critical)
-5. If fertilizer is blocked, explain it's because EC is too high
-6. Never invent numbers - only use the data provided above
+1. Low moisture (<20%) → Recommend irrigation immediately
+2. High moisture (>60%) → Risk of waterlogging, stop watering
+3. Low humidity (<30%) → Plants may face transpiration stress
+4. High humidity (>80%) → Risk of fungal diseases
+5. Temperature >40°C → Heat stress, recommend shade/irrigation
+6. Temperature <10°C → Cold stress, recommend crop covers
+7. Never invent numbers - only use the data provided above
 
 **FARMER'S QUESTION:**
 {request.text}
@@ -334,9 +329,9 @@ Keep your answer SHORT - maximum 2-3 sentences or 50 words."""
         # Fallback response if Gemini fails
         if "hindi" in request.text.lower() or any(ord(c) > 2304 for c in request.text):
             # Hindi detected
-            fallback = f"माफ़ करें, मैं अभी आपकी मदद नहीं कर सकता। तकनीकी समस्या है। आपकी मिट्टी का EC {context.get('ec', 0)} है और नमी {context.get('moisture', 0)}% है।"
+            fallback = f"माफ़ करें, मैं अभी आपकी मदद नहीं कर सकता। तकनीकी समस्या है। आपकी मिट्टी की नमी {context.get('moisture', 0)}% है और तापमान {context.get('temperature', 0)}°C है।"
         else:
-            fallback = f"Sorry, I'm having technical difficulties. Your soil EC is {context.get('ec', 0)} and moisture is {context.get('moisture', 0)}%."
+            fallback = f"Sorry, I'm having technical difficulties. Your soil moisture is {context.get('moisture', 0)}% and temperature is {context.get('temperature', 0)}°C."
         
         return ChatResponse(
             answer=fallback,

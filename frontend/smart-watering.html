@@ -997,10 +997,9 @@
                 if (!data) return;
                 
                 dataPointCount++;
-                const moisture = data.moisture;
-                const temp = data.temperature;
-                const ph = data.ph;
-                const ec = data.ec;
+                const moisture = data.moisture || 0;
+                const temp = data.temperature || 0;
+                const humidity = data.humidity || 0;
 
                 // Update moisture history
                 moistureHistory.push(moisture);

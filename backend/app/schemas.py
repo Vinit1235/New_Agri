@@ -109,8 +109,7 @@ class TelemetryIn(BaseModel):
     device_id: str = Field(min_length=1, max_length=80)
     moisture: Optional[float] = Field(default=None, ge=0, le=100)
     temperature: Optional[float] = Field(default=None, ge=-40, le=80)
-    ph: Optional[float] = Field(default=None, ge=0, le=14)
-    ec: Optional[float] = Field(default=None, ge=0, le=20)
+    humidity: Optional[float] = Field(default=None, ge=0, le=100)
     action: Optional[int] = Field(default=None, ge=0, le=10)
     action_name: Optional[str] = Field(default=None, max_length=120)
     pump: bool = False
@@ -134,8 +133,7 @@ class ReadingOut(BaseModel):
     id: int
     moisture: Optional[float] = None
     temperature: Optional[float] = None
-    ph: Optional[float] = None
-    ec: Optional[float] = None
+    humidity: Optional[float] = None
     timestamp: datetime
     device_id: str  # joined from device table
 
@@ -176,7 +174,7 @@ class HealthOut(BaseModel):
     ndwi: Optional[float] = None
     cloud_pct: Optional[float] = None
     observed_at: Optional[date] = None
-    soil: Optional[Dict[str, Any]] = None  # latest moisture/EC + interpretation
+    soil: Optional[Dict[str, Any]] = None  # latest moisture/temperature/humidity
 
 
 class HealthTrendPoint(BaseModel):

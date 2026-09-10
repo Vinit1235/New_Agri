@@ -89,7 +89,6 @@ def current_health(
         cloud_pct=cloud,
         prev_ndvi=None,  # trend handled in refresh; here we just report snapshot
         latest_moisture=reading.moisture if reading else None,
-        latest_ec=reading.ec if reading else None,
     )
 
     soil_ctx = None
@@ -97,8 +96,7 @@ def current_health(
         soil_ctx = {
             "moisture": reading.moisture,
             "temperature": reading.temperature,
-            "ph": reading.ph,
-            "ec": reading.ec,
+            "humidity": reading.humidity,
             "timestamp": reading.timestamp.isoformat(),
         }
 

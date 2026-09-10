@@ -1162,14 +1162,13 @@
                 dataPointCount++;
                 
                 // Update sensor values
-                moisture = data.moisture;
-                temperature = data.temperature;
-                ph = data.ph;
-                ec = data.ec;
+                moisture = data.moisture || 0;
+                temperature = data.temperature || 0;
+                humidity = data.humidity || 0;
 
-                // Update nutrient levels (simulated from sensor data for display)
+                // Update nutrient levels (estimated from sensor data for display)
                 nLevel = Math.max(200, Math.min(600, Math.round(350 + (moisture / 100) * 150 + (temperature / 40) * 80)));
-                pLevel = Math.max(15, Math.min(50, Math.round(25 + (ph - 6) * 10 + (ec / 3) * 5)));
+                pLevel = Math.max(15, Math.min(50, Math.round(25 + (humidity / 100) * 15 + (moisture / 100) * 10)));
                 kLevel = Math.max(100, Math.min(220, Math.round(140 + (temperature / 40) * 60 + (moisture / 100) * 40)));
 
                 // Update sensor cards

@@ -67,8 +67,7 @@ def ingest_telemetry(
     reading = models.SensorReading(
         moisture=payload.moisture,
         temperature=payload.temperature,
-        ph=payload.ph,
-        ec=payload.ec,
+        humidity=payload.humidity,
         timestamp=ts,
         device_id=device.id,
         field_id=device.field_id,

@@ -27,7 +27,7 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
         email=payload.email,
         password_hash=hash_password(payload.password),
         full_name=payload.full_name,
-        category=payload.category,
+        category=getattr(payload, 'category', None),
     )
     db.add(user)
     db.commit()

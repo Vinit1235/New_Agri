@@ -1884,15 +1884,9 @@
                 updateCount++;
                 dataPointCount++;
                 
-                const moisture = data.moisture;
-                const temp = data.temperature;
-                const ph = data.ph;
-                const ec = data.ec;
-                
-                // Assume static nutrients for now
-                const nitrogen = 400;
-                const phosphorus = 30;
-                const potassium = 150;
+                const moisture = data.moisture || 0;
+                const temp = data.temperature || 0;
+                const humidity = data.humidity || 0;
                 
                 document.getElementById('avgMoisture').textContent = Math.round(moisture) + '%';
                 document.getElementById('avgTemp').textContent = temp + '°C';
@@ -1907,7 +1901,8 @@
                 document.getElementById('healthBar').style.width = Math.min(health, 95) + '%';
                 document.getElementById('ndviValue').textContent = (Math.min(health, 95) / 100).toFixed(2);
 
-                if (ec > 2.5) {
+                // Fertilizer status based on moisture (safe range: 20-40%)
+                if (moisture < 15 || moisture > 65) {
                     document.getElementById('fertStatus').textContent = 'Blocked';
                     document.getElementById('fertBar').style.width = '10%';
                     document.getElementById('fertBar').style.background = '#E53935';
@@ -1916,11 +1911,11 @@
                     document.getElementById('fertBar').style.width = '40%';
                     document.getElementById('fertBar').style.background = '#0288D1';
                 }
-                document.getElementById('ecLevel').textContent = ec.toFixed(1) + ' dS/m';
+                try { document.getElementById('ecLevel').textContent = humidity.toFixed(1) + '% RH'; } catch(e) {}
 
-                updateLiveChart(moisture, temp, ph, ec);
-                updateNutrientChart(nitrogen, phosphorus, potassium);
-                updateMiniCharts(moisture, temp, ph, ec);
+                updateLiveChart(moisture, temp, humidity, 0);
+                updateNutrientChart(moisture, humidity, temp);
+                updateMiniCharts(moisture, temp, humidity, 0);
             })
             .catch(console.error);
         }

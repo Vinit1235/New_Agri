@@ -1,0 +1,5 @@
+{
+  "/kaggle/input/datasets/posterpresentation/trttest/fst_test3.jpeg": {
+    "_error": "RuntimeError: indices should be either on cpu or on the same device as the indexed tensor (cuda:1)"
+  }
+}

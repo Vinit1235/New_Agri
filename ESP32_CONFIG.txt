@@ -1,0 +1,44 @@
+﻿ESP32 Configuration
+Generated: 2026-09-02 16:10:27
+==========================================
+
+LOGIN CREDENTIALS:
+  Email:    esp32test_1788345274@test.com
+  Password: TestPass123!
+
+DEVICE INFORMATION:
+  Device ID:   esp32-01
+  Device Name: Field 1 ESP32
+  Field:       ESP32 Test Field 160436 (ID: 5)
+
+DEVICE TOKEN (copy to firmware):
+n50G04B43JwLFjMCozU5-JqJuUqFDBdWsHbj2FLpUJE
+
+==========================================
+COPY TO ARDUINO FIRMWARE:
+==========================================
+
+Open: esp32-firmware\SoilEdge_FieldNode\SoilEdge_FieldNode.ino
+
+Update these lines:
+
+const char* WIFI_SSID     = "YOUR_WIFI_NAME";
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+const char* BACKEND_URL   = "http://YOUR_PC_IP:8000/api/telemetry";
+const char* DEVICE_ID     = "esp32-01";
+const char* DEVICE_TOKEN  = "n50G04B43JwLFjMCozU5-JqJuUqFDBdWsHbj2FLpUJE";
+
+==========================================
+GET YOUR PC IP:
+==========================================
+
+Run in PowerShell:
+  ipconfig
+
+Look for "IPv4 Address" under your WiFi adapter
+Example: 192.168.1.105
+
+Then update BACKEND_URL:
+  "http://192.168.1.105:8000/api/telemetry"
+
+==========================================

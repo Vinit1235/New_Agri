@@ -20,10 +20,9 @@ router = APIRouter(prefix="/api/model", tags=["model"])
 
 
 class ScoreIn(BaseModel):
-    ph: float = Field(..., ge=0, le=14)
     temperature: float = Field(..., ge=-40, le=80)
     moisture: float = Field(..., ge=0, le=100)
-    ec: float = Field(..., ge=0, le=20)
+    humidity: float = Field(default=50.0, ge=0, le=100)
 
 
 class ScoreOut(BaseModel):
@@ -41,11 +40,11 @@ def info(_user: models.User = Depends(get_current_user)):
 
 @router.post("/score", response_model=ScoreOut)
 def score(payload: ScoreIn, _user: models.User = Depends(get_current_user)):
-    """Re-score a sensor reading through the trained tree.
+    """Re-score a sensor reading through simplified moisture-based logic.
 
-    Useful for the frontend to show 'what the firmware would decide' and
-    for operators to sanity-check edge cases.
+    Returns irrigation decision based on moisture and temperature thresholds.
     """
-    code = classify(payload.ph, payload.temperature, payload.moisture, payload.ec)
-    pump, fert = derive_pump_fertilizer(code, payload.moisture, payload.ec, payload.ph)
+    code = classify(payload.temperature, payload.moisture)
+    pump, fert = derive_pump_fertilizer(code, payload.moisture)
     return ScoreOut(action=code, action_name=action_name(code), pump=pump, fertilizer=fert)
+

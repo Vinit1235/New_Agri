@@ -937,7 +937,7 @@
         }
 
         // ===== 5. DATA =====
-        let moisture = 55, temp = 26, ph = 6.8, ec = 1.2;
+        let moisture = 55, temp = 26, humidity = 60;
         let yieldValue = 4.2;
         let dataPointCount = 0;
         let totalPoints = 156;
@@ -965,26 +965,20 @@
                 dataPointCount++;
                 totalPoints++;
                 
-                moisture = data.moisture;
-                temp = data.temperature;
-                ph = data.ph;
-                ec = data.ec;
+                moisture = data.moisture || 0;
+                temp = data.temperature || 0;
+                humidity = data.humidity || 0;
                 
                 // Update sensor values
-                document.getElementById('pMoisture').textContent = moisture;
-                updateSensorStatus('pMoistureStatus', moisture, 45, 70);
+                try { document.getElementById('pMoisture').textContent = moisture; } catch(e) {}
+                try { updateSensorStatus('pMoistureStatus', moisture, 45, 70); } catch(e) {}
+                try { document.getElementById('pTemp').textContent = temp; } catch(e) {}
+                try { updateSensorStatus('pTempStatus', temp, 20, 32); } catch(e) {}
+                try { document.getElementById('pPh').textContent = humidity.toFixed(1); } catch(e) {}
+                try { document.getElementById('pEc').textContent = '--'; } catch(e) {}
 
-                document.getElementById('pTemp').textContent = temp;
-                updateSensorStatus('pTempStatus', temp, 20, 32);
-
-                document.getElementById('pPh').textContent = ph.toFixed(1);
-                updateSensorStatus('pPhStatus', ph, 6.0, 7.5);
-
-                document.getElementById('pEc').textContent = ec.toFixed(1);
-                updateSensorStatus('pEcStatus', ec, 0.5, 2.5);
-
-                // Update yield prediction
-                const yieldChange = (moisture / 100) * 0.5 + (1 - ec / 5) * 0.3 + (ph / 10) * 0.2;
+                // Update yield prediction (moisture + temperature based)
+                const yieldChange = (moisture / 100) * 0.5 + (1 - Math.abs(temp - 25) / 30) * 0.3 + (humidity / 100) * 0.2;
                 const newYield = 3.5 + yieldChange * 2;
                 yieldValue = Math.round(newYield * 10) / 10;
                 

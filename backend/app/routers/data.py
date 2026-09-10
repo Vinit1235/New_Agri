@@ -30,8 +30,7 @@ def _serialize_reading(r: models.SensorReading) -> schemas.ReadingOut:
         id=r.id,
         moisture=r.moisture,
         temperature=r.temperature,
-        ph=r.ph,
-        ec=r.ec,
+        humidity=r.humidity,
         timestamp=r.timestamp,
         device_id=r.device.device_id if r.device else "",
     )

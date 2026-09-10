@@ -113,7 +113,6 @@ def compute_health(
     cloud_pct: Optional[float],
     prev_ndvi: Optional[float],
     latest_moisture: Optional[float],
-    latest_ec: Optional[float],
 ) -> HealthVerdict:
     if ndvi is None:
         return HealthVerdict(status="unknown", reason="No satellite data available yet for this field.")
@@ -174,31 +173,18 @@ def compute_health(
         elif ndwi > 0.30:
             notes.append(f"high NDWI ({ndwi:.2f}) suggests very wet canopy / waterlogging risk")
 
-    # 4. Soil sensor cross-check
-    soil_interp: list[str] = []
+    # 4. Soil moisture cross-check
     if latest_moisture is not None:
         if latest_moisture < 18:
             stress += 1
-            soil_interp.append(f"soil moisture low ({latest_moisture:.1f}%)")
-        elif latest_moisture > 40:
-            soil_interp.append(f"soil moisture high ({latest_moisture:.1f}%)")
-    if latest_ec is not None:
-        if latest_ec >= 4.0:
-            stress += 2
-            soil_interp.append(f"soil EC high ({latest_ec:.2f} dS/m) — salt stress likely")
-        elif latest_ec >= 2.2:
-            stress += 1
-            soil_interp.append(f"soil EC elevated ({latest_ec:.2f} dS/m)")
-    if soil_interp:
-        notes.append("; ".join(soil_interp))
+            notes.append(f"soil moisture low ({latest_moisture:.1f}%)")
+        elif latest_moisture > 60:
+            notes.append(f"soil moisture high ({latest_moisture:.1f}%) — waterlogging risk")
 
     # 5. Cross-modality reasoning
     if trend is not None and trend < -0.05 and latest_moisture is not None and latest_moisture < 22:
         stress += 1
         notes.append("canopy drop coincides with low soil moisture → likely water stress")
-    if trend is not None and trend < -0.05 and latest_ec is not None and latest_ec >= 4.0:
-        stress += 1
-        notes.append("canopy drop coincides with high EC → likely salt stress")
 
     if stress >= 3:
         status = "high_stress"
@@ -209,3 +195,4 @@ def compute_health(
 
     reason = "; ".join(notes) if notes else "All signals within expected range."
     return HealthVerdict(status=status, reason=reason, ndvi_trend=trend)
+
