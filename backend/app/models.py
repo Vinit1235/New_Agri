@@ -96,6 +96,11 @@ class SensorReading(Base):
     moisture: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     temperature: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     humidity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    # v3.0 — new sensor fields
+    turbidity_ntu: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    flow_rate_lpm: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    session_volume_L: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    total_volume_L: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -121,6 +126,10 @@ class AutomationEvent(Base):
     action_name: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     pump: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     fertilizer: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # v3.0 — water volume tracking
+    flow_rate_lpm: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    session_volume_L: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    total_volume_L: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 

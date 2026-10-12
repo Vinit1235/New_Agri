@@ -27,3 +27,6 @@ email-validator==2.2.0
 
 # --- Gemini Voice Chat ---
 google-genai==0.2.2
+
+# --- Serial port monitor (ESP32 USB streaming) ---
+pyserial==3.5

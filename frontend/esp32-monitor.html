@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESP32 Live Monitor — SoilEdge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:        #080e17;
+      --surface:   #0d1926;
+      --card:      #111e2f;
+      --border:    rgba(56,189,248,0.12);
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --cyan:      #22d3ee;
+      --green:     #10b981;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+      --blue:      #3b82f6;
+      --purple:    #a78bfa;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    a{text-decoration:none;color:inherit}
+
+    /* ── NAV ── */
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,14,23,.92);
+         backdrop-filter:blur(16px);border-bottom:1px solid var(--border);
+         display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px}
+    .nav-logo{font-size:18px;font-weight:800;color:var(--cyan);display:flex;align-items:center;gap:8px}
+    .nav-links{display:flex;gap:20px;align-items:center}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--muted);transition:.2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-links a.active{color:var(--cyan)}
+
+    /* ── LAYOUT ── */
+    .page{padding:76px 24px 40px;max-width:1280px;margin:0 auto}
+
+    /* ── PAGE HEADER ── */
+    .page-hdr{margin-bottom:28px}
+    .page-hdr h1{font-size:26px;font-weight:800;margin-bottom:4px}
+    .page-hdr h1 span{color:var(--cyan)}
+    .page-hdr p{color:var(--muted);font-size:14px}
+
+    /* ── CONNECTION BAR ── */
+    .conn-bar{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+              padding:18px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+    .conn-bar label{font-size:13px;color:var(--muted);font-weight:500}
+    .conn-bar select,.conn-bar input[type=number],.conn-bar input[type=text]{
+      background:#0a1522;border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-size:13px;padding:7px 12px;outline:none;transition:.2s;
+      font-family:'Inter',sans-serif}
+    .conn-bar select:focus,.conn-bar input:focus{border-color:var(--cyan)}
+    select#portSelect{min-width:200px}
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;
+         font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+    .btn-cyan{background:rgba(34,211,238,.15);color:var(--cyan);border:1px solid rgba(34,211,238,.3)}
+    .btn-cyan:hover{background:rgba(34,211,238,.25)}
+    .btn-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+    .btn-green:hover{background:rgba(16,185,129,.25)}
+    .btn-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+    .btn-red:hover{background:rgba(239,68,68,.25)}
+    .btn-muted{background:rgba(100,116,139,.12);color:var(--muted);border:1px solid rgba(100,116,139,.2)}
+    .conn-status{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-left:auto}
+    .conn-dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+    .conn-dot.connected{background:var(--green);box-shadow:0 0 8px var(--green)}
+    .conn-dot.connecting{background:var(--amber);animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* ── SENSOR GRID ── */
+    .sensor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+    .scard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+    .scard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+    .scard.moisture::before{background:linear-gradient(90deg,#f59e0b,#10b981)}
+    .scard.temp::before{background:linear-gradient(90deg,#3b82f6,#ef4444)}
+    .scard.humidity::before{background:linear-gradient(90deg,#22d3ee,#3b82f6)}
+    .scard.flow::before{background:linear-gradient(90deg,#22d3ee,#a78bfa)}
+    .scard.volume::before{background:linear-gradient(90deg,#a78bfa,#10b981)}
+    .scard.turbidity::before{background:linear-gradient(90deg,#10b981,#f59e0b)}
+    .scard.pump::before{background:linear-gradient(90deg,#ef4444,#f59e0b)}
+    .sc-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+    .sc-val{font-size:32px;font-weight:800;line-height:1;color:var(--text)}
+    .sc-unit{font-size:14px;font-weight:500;color:var(--muted);margin-left:3px}
+    .sc-sub{font-size:12px;color:var(--muted);margin-top:5px}
+    .bar-wrap{height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-top:10px}
+    .bar-fill{height:100%;border-radius:99px;transition:width .5s ease}
+    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:700;margin-top:8px}
+    .badge-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+    .badge-amber{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+    .badge-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+    .badge-cyan{background:rgba(34,211,238,.15);color:var(--cyan);border:1px solid rgba(34,211,238,.25)}
+    .badge-muted{background:rgba(100,116,139,.12);color:var(--muted);border:1px solid rgba(100,116,139,.2)}
+
+    /* ── CHARTS ROW ── */
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+    @media(max-width:800px){.charts-row{grid-template-columns:1fr}}
+    .chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+    .chart-card h3{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .chart-card canvas{max-height:200px}
+
+    /* ── WATER VOLUME SUMMARY ── */
+    .vol-banner{background:linear-gradient(135deg,rgba(34,211,238,.07),rgba(167,139,250,.07));
+                border:1px solid rgba(34,211,238,.15);border-radius:14px;padding:20px 24px;
+                display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+                gap:16px;margin-bottom:24px}
+    .vol-banner h3{font-size:14px;font-weight:700;color:var(--cyan);margin-bottom:4px}
+    .vol-banner p{font-size:12px;color:var(--muted)}
+    .vol-stat{text-align:center}
+    .vol-stat .big{font-size:36px;font-weight:900}
+    .vol-stat .lbl{font-size:12px;color:var(--muted);margin-top:2px}
+    .vol-divider{width:1px;height:50px;background:var(--border)}
+
+    /* ── SERIAL TERMINAL ── */
+    .terminal-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px}
+    .term-header{display:flex;align-items:center;justify-content:space-between;
+                 padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .term-header h3{font-size:13px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .term-controls{display:flex;gap:8px;align-items:center}
+    .term-body{height:340px;overflow-y:auto;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;scroll-behavior:smooth}
+    .term-body::-webkit-scrollbar{width:5px}
+    .term-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+    .log-line{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.025)}
+    .log-ts{color:var(--muted);user-select:none}
+    .log-text.telemetry{color:var(--green)}
+    .log-text.alert{color:var(--red)}
+    .log-text.info{color:var(--cyan)}
+    .log-text.warn{color:var(--amber)}
+    .log-text.default{color:#94a3b8}
+    .autoscroll-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer}
+    .autoscroll-toggle input{accent-color:var(--cyan)}
+
+    /* ── PUMP EVENTS ── */
+    .events-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+    .events-card h3{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+    .event-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+    .event-row:last-child{border-bottom:none}
+    .ev-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .ev-pump-on{background:rgba(16,185,129,.15);color:var(--green)}
+    .ev-pump-off{background:rgba(100,116,139,.12);color:var(--muted)}
+    .ev-cutout{background:rgba(239,68,68,.15);color:var(--red)}
+    .ev-body{flex:1}
+    .ev-name{font-size:13px;font-weight:600}
+    .ev-sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .ev-right{text-align:right;font-size:12px;color:var(--muted)}
+    .ev-vol{font-size:14px;font-weight:700;color:var(--cyan)}
+
+    /* ── NO DEVICE PLACEHOLDER ── */
+    .no-device{display:none;flex-direction:column;align-items:center;justify-content:center;
+               padding:60px 20px;gap:16px;color:var(--muted);text-align:center}
+    .no-device i{font-size:52px;color:rgba(100,116,139,.3)}
+    .no-device h3{font-size:18px;font-weight:700;color:var(--text)}
+    .no-device p{max-width:420px;line-height:1.6;font-size:14px}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:600px){
+      .sensor-grid{grid-template-columns:1fr 1fr}
+      .vol-banner{flex-direction:column;align-items:flex-start}
+      .vol-divider{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <div class="nav-logo"><i class="fa-solid fa-microchip"></i> SoilEdge Monitor</div>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="smart-watering.html">Watering</a>
+    <a href="esp32-monitor.html" class="active">ESP32 Monitor</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ── PAGE HEADER ── -->
+  <div class="page-hdr">
+    <h1>ESP32 <span>Live Monitor</span></h1>
+    <p>Real-time sensor readings, water volume tracking, and serial terminal — WiFi or USB</p>
+  </div>
+
+  <!-- ── CONNECTION BAR ── -->
+  <div class="conn-bar">
+    <div>
+      <label>Source</label><br>
+      <select id="sourceSelect" onchange="onSourceChange()">
+        <option value="api">🌐 WiFi — Backend API (auto-refresh)</option>
+        <option value="serial">🔌 USB — Serial Port (live stream)</option>
+      </select>
+    </div>
+    <div id="serialPortGroup" style="display:none">
+      <label>Serial Port</label><br>
+      <select id="portSelect"><option value="">— scan ports —</option></select>
+    </div>
+    <div id="baudGroup" style="display:none">
+      <label>Baud</label><br>
+      <input type="number" id="baudInput" value="115200" style="width:100px">
+    </div>
+    <div id="fieldGroup">
+      <label>Field ID (API mode)</label><br>
+      <input type="number" id="fieldIdInput" value="1" min="1" style="width:80px">
+    </div>
+    <button class="btn btn-cyan" id="scanBtn" onclick="scanPorts()" style="display:none"><i class="fa fa-rotate"></i> Scan</button>
+    <button class="btn btn-green" id="connectBtn" onclick="connectSerial()" style="display:none"><i class="fa fa-plug"></i> Connect</button>
+    <button class="btn btn-red" id="disconnectBtn" onclick="disconnectSerial()" style="display:none"><i class="fa fa-plug-circle-xmark"></i> Disconnect</button>
+    <div class="conn-status">
+      <div class="conn-dot" id="connDot"></div>
+      <span id="connLabel">Disconnected</span>
+    </div>
+  </div>
+
+  <!-- ── NO DEVICE (shown when serial selected but not connected) ── -->
+  <div class="no-device" id="noDevice">
+    <i class="fa-solid fa-usb"></i>
+    <h3>No Device Connected</h3>
+    <p>Plug your ESP32 into USB, select the serial port above and click <b>Connect</b>. SoilEdge will stream live data directly from the chip.</p>
+  </div>
+
+  <!-- ── SENSOR CARDS ── -->
+  <div class="sensor-grid" id="sensorGrid">
+    <!-- Soil Moisture -->
+    <div class="scard moisture">
+      <div class="sc-label"><i class="fa-solid fa-droplet"></i> Soil Moisture</div>
+      <div><span class="sc-val" id="vMoisture">--</span><span class="sc-unit">%</span></div>
+      <div class="bar-wrap"><div class="bar-fill" id="bMoisture" style="width:0%;background:linear-gradient(90deg,#f59e0b,#10b981)"></div></div>
+      <div id="bdgMoisture" class="badge badge-muted" style="margin-top:8px">—</div>
+    </div>
+    <!-- Temperature -->
+    <div class="scard temp">
+      <div class="sc-label"><i class="fa-solid fa-temperature-half"></i> Temperature</div>
+      <div><span class="sc-val" id="vTemp">--</span><span class="sc-unit">°C</span></div>
+      <div class="bar-wrap"><div class="bar-fill" id="bTemp" style="width:0%;background:linear-gradient(90deg,#3b82f6,#ef4444)"></div></div>
+      <div class="sc-sub" id="subTemp">—</div>
+    </div>
+    <!-- Humidity -->
+    <div class="scard humidity">
+      <div class="sc-label"><i class="fa-solid fa-wind"></i> Humidity</div>
+      <div><span class="sc-val" id="vHumidity">--</span><span class="sc-unit">%</span></div>
+      <div class="bar-wrap"><div class="bar-fill" id="bHumidity" style="width:0%;background:#22d3ee"></div></div>
+      <div class="sc-sub" id="subHumidity">—</div>
+    </div>
+    <!-- Turbidity -->
+    <div class="scard turbidity">
+      <div class="sc-label"><i class="fa-solid fa-vial"></i> Turbidity</div>
+      <div><span class="sc-val" id="vTurbidity">--</span><span class="sc-unit">NTU</span></div>
+      <div class="bar-wrap"><div class="bar-fill" id="bTurbidity" style="width:0%;background:linear-gradient(90deg,#10b981,#f59e0b)"></div></div>
+      <div id="bdgTurbidity" class="badge badge-muted" style="margin-top:8px">—</div>
+    </div>
+    <!-- Flow Rate -->
+    <div class="scard flow">
+      <div class="sc-label"><i class="fa-solid fa-faucet-drip"></i> Flow Rate</div>
+      <div><span class="sc-val" id="vFlow">--</span><span class="sc-unit">L/min</span></div>
+      <div class="sc-sub" id="subFlow">Hall-effect sensor · GPIO27</div>
+    </div>
+    <!-- Pump Status -->
+    <div class="scard pump">
+      <div class="sc-label"><i class="fa-solid fa-water-ladder"></i> Pump / Relay</div>
+      <div class="sc-val" id="vPump" style="font-size:22px">--</div>
+      <div id="bdgPump" class="badge badge-muted" style="margin-top:8px">—</div>
+      <div class="sc-sub" id="subPump">GPIO26</div>
+    </div>
+  </div>
+
+  <!-- ── WATER VOLUME BANNER ── -->
+  <div class="vol-banner">
+    <div>
+      <h3>💧 Water Pumped</h3>
+      <p>Calculated from hall-effect flow sensor · K = 7.5 pulses/s per L/min</p>
+    </div>
+    <div class="vol-stat">
+      <div class="big" id="vSessionVol" style="color:var(--cyan)">0.000</div>
+      <div class="lbl">This Session (L)</div>
+    </div>
+    <div class="vol-divider"></div>
+    <div class="vol-stat">
+      <div class="big" id="vTotalVol" style="color:var(--purple)">0.000</div>
+      <div class="lbl">Cumulative Total (L)</div>
+    </div>
+    <div class="vol-divider"></div>
+    <div class="vol-stat">
+      <div class="big" id="vFlowBig" style="color:var(--green)">0.00</div>
+      <div class="lbl">Current (L/min)</div>
+    </div>
+  </div>
+
+  <!-- ── CHARTS ── -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-chart-line" style="color:var(--cyan)"></i> Moisture Trend</h3>
+      <canvas id="chartMoisture"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3><i class="fa-solid fa-droplet" style="color:var(--blue)"></i> Water Volume Over Time</h3>
+      <canvas id="chartVolume"></canvas>
+    </div>
+  </div>
+
+  <!-- ── SERIAL TERMINAL ── -->
+  <div class="terminal-wrap" id="terminalWrap" style="display:none">
+    <div class="term-header">
+      <h3><i class="fa-solid fa-terminal" style="color:var(--cyan)"></i> Serial Terminal</h3>
+      <div class="term-controls">
+        <label class="autoscroll-toggle">
+          <input type="checkbox" id="autoScrollChk" checked> Auto-scroll
+        </label>
+        <button class="btn btn-muted" onclick="clearTerminal()" style="padding:5px 12px;font-size:12px"><i class="fa fa-eraser"></i> Clear</button>
+      </div>
+    </div>
+    <div class="term-body" id="termBody"></div>
+  </div>
+
+  <!-- ── PUMP EVENTS ── -->
+  <div class="events-card">
+    <h3>🕹 Pump Events</h3>
+    <div id="eventsContainer">
+      <div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No events yet — waiting for data...</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Config
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const API = 'http://localhost:8000';
+let source = 'api';         // 'api' | 'serial'
+let apiPollTimer = null;
+let eventSource  = null;    // SSE for serial
+let pumpEvents   = [];
+let chartMoistureData = { labels: [], values: [] };
+let chartVolumeData   = { labels: [], session: [], total: [] };
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Charts
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const mkChart = (id, datasets, yLabel) => new Chart(document.getElementById(id).getContext('2d'), {
+  type: 'line',
+  data: { labels: [], datasets },
+  options: {
+    responsive: true, maintainAspectRatio: true,
+    animation: { duration: 400 },
+    plugins: { legend: { labels: { color: '#64748b', font: { size: 11 } } } },
+    scales: {
+      x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+      y: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.06)' },
+           title: { display: !!yLabel, text: yLabel, color: '#64748b', font: { size: 11 } } }
+    }
+  }
+});
+
+const chartM = mkChart('chartMoisture', [{
+  label: 'Moisture %', data: [],
+  borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.08)',
+  fill: true, tension: 0.4, pointRadius: 0
+}]);
+
+const chartV = mkChart('chartVolume', [
+  { label: 'Session (L)', data: [], borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,.06)', fill: true, tension: 0.4, pointRadius: 0 },
+  { label: 'Total (L)',   data: [], borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,.04)', fill: false, tension: 0.4, pointRadius: 0 }
+], 'Litres');
+
+function pushChartPoint(ts, moisture, session, total) {
+  const label = ts || new Date().toLocaleTimeString();
+  const MAX = 60;
+  [chartM, chartV].forEach(c => { if (c.data.labels.length >= MAX) { c.data.labels.shift(); c.data.datasets.forEach(d => d.data.shift()); } });
+  chartM.data.labels.push(label);
+  chartM.data.datasets[0].data.push(moisture ?? null);
+  chartV.data.labels.push(label);
+  chartV.data.datasets[0].data.push(session ?? null);
+  chartV.data.datasets[1].data.push(total ?? null);
+  chartM.update('none');
+  chartV.update('none');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Sensor card updaters
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function setVal(id, v, decimals = 1) { document.getElementById(id).textContent = v == null ? '--' : (typeof v === 'number' ? v.toFixed(decimals) : v); }
+function setBar(id, pct, max = 100) { document.getElementById(id).style.width = Math.min(100, Math.max(0, (pct / max) * 100)) + '%'; }
+
+function setBadge(id, cls, text) {
+  const el = document.getElementById(id);
+  el.className = `badge badge-${cls}`;
+  el.textContent = text;
+}
+
+function updateCards(d) {
+  // Moisture
+  setVal('vMoisture', d.moisture, 1);
+  setBar('bMoisture', d.moisture);
+  if (d.moisture != null) {
+    if (d.moisture < 25)      setBadge('bdgMoisture', 'red',   '🔴 Dry');
+    else if (d.moisture < 60) setBadge('bdgMoisture', 'green', '✅ OK');
+    else                      setBadge('bdgMoisture', 'amber', '⚠️ Wet');
+  }
+
+  // Temp
+  setVal('vTemp', d.temperature, 1);
+  setBar('bTemp', d.temperature ? (d.temperature - 10) : 0, 40);
+  document.getElementById('subTemp').textContent = d.temperature != null ? `${d.temperature > 30 ? '🌡 Hot' : d.temperature < 18 ? '❄ Cool' : '✅ Normal'}` : '—';
+
+  // Humidity
+  setVal('vHumidity', d.humidity, 1);
+  setBar('bHumidity', d.humidity);
+  document.getElementById('subHumidity').textContent = d.humidity != null ? (d.humidity > 80 ? '💧 High' : d.humidity < 40 ? '💨 Low' : '✅ Normal') : '—';
+
+  // Turbidity
+  setVal('vTurbidity', d.turbidity_ntu, 0);
+  setBar('bTurbidity', d.turbidity_ntu, 300);
+  if (d.turbidity_ntu != null) {
+    if (d.turbidity_ntu < 5)        setBadge('bdgTurbidity', 'green', '🟢 Clear');
+    else if (d.turbidity_ntu < 200) setBadge('bdgTurbidity', 'amber', '⚠️ Turbid');
+    else                            setBadge('bdgTurbidity', 'red',   '🔴 Very Turbid');
+  }
+
+  // Flow
+  setVal('vFlow', d.flow_rate_lpm, 2);
+  document.getElementById('subFlow').textContent = d.flow_rate_lpm != null && d.flow_rate_lpm > 0 ? '🌊 Flowing' : 'No flow';
+
+  // Volume banner
+  setVal('vSessionVol', d.session_volume_L, 3);
+  setVal('vTotalVol',   d.total_volume_L, 3);
+  setVal('vFlowBig',    d.flow_rate_lpm, 2);
+
+  // Pump
+  const pump = d.pump_active ?? d.pump;
+  const lockout = d.safety_lockout;
+  if (lockout) {
+    document.getElementById('vPump').textContent = 'LOCKOUT';
+    document.getElementById('vPump').style.color  = '#ef4444';
+    setBadge('bdgPump', 'red', '🔒 Safety Cutout');
+  } else if (pump) {
+    document.getElementById('vPump').textContent = 'ACTIVE';
+    document.getElementById('vPump').style.color  = '#10b981';
+    setBadge('bdgPump', 'green', '🟢 Pumping');
+  } else {
+    document.getElementById('vPump').textContent = 'IDLE';
+    document.getElementById('vPump').style.color  = '#64748b';
+    setBadge('bdgPump', 'muted', '⏹ Idle');
+  }
+
+  // Charts
+  pushChartPoint(null, d.moisture, d.session_volume_L, d.total_volume_L);
+
+  // Pump event recording
+  if (d.action_name) recordEvent(d);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Pump Events List
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function recordEvent(d) {
+  const action = d.action_name || '';
+  const isOn   = action.includes('ON') || (d.pump_active || d.pump);
+  const isCut  = action.includes('CUTOUT');
+  const ev = {
+    action, isOn, isCut,
+    session: d.session_volume_L ?? 0,
+    total:   d.total_volume_L   ?? 0,
+    time:    new Date().toLocaleTimeString(),
+  };
+  // De-dup adjacent identical states
+  if (pumpEvents.length && pumpEvents[0].action === ev.action) return;
+  pumpEvents.unshift(ev);
+  if (pumpEvents.length > 30) pumpEvents.pop();
+  renderEvents();
+}
+
+function renderEvents() {
+  const c = document.getElementById('eventsContainer');
+  if (!pumpEvents.length) { c.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No events yet</div>'; return; }
+  c.innerHTML = pumpEvents.map(ev => {
+    const iconCls  = ev.isCut ? 'ev-cutout' : ev.isOn ? 'ev-pump-on' : 'ev-pump-off';
+    const icon     = ev.isCut ? '🔒' : ev.isOn ? '💧' : '⏹';
+    const actionLbl = ev.action || (ev.isOn ? 'Pump ON' : 'Pump OFF');
+    return `<div class="event-row">
+      <div class="ev-icon ${iconCls}">${icon}</div>
+      <div class="ev-body">
+        <div class="ev-name">${actionLbl}</div>
+        <div class="ev-sub">Session: <span class="ev-vol">${Number(ev.session).toFixed(3)} L</span> &bull; Total: <span class="ev-vol">${Number(ev.total).toFixed(2)} L</span></div>
+      </div>
+      <div class="ev-right">${ev.time}</div>
+    </div>`;
+  }).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Connection status dot
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function setConnStatus(state, label) {
+  const dot = document.getElementById('connDot');
+  dot.className = 'conn-dot' + (state === 'connected' ? ' connected' : state === 'connecting' ? ' connecting' : '');
+  document.getElementById('connLabel').textContent = label;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Source toggle
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function onSourceChange() {
+  source = document.getElementById('sourceSelect').value;
+  const isSerial = source === 'serial';
+
+  document.getElementById('serialPortGroup').style.display = isSerial ? '' : 'none';
+  document.getElementById('baudGroup').style.display       = isSerial ? '' : 'none';
+  document.getElementById('fieldGroup').style.display      = isSerial ? 'none' : '';
+  document.getElementById('scanBtn').style.display         = isSerial ? '' : 'none';
+  document.getElementById('connectBtn').style.display      = isSerial ? '' : 'none';
+  document.getElementById('disconnectBtn').style.display   = 'none';
+  document.getElementById('terminalWrap').style.display    = isSerial ? '' : 'none';
+  document.getElementById('noDevice').style.display        = isSerial ? 'flex' : 'none';
+  document.getElementById('sensorGrid').style.display      = isSerial ? 'none' : '';
+
+  stopAll();
+
+  if (!isSerial) {
+    startApiPolling();
+    document.getElementById('noDevice').style.display = 'none';
+    document.getElementById('sensorGrid').style.display = '';
+  } else {
+    scanPorts();
+    setConnStatus('', 'Not connected');
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// API polling mode
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function startApiPolling() {
+  setConnStatus('connecting', 'Connecting to API...');
+  fetchApiData();
+  apiPollTimer = setInterval(fetchApiData, 5000);
+}
+
+function fetchApiData() {
+  const token   = localStorage.getItem('krishi_token');
+  const fieldId = document.getElementById('fieldIdInput').value || 1;
+  if (!token) { setConnStatus('', 'Not logged in'); return; }
+
+  Promise.all([
+    fetch(`${API}/api/fields/${fieldId}/readings/latest`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+    fetch(`${API}/api/fields/${fieldId}/events?limit=20`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : []),
+  ]).then(([reading, events]) => {
+    if (reading) {
+      setConnStatus('connected', `API · field ${fieldId}`);
+      updateCards(reading);
+    }
+    if (Array.isArray(events) && events.length) {
+      events.forEach(e => recordEvent({ ...e, pump_active: e.pump }));
+    }
+  }).catch(() => setConnStatus('', 'API unreachable'));
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Serial mode
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function scanPorts() {
+  const sel = document.getElementById('portSelect');
+  sel.innerHTML = '<option>Scanning...</option>';
+  try {
+    const res  = await fetch(`${API}/api/serial/ports`);
+    const data = await res.json();
+    sel.innerHTML = data.ports.length
+      ? data.ports.map(p => `<option value="${p.device}">${p.device} — ${p.description}</option>`).join('')
+      : '<option value="">No serial ports found</option>';
+  } catch {
+    sel.innerHTML = '<option value="">Backend unreachable</option>';
+  }
+}
+
+async function connectSerial() {
+  const port = document.getElementById('portSelect').value;
+  const baud = parseInt(document.getElementById('baudInput').value) || 115200;
+  if (!port) { alert('Select a port first.'); return; }
+
+  setConnStatus('connecting', `Opening ${port}...`);
+  try {
+    const res  = await fetch(`${API}/api/serial/connect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ port, baud }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.detail || 'Failed');
+
+    setConnStatus('connected', `${port} @ ${baud}`);
+    document.getElementById('connectBtn').style.display    = 'none';
+    document.getElementById('disconnectBtn').style.display = '';
+    document.getElementById('noDevice').style.display      = 'none';
+    document.getElementById('sensorGrid').style.display    = '';
+
+    // Load existing log buffer
+    const logRes  = await fetch(`${API}/api/serial/log?n=100`);
+    const logData = await logRes.json();
+    if (logData.lines) logData.lines.forEach(l => appendTermLine(l));
+
+    startSSE();
+  } catch (e) {
+    setConnStatus('', 'Connection failed');
+    alert('Could not connect: ' + e.message);
+  }
+}
+
+async function disconnectSerial() {
+  await fetch(`${API}/api/serial/disconnect`, { method: 'POST' });
+  stopAll();
+  document.getElementById('connectBtn').style.display    = '';
+  document.getElementById('disconnectBtn').style.display = 'none';
+  document.getElementById('sensorGrid').style.display    = 'none';
+  document.getElementById('noDevice').style.display      = 'flex';
+  setConnStatus('', 'Disconnected');
+}
+
+function startSSE() {
+  if (eventSource) eventSource.close();
+  eventSource = new EventSource(`${API}/api/serial/stream`);
+
+  eventSource.addEventListener('message', e => {
+    appendTermLine(e.data);
+  });
+
+  eventSource.addEventListener('telemetry', e => {
+    try {
+      const d = JSON.parse(e.data);
+      // Map serial telemetry keys to card keys
+      const mapped = {
+        moisture:        d.M,
+        temperature:     d.T,
+        humidity:        d.RH,
+        turbidity_ntu:   d.Turb,
+        flow_rate_lpm:   d['Flow'],
+        session_volume_L: d.Sess,
+        total_volume_L:  d.Total,
+        pump_active:     d.Pump === 'ON',
+      };
+      updateCards(mapped);
+    } catch {}
+  });
+
+  eventSource.onerror = () => {
+    setConnStatus('connecting', 'Reconnecting...');
+  };
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Terminal
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function appendTermLine(raw) {
+  const body  = document.getElementById('termBody');
+  const line  = document.createElement('div');
+  line.className = 'log-line';
+
+  // Detect line class
+  let cls = 'default';
+  if (raw.includes('[Telemetry]')) cls = 'telemetry';
+  else if (raw.includes('[ALERT]') || raw.includes('Error') || raw.includes('error')) cls = 'alert';
+  else if (raw.includes('[WiFi]') || raw.includes('[Backend]') || raw.includes('[WebServer]')) cls = 'info';
+  else if (raw.includes('[Safety]') || raw.includes('[Irrigation]') || raw.includes('[Flow]')) cls = 'warn';
+
+  // Split off timestamp prefix [HH:MM:SS]
+  const match = raw.match(/^\[(\d{2}:\d{2}:\d{2})\] (.*)$/);
+  if (match) {
+    line.innerHTML = `<span class="log-ts">[${match[1]}] </span><span class="log-text ${cls}">${escHtml(match[2])}</span>`;
+  } else {
+    line.innerHTML = `<span class="log-text ${cls}">${escHtml(raw)}</span>`;
+  }
+
+  body.appendChild(line);
+  // Keep last 500 lines in DOM
+  while (body.children.length > 500) body.removeChild(body.firstChild);
+  if (document.getElementById('autoScrollChk').checked) body.scrollTop = body.scrollHeight;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function clearTerminal() { document.getElementById('termBody').innerHTML = ''; }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Cleanup
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function stopAll() {
+  if (apiPollTimer) { clearInterval(apiPollTimer); apiPollTimer = null; }
+  if (eventSource)  { eventSource.close(); eventSource = null; }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Init
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window.addEventListener('beforeunload', stopAll);
+startApiPolling();   // default: API mode
+</script>
+</body>
+</html>

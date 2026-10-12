@@ -68,6 +68,11 @@ def ingest_telemetry(
         moisture=payload.moisture,
         temperature=payload.temperature,
         humidity=payload.humidity,
+        # v3.0 fields
+        turbidity_ntu=payload.turbidity_ntu,
+        flow_rate_lpm=payload.flow_rate_lpm,
+        session_volume_L=payload.session_volume_L,
+        total_volume_L=payload.total_volume_L,
         timestamp=ts,
         device_id=device.id,
         field_id=device.field_id,
@@ -83,6 +88,10 @@ def ingest_telemetry(
             action_name=payload.action_name,
             pump=payload.pump,
             fertilizer=payload.fertilizer,
+            # v3.0 water volume fields
+            flow_rate_lpm=payload.flow_rate_lpm,
+            session_volume_L=payload.session_volume_L,
+            total_volume_L=payload.total_volume_L,
             timestamp=ts,
             device_id=device.id,
             field_id=device.field_id,

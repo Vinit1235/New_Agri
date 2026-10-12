@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ESP32 Breadboard Row Map — Multi-Sensor Irrigation Station</title>
+<style>
+  :root{
+    --bg:#0B1E33; --bg2:#0F2A4A; --card:#14304F; --card2:#183A5E;
+    --line:rgba(127,216,232,0.25); --grid:rgba(255,255,255,0.04);
+    --text:#E8EEF5; --text-dim:#9FB4C9; --cyan:#7FD8E8;
+    --red:#E24B4A; --orange:#F2A623; --green:#5DCAA5;
+    --blue:#5B9BD5; --purple:#B08DE0; --blackline:#C9D3DC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:32px 32px;
+    color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    line-height:1.6; padding:0 0 60px;
+  }
+  header{padding:32px 24px 16px; max-width:1080px; margin:0 auto;}
+  h1{font-size:23px; font-weight:600; margin:0 0 4px; color:#fff;}
+  header p{color:var(--text-dim); margin:0; font-size:14px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+
+  h2{font-size:17px; font-weight:600; color:#fff; margin:34px 0 10px; scroll-margin-top:20px; display:flex; align-items:center; gap:10px;}
+  h2 .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+
+  .railbox{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:18px 22px; margin:18px 0; font-family:'SFMono-Regular',Consolas,monospace; font-size:13.5px;
+  }
+  .railbox .row{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);}
+  .railbox .row:last-child{border-bottom:none;}
+  .railbox .label{color:var(--text-dim);}
+  .railbox .val{color:var(--text); text-align:right;}
+  .rail-red{color:#F49A99; font-weight:600;}
+  .rail-blue{color:#9DC3EA; font-weight:600;}
+
+  table{width:100%; border-collapse:collapse; font-size:13px; background:var(--card); border-radius:8px; overflow:hidden; margin:10px 0 22px;}
+  th{text-align:left; background:var(--card2); color:var(--cyan); font-weight:600; padding:9px 11px; border-bottom:1px solid var(--line); font-size:12px;}
+  td{padding:8px 11px; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:top; font-family:'SFMono-Regular',Consolas,monospace; font-size:12.5px;}
+  tr:last-child td{border-bottom:none;}
+  td.row-num{color:var(--cyan); font-weight:700; text-align:center; width:40px;}
+  td.empty{color:var(--text-dim); font-style:italic;}
+  .wire-tag{display:inline-block; padding:1px 7px; border-radius:4px; font-size:10.5px; font-weight:700; font-family:-apple-system,sans-serif; margin-right:6px;}
+  .w-power{background:rgba(226,75,74,0.18); color:#F49A99;}
+  .w-gnd{background:rgba(201,211,220,0.18); color:#C9D3DC;}
+  .w-3v3{background:rgba(242,166,35,0.18); color:#F7C368;}
+  .w-analog{background:rgba(93,202,165,0.18); color:#8FE0C0;}
+  .w-digital{background:rgba(91,155,213,0.18); color:#9DC3EA;}
+  .w-ctrl{background:rgba(176,141,224,0.18); color:#CBB6EE;}
+
+  .note{background:var(--card); border-left:3px solid var(--orange); padding:12px 16px; margin:14px 0; border-radius:0 6px 6px 0; font-size:13px; color:var(--text-dim);}
+  .note b{color:var(--text);}
+  .warning{background:rgba(226,75,74,0.1); border-left:3px solid var(--red); padding:12px 16px; margin:14px 0; border-radius:0 6px 6px 0; font-size:13px; color:#F49A99;}
+  .warning b{color:#fff;}
+
+  pre{background:var(--card2); color:var(--cyan); padding:16px; border-radius:8px; font-size:12.5px; overflow-x:auto; line-height:1.55; margin:14px 0;}
+  code{font-family:'SFMono-Regular',Consolas,monospace;}
+
+  .section-divider{border:none; border-top:1px dashed var(--line); margin:30px 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ESP32 breadboard row map — multi-sensor irrigation station</h1>
+  <p>Soil moisture (switched), DHT11, turbidity, and water flow rate logging — all on one breadboard, row by row.</p>
+</header>
+
+<div class="wrap">
+
+<h2><span class="dot" style="background:var(--red)"></span>Power rails</h2>
+<div class="railbox">
+  <div class="row"><span class="label">LEFT RED RAIL&nbsp;&nbsp;(+)</span><span class="val rail-red">5V Power — from LM2596 OUT+</span></div>
+  <div class="row"><span class="label">LEFT BLUE RAIL&nbsp;(−)</span><span class="val rail-blue">Main Ground — from LM2596 OUT−</span></div>
+  <div class="row"><span class="label">RIGHT RED RAIL&nbsp;(+)</span><span class="val rail-red">3.3V Power — from ESP32 3V3 pin</span></div>
+  <div class="row"><span class="label">RIGHT BLUE RAIL (−)</span><span class="val rail-blue">Common Ground — jumper to LEFT BLUE RAIL</span></div>
+</div>
+
+<h2><span class="dot" style="background:var(--blue)"></span>ESP32 pin map <small style="font-size:12px;color:var(--text-dim);font-weight:400;">rows 1–15</small></h2>
+<table>
+<tr><th class="row-num">Row</th><th>Left pin</th><th>Wiring connection</th><th class="row-num">Row</th><th>Right pin</th><th>Wiring connection</th></tr>
+<tr><td class="row-num">01</td><td>VIN</td><td><span class="wire-tag w-power">PWR</span>LEFT RED RAIL (5V)</td><td class="row-num">01</td><td>3V3</td><td><span class="wire-tag w-3v3">3V3</span>RIGHT RED RAIL (3.3V)</td></tr>
+<tr><td class="row-num">02</td><td>GND</td><td><span class="wire-tag w-gnd">GND</span>LEFT BLUE RAIL</td><td class="row-num">02</td><td>GND</td><td><span class="wire-tag w-gnd">GND</span>RIGHT BLUE RAIL</td></tr>
+<tr><td class="row-num">03</td><td>D13</td><td class="empty">[ Empty ]</td><td class="row-num">03</td><td>D15</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">04</td><td>D12</td><td class="empty">[ Empty ]</td><td class="row-num">04</td><td>D2</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">05</td><td>D14</td><td class="empty">[ Empty ]</td><td class="row-num">05</td><td>D4</td><td><span class="wire-tag w-digital">SIG</span>DHT11 DATA (Row 27)</td></tr>
+<tr><td class="row-num">06</td><td>D27</td><td><span class="wire-tag w-analog">SIG</span>Flow Sensor Signal (Row 62)</td><td class="row-num">06</td><td>RX2</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">07</td><td>D26</td><td class="empty">[ Empty ]</td><td class="row-num">07</td><td>TX2</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">08</td><td>D25</td><td><span class="wire-tag w-ctrl">CTRL</span>Row 21 (1kΩ, Transistor Base)</td><td class="row-num">08</td><td>D5</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">09</td><td>D33</td><td class="empty">[ Empty ]</td><td class="row-num">09</td><td>D18</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">10</td><td>D32</td><td><span class="wire-tag w-analog">ADC</span>Row 47 (Soil AO)</td><td class="row-num">10</td><td>D19</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">11</td><td>D35</td><td><span class="wire-tag w-analog">ADC</span>Row 38 (EC Divider Tap)</td><td class="row-num">11</td><td>D21</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">12</td><td>D34</td><td><span class="wire-tag w-analog">ADC</span>Row 33 (pH Divider Tap)</td><td class="row-num">12</td><td>RX0</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">13</td><td>VN</td><td class="empty">[ Empty ]</td><td class="row-num">13</td><td>TX0</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">14</td><td>VP</td><td class="empty">[ Empty ]</td><td class="row-num">14</td><td>D22</td><td class="empty">[ Empty ]</td></tr>
+<tr><td class="row-num">15</td><td>EN</td><td class="empty">[ Empty ]</td><td class="row-num">15</td><td>D23</td><td class="empty">[ Empty ]</td></tr>
+</table>
+
+<hr class="section-divider">
+
+<h2><span class="dot" style="background:var(--purple)"></span>Soil sensor power switch <small style="font-size:12px;color:var(--text-dim);font-weight:400;">2N2222 / BSS138 — rows 20–24</small></h2>
+<table>
+<tr><th class="row-num">Row</th><th>Connection</th></tr>
+<tr><td class="row-num">20</td><td><span class="wire-tag w-ctrl">CTRL</span>Wire from ESP32 D25 (Row 08 Left) → 1kΩ Resistor Leg 1</td></tr>
+<tr><td class="row-num">21</td><td><span class="wire-tag w-ctrl">CTRL</span>1kΩ Resistor Leg 2 → Transistor BASE (middle pin)</td></tr>
+<tr><td class="row-num">22</td><td><span class="wire-tag w-gnd">GND</span>Transistor EMITTER (left pin) → LEFT BLUE RAIL</td></tr>
+<tr><td class="row-num">23</td><td><span class="wire-tag w-gnd">GND</span>Transistor COLLECTOR (right pin) → Row 48 (Soil GND)</td></tr>
+<tr><td class="row-num">24</td><td class="empty">[ Empty ]</td></tr>
+</table>
+
+<h2><span class="dot" style="background:var(--orange)"></span>DHT11 module + pull-up <small style="font-size:12px;color:var(--text-dim);font-weight:400;">rows 26–29</small></h2>
+<table>
+<tr><th class="row-num">Row</th><th>Connection</th></tr>
+<tr><td class="row-num">26</td><td><span class="wire-tag w-3v3">3V3</span>DHT11 VCC → RIGHT RED RAIL (3.3V)</td></tr>
+<tr><td class="row-num">27</td><td><span class="wire-tag w-digital">SIG</span>DHT11 DATA → ESP32 D4 (Row 05 Right) + 10kΩ Resistor Leg 1</td></tr>
+<tr><td class="row-num">28</td><td><span class="wire-tag w-3v3">3V3</span>10kΩ Resistor Leg 2 → RIGHT RED RAIL (3.3V) <i style="color:var(--text-dim);">[pull-up]</i></td></tr>
+<tr><td class="row-num">29</td><td><span class="wire-tag w-gnd">GND</span>DHT11 GND → LEFT BLUE RAIL</td></tr>
+</table>
+
+<h2><span class="dot" style="background:var(--green)"></span>pH module + divider <small style="font-size:12px;color:var(--text-dim);font-weight:400;">rows 31–35</small></h2>
+<table>
+<tr><th class="row-num">Row</th><th>Connection</th></tr>
+<tr><td class="row-num">31</td><td><span class="wire-tag w-power">PWR</span>pH Module VCC → LEFT RED RAIL (5V)</td></tr>
+<tr><td class="row-num">32</td><td><span class="wire-tag w-analog">SIG</span>pH Module PO (output) → 5.6kΩ Resistor Leg 1 (R1)</td></tr>
+<tr><td class="row-num">33</td><td><span class="wire-tag w-analog">TAP</span>5.6kΩ Leg 2 + 10kΩ Leg 1 (R2) → ESP32 D34 (Row 12 Left) <b style="color:var(--cyan);">[TAP POINT]</b></td></tr>
+<tr><td class="row-num">34</td><td><span class="wire-tag w-gnd">GND</span>10kΩ Leg 2 → LEFT BLUE RAIL</td></tr>
+<tr><td class="row-num">35</td><td><span class="wire-tag w-gnd">GND</span>pH Module GND → LEFT BLUE RAIL</td></tr>
+</table>
+
+<h2><span class="dot" style="background:var(--green)"></span>EC module + divider <small style="font-size:12px;color:var(--text-dim);font-weight:400;">rows 37–41</small></h2>
+<table>
+<tr><th class="row-num">Row</th><th>Connection</th></tr>
+<tr><td class="row-num">37</td><td><span class="wire-tag w-analog">SIG</span>EC Module AO (output) → 5.6kΩ Resistor Leg 1 (R1)</td></tr>
+<tr><td class="row-num">38</td><td><span class="wire-tag w-analog">TAP</span>5.6kΩ Leg 2 + 10kΩ Leg 1 (R2) → ESP32 D35 (Row 11 Left) <b style="color:var(--cyan);">[TAP POINT]</b></td></tr>
+<tr><td class="row-num">39</td><td><span class="wire-tag w-gnd">GND</span>10kΩ Leg 2 → LEFT BLUE RAIL</td></tr>
+<tr><td class="row-num">40</td><td><span class="wire-tag w-power">PWR</span>EC Module VCC → LEFT RED RAIL (5V)</td></tr>
+<tr><td class="row-num">41</td><td><span class="wire-tag w-gnd">GND</span>EC Module GND → LEFT BLUE RAIL</td></tr>
+</table>
+
+<h2><span class="dot" style="background:var(--cyan)"></span>Soil moisture sensor <small style="font-size:12px;color:var(--text-dim);font-weight:400;">HW-103 — rows 46–48</small></h2>
+<table>
+<tr><th class="row-num">Row</th><th>Connection</th></tr>
+<tr><td class="row-num">46</td><td><span class="wire-tag w-3v3">3V3</span>Soil VCC → RIGHT RED RAIL (3.3V)</td></tr>
+<tr><td class="row-num">47</td><td><span class="wire-tag w-analog">ADC</span>Soil AO → ESP32 D32 (Row 10 Left)</td></tr>
+<tr><td class="row-num">48</td><td><span class="wire-tag w-gnd">GND</span>Soil GND → Row 23 (Transistor COLLECTOR) <i style="color:var(--text-dim);">— not the ground rail directly</i></td></tr>
+</table>
+
+<h2><span class="dot" style="background:#4FC3E8"></span>Water flow sensor <small style="font-size:12px;color:var(--text-dim);font-weight:400;">hall-effect pulse type — rows 60–63</small></h2>
+<table>
+<tr><th class="row-num">Row</th><th>Connection</th></tr>
+<tr><td class="row-num">60</td><td><span class="wire-tag w-power">PWR</span>Flow Sensor VCC (Red wire) → LEFT RED RAIL (5V)</td></tr>
+<tr><td class="row-num">61</td><td><span class="wire-tag w-gnd">GND</span>Flow Sensor GND (Black wire) → LEFT BLUE RAIL</td></tr>
+<tr><td class="row-num">62</td><td><span class="wire-tag w-digital">SIG</span>Flow Sensor SIGNAL (Yellow wire) → ESP32 D27 (Row 06 Left) + 10kΩ Pull-up Leg 1</td></tr>
+<tr><td class="row-num">63</td><td><span class="wire-tag w-3v3">3V3</span>10kΩ Pull-up Leg 2 → RIGHT RED RAIL (3.3V)</td></tr>
+</table>
+
+<div class="note">
+  <b>Why the pull-up goes to 3.3V, not 5V:</b> the flow sensor's signal pulse swings up to whatever voltage powers it. Pulling it up to the 5V rail would feed a 5V pulse into an ESP32 GPIO, which is not 5V-tolerant. Pulling up to 3.3V instead keeps the pulse at a safe logic level while the sensor itself still runs on 5V.
+</div>
+
+<h2><span class="dot" style="background:var(--cyan)"></span>Firmware — pulse counting</h2>
+<pre><code>#define FLOW_PIN 27
+volatile unsigned long pulseCount = 0;
+unsigned long lastCalc = 0;
+float flowRate = 0;  // litres per minute
+
+void IRAM_ATTR countPulse() {
+  pulseCount++;
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(FLOW_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(FLOW_PIN), countPulse, FALLING);
+}
+
+void loop() {
+  if (millis() - lastCalc >= 1000) {
+    noInterrupts();
+    unsigned long pulses = pulseCount;
+    pulseCount = 0;
+    interrupts();
+
+    // Calibration factor varies by sensor model — see note below
+    flowRate = pulses / 7.5;  // pulses/sec ÷ K-factor = L/min
+
+    Serial.print("Flow rate: ");
+    Serial.print(flowRate);
+    Serial.println(" L/min");
+
+    lastCalc = millis();
+  }
+}</code></pre>
+
+<div class="note">
+  <b>Calibration factor (7.5) is a placeholder</b> — it's the common default for YF-S201-style sensors, but varies by model and pipe diameter. Check the sensor body for a printed model number to confirm the right value for yours.
+</div>
+
+<hr class="section-divider">
+
+<h2><span class="dot" style="background:var(--red)"></span>Design notes</h2>
+<div class="note">
+  <b>pH and EC dividers are fully separate</b> — no resistor or row is shared between them (rows 31–35 vs 37–41).
+</div>
+<div class="note">
+  <b>Soil GND is the only ground in this design that doesn't touch the blue rail directly</b> — it's switched through the transistor so GPIO25 can power-cycle the sensor and reduce probe corrosion.
+</div>
+<div class="warning">
+  <b>Set the LM2596 to exactly 5.00V</b> (measured on LEFT RED RAIL vs LEFT BLUE RAIL) <b>before</b> connecting the ESP32 or any sensor.
+</div>
+
+</div>
+</body>
+</html>

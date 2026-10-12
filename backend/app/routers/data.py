@@ -31,6 +31,11 @@ def _serialize_reading(r: models.SensorReading) -> schemas.ReadingOut:
         moisture=r.moisture,
         temperature=r.temperature,
         humidity=r.humidity,
+        # v3.0 fields
+        turbidity_ntu=r.turbidity_ntu,
+        flow_rate_lpm=r.flow_rate_lpm,
+        session_volume_L=r.session_volume_L,
+        total_volume_L=r.total_volume_L,
         timestamp=r.timestamp,
         device_id=r.device.device_id if r.device else "",
     )
@@ -43,6 +48,10 @@ def _serialize_event(e: models.AutomationEvent) -> schemas.EventOut:
         action_name=e.action_name,
         pump=e.pump,
         fertilizer=e.fertilizer,
+        # v3.0 water volume fields
+        flow_rate_lpm=e.flow_rate_lpm,
+        session_volume_L=e.session_volume_L,
+        total_volume_L=e.total_volume_L,
         timestamp=e.timestamp,
         device_id=e.device.device_id if e.device else None,
     )

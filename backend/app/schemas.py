@@ -110,6 +110,11 @@ class TelemetryIn(BaseModel):
     moisture: Optional[float] = Field(default=None, ge=0, le=100)
     temperature: Optional[float] = Field(default=None, ge=-40, le=80)
     humidity: Optional[float] = Field(default=None, ge=0, le=100)
+    # v3.0 new sensor fields
+    turbidity_ntu: Optional[float] = Field(default=None, ge=0)
+    flow_rate_lpm: Optional[float] = Field(default=None, ge=0)
+    session_volume_L: Optional[float] = Field(default=None, ge=0)
+    total_volume_L: Optional[float] = Field(default=None, ge=0)
     action: Optional[int] = Field(default=None, ge=0, le=10)
     action_name: Optional[str] = Field(default=None, max_length=120)
     pump: bool = False
@@ -134,6 +139,11 @@ class ReadingOut(BaseModel):
     moisture: Optional[float] = None
     temperature: Optional[float] = None
     humidity: Optional[float] = None
+    # v3.0 new sensor fields
+    turbidity_ntu: Optional[float] = None
+    flow_rate_lpm: Optional[float] = None
+    session_volume_L: Optional[float] = None
+    total_volume_L: Optional[float] = None
     timestamp: datetime
     device_id: str  # joined from device table
 
@@ -146,6 +156,10 @@ class EventOut(BaseModel):
     action_name: Optional[str] = None
     pump: bool
     fertilizer: bool
+    # v3.0 water volume tracking
+    flow_rate_lpm: Optional[float] = None
+    session_volume_L: Optional[float] = None
+    total_volume_L: Optional[float] = None
     timestamp: datetime
     device_id: Optional[str] = None  # joined
 

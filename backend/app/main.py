@@ -20,6 +20,7 @@ from .routers import model as model_router
 from .routers import server as server_router
 from .routers import telemetry as telemetry_router
 from .routers import voice as voice_router
+from .routers import serial_monitor as serial_monitor_router
 
 settings = get_settings()
 
@@ -59,6 +60,7 @@ app.include_router(data_router.router)
 app.include_router(health_router.router)
 app.include_router(model_router.router)
 app.include_router(voice_router.router)
+app.include_router(serial_monitor_router.router)
 
 
 # ---------------------------------------------------------------------------
