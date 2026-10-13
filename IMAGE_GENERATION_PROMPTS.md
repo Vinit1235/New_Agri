@@ -1,154 +1,308 @@
-# 🎨 SoilEdge: Master AI Image Generation Prompts Guide
-> **Aesthetic Profile:** Liquid Glass (Neu-Glassmorphic) • Dark Cyber-Organic • Precision AgTech • 8K Photorealistic  
-> **Optimized For:** Midjourney v6.1, Google Imagen 3, DALL-E 3, and Stable Diffusion XL (SDXL)
+# 🎨 SoilEdge: Dribbble-Grade Light & Warm Aesthetic Image Generation Guide
+> **Inspired By:** Farhan (Warm Ceramic & Terracotta), Flow Forge (Clean Floating Cards), NexUX Lab (Pill Utilities), and Apple Health.  
+> **Aesthetic Profile:** Warm Travertine Canvas • Sun-Drenched Organic Botany • Scandinavian Industrial Minimalism • Soft Diffuse Lighting.  
+> **Core Rule:** No dark mode, no cyber-neon, no harsh contrast. Pure warmth, elegance, and natural light.  
+> **Optimized For:** Midjourney v6.1, Google Imagen 3, DALL-E 3, and Stable Diffusion XL (SDXL).
 
 ---
 
-## 📑 Prompt Matrix Overview
+## 📑 Visual Language & Palette Reference
 
-| Component | Target Location in App | Primary Mood / Accent | Recommended Aspect Ratio |
-|---|---|---|---|
-| **1. Ambient App Background** | Global body/app container | Deep Obsidian, Emerald bokeh, cyber soil | `16:9` |
-| **2. ESP32 Field Node Card** | Connection & Hardware Status | Matte black PCB, glowing sensors, copper traces | `16:9` or `1:1` |
-| **3. Smart Drip & Flow Hub** | Live Telemetry & Irrigation | Crystalline water droplets, micro-mist, neon cyan | `16:9` or `4:3` |
-| **4. Plant Disease Diagnostic** | Gemini Vision Camera Clinic | Clinical macro leaf, bio-scanner grid, cellular detail | `1:1` or `4:3` |
-| **5. Multispectral Satellite GIS** | Copernicus Sentinel-2 View | Orbital Earth view, NDVI infrared heatmap overlay | `16:9` |
-| **6. AI Agronomist Voice Avatar**| Voice Assistant Floating Orb | Bioluminescent chlorophyll orb, soundwave rings | `1:1` |
-
----
-
-## 1. 🌌 Global App Hero & Ambient Background
-
-### Prompt 1A: Cinematic Twilight Cyber-Farm (Recommended for Main App)
-```text
-Cinematic wide-angle view of a futuristic precision farm at twilight. Lush organic green crop rows stretching into the horizon, subtle glowing neon emerald and cyan digital data streamlines pulsing gently through the moist soil. Soft irrigation mist catching volumetric twilight rays, floating frosted dark glass telemetry HUD elements with glowing micro-indicators. Photorealistic 8k, cinematic depth of field, sleek obsidian and deep midnight sapphire tones, ray-traced ambient occlusion, Unreal Engine 5 render style, shot on Hasselblad H6D-100c --ar 16:9 --style raw --v 6.1 --s 250
 ```
-
-### Prompt 1B: Abstract Neu-Glass Dark Agriculture Texture
-```text
-Ultra-modern abstract dark mode background texture for smart agriculture web application. Seamless dark obsidian surface with subtle organic leaf vein fractals intertwined with glowing copper PCB circuit traces. Translucent frosted glass layers with soft refractive blur, ambient bioluminescent mint green and electric turquoise neon edge lighting, elegant minimalistic tech aesthetic, 8k resolution, clean composition, zero text, luxury UI backdrop --ar 16:9 --v 6.1
+Canvas Backdrop:       #FBF9F5 (Warm Linen / Travertine)
+Card Surfaces:         #FFFFFF (Crisp White Floating Panels)
+Pill / Segment Track:  #F2EFE9 (Soft Warm Sand)
+Organic Botanical:     #2D6A4F (Deep Forest Green) & #52B788 (Fresh Sage)
+Warm Earth Accent:     #D97736 (Warm Terracotta / Clay)
+Sunlight Highlight:    #F4A261 (Morning Sun Amber)
+Typography:            #1C1917 (Warm Espresso Slate) & #78716C (Stone Gray)
 ```
 
 ---
 
-## 2. ⚡ ESP32 Field Node & IoT Hardware Component
+## 1. 🌿 Hero Crop & Moisture Status Card (Farhan Ceramic Style)
 
-### Prompt 2A: High-End Industrial IoT Node in Field
+> **Use in:** Top Dashboard Hero Card, Soil Moisture Status Header, or Field Overview Banner.  
+> **Why it works:** Replaces flat robotic gauge graphics with warm, tactile, living botanical photography that feels like a luxury lifestyle and agtech product.
+
+### Midjourney v6.1 / Imagen 3 Prompt
 ```text
-Extreme close-up commercial product photography of an industrial IoT edge sensor node mounted on a carbon-fiber stake in fertile agricultural soil. A rugged matte-black weatherproof casing with an open smoked glass window revealing an ESP32 microcontroller with a glowing blue heartbeat status LED. Capacitive soil moisture probe inserted into dark damp earth, miniature precision flow meter with translucent housing. Warm golden hour sunlight blended with subtle neon cyan status indicators, macro photography, f/2.8 bokeh, IP67 ruggedized luxury agtech hardware --ar 16:9 --style raw --v 6.1
+Clean Scandinavian editorial product photography of a single healthy young basil plant growing in a minimalist warm terracotta ceramic pot. Sunlit organic farm greenhouse background with soft warm morning haze, delicate dewy water drops on leaves, warm neutral travertine surface. High-end Dribbble aesthetic, natural golden sunlight, Leica 90mm macro lens, soft shadows, warm beige and earthy green tones, zero clutter, shot on Hasselblad X2D 100C --ar 4:3 --style raw --v 6.1 --s 160
 ```
 
-### Prompt 2B: Futuristic Circuitry & Sensor Symphony (Isometric Card)
+### DALL-E 3 / AI Studio Prompt
 ```text
-Isometric 3D render of an advanced agtech IoT motherboard module floating in dark space. Dark obsidian PCB with emerald green glowing traces, ESP32 chip labeled with subtle laser etching, capacitive moisture sensor and miniature brass solenoid valve hovering nearby with magnetic connection beams. Frosted glass liquid display floating above showing live voltage and telemetry data, hyper-detailed, Octane render, luxury dark mode, 8k --ar 1:1 --v 6.1
-```
-
----
-
-## 3. 💧 Smart Watering & Hydro-Dynamics Component
-
-### Prompt 3A: Crystalline Micro-Drip Irrigation Dynamics
-```text
-Macro high-speed photography of a single crystalline water droplet falling from a high-tech micro-drip irrigation nozzle onto healthy vibrant green crop roots. Volumetric water splash frozen in time with microscopic clarity, subtle cyan neon bioluminescence glowing within the water droplet, dark rich loam soil texture in the background. Cinematic studio lighting with emerald rim light, ultra-sharp focus, Zeiss 100mm macro lens, 8k --ar 16:9 --style raw --v 6.1
-```
-
-### Prompt 3B: Smart Flow Meter & Fluid Energy
-```text
-Futuristic transparent flow meter tube with illuminated water rushing through it, micro-bubbles sparkling under electric cyan LED backlighting. Digital volumetric metering HUD showing dynamic water savings and pressure lines, sleek dark glass aesthetic, ultra-clean commercial industrial design --ar 4:3 --v 6.1
+A sun-drenched, high-end editorial photo of a vibrant green tomato seedling growing in a matte off-white ceramic planter on a clean warm travertine stone tabletop. In the background, a bright, airy greenhouse with morning sunlight filtering through architectural glass. Gentle water droplets resting on the leaves, soft warm shadows, minimalist Scandinavian aesthetic, natural warm earth tones, hyper-realistic, 8k.
 ```
 
 ---
 
-## 4. 🔬 Plant Health & Gemini Vision Diagnostic Hub
+## 2. ⚡ ESP32 Field Node & IoT Sensor Hardware (Teenage Engineering / Apple Style)
 
-### Prompt 4A: Clinical Botanical Leaf Analysis (AI Plant Clinic)
+> **Use in:** ESP32 Device Pairing Modal, Connection Status Card, or Hardware Diagnostics Tab.  
+> **Why it works:** Makes DIY IoT electronics look like an expensive, award-winning consumer hardware device.
+
+### Midjourney v6.1 / Imagen 3 Prompt
 ```text
-Macro clinical inspection of a fresh bell pepper leaf held under a high-tech agricultural diagnostic light. A holographic translucent green laser grid scanning the leaf surface, highlighting a subtle fungal powdery mildew lesion with a floating glowing amber circular reticle and AI confidence score tags. Laboratory cleanroom aesthetic mixed with fertile greenhouse background, hyper-detailed cellular texture, scientific precision, Leica Summilux lens --ar 1:1 --style raw --v 6.1
+Commercial industrial product design photography of a sleek, minimalist smart agriculture field sensor node. Matte eggshell-white cylindrical enclosure with a subtle bamboo wood accent ring and clean brushed aluminum stake, planted in rich warm organic garden soil inside a clean white porcelain tray. Pure warm beige studio background, soft daylight casting gentle shadows, high-end Teenage Engineering and Apple product aesthetic, beautiful and clean, 8k --ar 1:1 --style raw --v 6.1
 ```
 
-### Prompt 4B: Split Healthy vs. Diseased Botanical Diagnostic
+### Prompt 2B: Clean Studio Knolling Flat-Lay (Hardware Assembly)
 ```text
-Macro split comparison of agricultural crop leaves against a dark matte slate background. Left side: vibrant, glossy, nutrient-rich emerald green tomato leaf. Right side: leaf showing early blight chlorosis with diagnostic digital scan lines and golden nutrient deficiency mapping. Ultra-sharp focus, photorealistic botanical scientific study, 8k --ar 16:9 --v 6.1
-```
-
----
-
-## 5. 🛰️ Multispectral Sentinel-2 Satellite Earth Observation
-
-### Prompt 5A: Orbital Multispectral Farm Field from Space
-```text
-Ultra-high-resolution satellite earth observation photograph of agricultural patchwork crop fields viewed from low Earth orbit, inspired by Copernicus Sentinel-2 L2A. Stylized multispectral false-color NDVI overlay where lush healthy crops glow in vivid neon infrared emerald and moisture-rich irrigation corridors glow in electric cyan, bordered by rich terracotta soil. Subtle orbital telemetry HUD grid, crisp geographical boundaries, photorealistic NASA earth observatory style --ar 16:9 --v 6.1
+Bright knolling flat-lay photography of smart irrigation electronics on a pure white textured matte linen background. An ESP32 development board with clean golden solder pins, modern ceramic capacitive moisture sensor, translucent silicone water tube with clean brass fittings, and a minimalist solar cell. Soft natural daylight casting delicate shadows, clean organized studio photography, high-end design magazine spread --ar 4:3 --v 6.1
 ```
 
 ---
 
-## 6. 🎙️ Gemini AI Agronomist Voice Avatar / Floating Orb
+## 3. 💧 Smart Drip Irrigation & Water Dynamics (Purity & Flow)
 
-### Prompt 6A: Bioluminescent Chlorophyll Voice AI Hologram
+> **Use in:** Smart Watering Hub, Water Flow Rate Card (L/min), or Pump Timer Widget.  
+> **Why it works:** Translates flow rates and valve states into crisp, refreshing imagery of pure water and hydrated crops.
+
+### Midjourney v6.1 / Imagen 3 Prompt
 ```text
-A mystical futuristic voice AI orb floating in dark space. The core resembles a glowing bioluminescent sphere of chlorophyll green energy and liquid light pulses, surrounded by concentric frosted glass sonic rings and undulating soundwave ripples in cyan and emerald. Subtle floating botanical particles, soft caustic reflections on dark wet glass, glowing luxury AI persona, 8k 3D render, Octane render, minimalist luxury --ar 1:1 --v 6.1
+Macro photography of a single crystal-clear water droplet on the tip of a vibrant, healthy green basil leaf, illuminated by warm morning sunshine. Soft bokeh of a lush sunlit vegetable garden in the background, sparkling clean water caustics, vibrant natural greens and warm gold highlights. Extremely crisp focus, Leica 90mm Macro lens, clean organic purity, 8k --ar 16:9 --style raw --v 6.1
+```
+
+### Prompt 3B: Modern Micro-Drip Line in Fertile Soil
+```text
+Close-up shot of a modern micro-drip irrigation emitter releasing gentle, clear water rings around healthy tomato plant roots in rich organic mulch. Bright sunny day, warm natural color palette, fresh moisture soaking into soil, clean and optimistic sustainable agriculture photography --ar 4:3 --v 6.1
 ```
 
 ---
 
-## 7. 💻 Ready-to-Use CSS Implementation (Liquid Glass Overlay)
+## 4. 🔬 Plant Health & Gemini Vision Leaf Clinic (Clinical Botanical)
 
-To ensure background images never reduce text legibility or interfere with telemetry gauges, use this **Neu-Glass Gradient Stacking Technique**:
+> **Use in:** AI Plant Health Camera Screen, Leaf Upload Dropzone, or Disease Diagnosis Result Card.  
+> **Why it works:** Combines clinical accuracy with warm editorial art, making the AI diagnostic feature feel reassuring and high-tech without looking intimidating.
+
+### Midjourney v6.1 / Imagen 3 Prompt
+```text
+Top-down editorial flat-lay of three freshly plucked green crop leaves on a warm cream travertine stone tile. Bright natural window light, one leaf completely pristine and dewy, one leaf showing delicate natural veins, clean minimalist botanical catalog aesthetic, warm earthy undertones, ultra-sharp focus, shot on Hasselblad X2D --ar 1:1 --v 6.1
+```
+
+### Prompt 4B: Warm Harvest & Nutrient Study (Fertilizer Hub)
+```text
+Top-down flat-lay of freshly harvested organic vegetables and leaves—crisp bell peppers, heirloom tomatoes, and mint sprigs arranged elegantly on a clean warm travertine stone slab. Bright soft daylight, fresh dewy droplets, natural culinary and agronomic perfection, warm earthy neutrals and vibrant garden greens --ar 16:9 --v 6.1
+```
+
+---
+
+## 5. 🛰️ Satellite Field Landscape (Sunlit Sentinel-2 View)
+
+> **Use in:** Field Map Background, Satellite Health GIS Screen, or Farm Location Card.  
+> **Why it works:** Replaces dark radar maps with lush, sun-drenched aerial photography of real rolling agricultural fields.
+
+### Midjourney v6.1 / Imagen 3 Prompt
+```text
+Crisp high-resolution aerial drone photograph of picturesque patchwork farmland in rolling green hills on a bright, sunny afternoon. Neat geometric agricultural fields with varying shades of olive green, emerald, and warm golden wheat. Soft fluffy white cloud shadows, crystal-clear atmosphere, modern European sustainable farmland, breathtaking natural landscape, shot on DJI Inspire 3 --ar 16:9 --v 6.1
+```
+
+---
+
+## 6. 🎙️ Friendly AI Agronomist Mascot (3D Sprout Avatar)
+
+> **Use in:** Multilingual Gemini Voice Assistant Floating Button, Chat Header, or Onboarding Screen.  
+> **Why it works:** Replaces generic voice waves with a charming, approachable Pixar/Apple-style botanical mascot.
+
+### Midjourney v6.1 / Imagen 3 Prompt
+```text
+A cute, minimalist 3D stylized botanical sprout character with two fresh green leaves, crafted from smooth matte porcelain and soft matte silicone, smiling gently. Pure off-white studio background with soft warm lighting and delicate diffused contact shadows. Pixar-inspired friendly minimalism, clean pastel sage and warm cream tones, high-end app mascot icon, 8k render --ar 1:1 --v 6.1
+```
+
+---
+
+## 7. 🛠️ Dribbble Card Construction Blueprint (CSS Code)
+
+To make your app look identical to the Flow Forge and Farhan Dribbble references, wrap your components using this exact structure:
+
+```html
+<!-- Dribbble-Grade Organic Card Container -->
+<div class="dribbble-card">
+  <!-- Top Visual Thumbnail -->
+  <div class="card-thumb-frame">
+    <img src="YOUR_GENERATED_IMAGE.jpg" alt="Field Crop" />
+    <span class="tag-pill">🌱 42% Moisture</span>
+  </div>
+
+  <!-- Body Content -->
+  <div class="card-body">
+    <div class="header-row">
+      <span class="subtitle">Zone 01 • Drip Node</span>
+      <h3 class="title">Main Greenhouse</h3>
+    </div>
+
+    <!-- Segmented 4-Mode Pills -->
+    <div class="pill-track">
+      <button class="pill active">Auto</button>
+      <button class="pill">Schedule</button>
+      <button class="pill">Manual</button>
+      <button class="pill">Custom</button>
+    </div>
+
+    <!-- Quick Action -->
+    <div class="action-row">
+      <div>
+        <span class="metric-num">2.4</span>
+        <span class="metric-unit">L/min Flow</span>
+      </div>
+      <button class="primary-pill-btn">Pulse Pump (2m)</button>
+    </div>
+  </div>
+</div>
+```
 
 ```css
-/* =============================================================================
-   LIQUID GLASS BACKGROUND & COMPONENT OVERLAYS
-   ============================================================================= */
-
-/* 1. Global App Body with Background Image */
-.app-container {
-  min-height: 100vh;
-  background-color: #060b11;
-  /* Replace with your generated image URL */
-  background-image: 
-    radial-gradient(circle at 15% 20%, rgba(0, 230, 153, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 85% 80%, rgba(0, 212, 255, 0.10) 0%, transparent 40%),
-    linear-gradient(180deg, rgba(6, 11, 17, 0.75) 0%, rgba(6, 11, 17, 0.95) 100%),
-    url('assets/soiledge_hero_bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: #f1f5f9;
+/* --- Master Dribbble Styles --- */
+body {
+  background-color: #FBF9F5;
+  color: #1C1917;
+  font-family: -apple-system, BlinkMacSystemFont, 'Outfit', 'Inter', sans-serif;
+  margin: 0;
+  padding: 24px;
 }
 
-/* 2. Ultra-Premium Frosted Glass Panel */
-.liquid-glass-card {
-  background: rgba(16, 28, 44, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.dribbble-card {
+  background: #FFFFFF;
+  border-radius: 28px;
+  box-shadow: 0 10px 30px -4px rgba(44, 39, 32, 0.05), 0 2px 6px -1px rgba(44, 39, 32, 0.02);
+  padding: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+  border: 1px solid rgba(231, 239, 233, 0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dribbble-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -6px rgba(44, 39, 32, 0.08);
+}
+
+.card-thumb-frame {
   position: relative;
+  width: 100%;
+  height: 210px;
+  border-radius: 20px;
   overflow: hidden;
 }
 
-.liquid-glass-card:hover {
-  background: rgba(24, 42, 66, 0.75);
-  border-color: rgba(0, 230, 153, 0.4);
-  box-shadow: 0 12px 40px 0 rgba(0, 230, 153, 0.15);
-  transform: translateY(-2px);
+.card-thumb-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* 3. Component Header with Subtle Embedded Thumbnail */
-.card-header-with-thumb {
+.tag-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2D6A4F;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.card-body {
+  padding: 18px 8px 8px;
+}
+
+.subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #78716C;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1C1917;
+  margin: 4px 0 16px;
+  letter-spacing: -0.02em;
+}
+
+.pill-track {
+  display: flex;
+  background: #F2EFE9;
+  padding: 5px;
+  border-radius: 9999px;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.pill {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #78716C;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill.active {
+  background: #FFFFFF;
+  color: #1C1917;
+  box-shadow: 0 3px 10px rgba(44, 39, 32, 0.07);
+}
+
+.action-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid #F4EFEB;
 }
 
-.card-thumb {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  object-fit: cover;
-  border: 1px solid rgba(0, 230, 153, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 230, 153, 0.2);
+.metric-num {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1C1917;
+  letter-spacing: -0.03em;
+}
+
+.metric-unit {
+  font-size: 12px;
+  color: #78716C;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.primary-pill-btn {
+  background: #2D6A4F;
+  color: #FFFFFF;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.25);
+  transition: all 0.2s ease;
+}
+
+.primary-pill-btn:hover {
+  background: #22543D;
+  transform: translateY(-1px);
 }
 ```
+
+---
+
+## 8. 💡 Midjourney Parameter Quick Cheat Sheet
+
+Append these flags to your Midjourney prompts for the best results:
+* `--ar 4:3` (Best for card embedded photos)
+* `--ar 1:1` (Best for square hardware & avatar cards)
+* `--ar 16:9` (Best for full-width landscape banners)
+* `--style raw` (Produces natural photographic textures without over-stylized cartoon effects)
+* `--v 6.1` (Latest photorealism engine)
+* `--s 150` (Moderate stylization to keep the photos clean and grounded)
