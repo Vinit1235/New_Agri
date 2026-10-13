@@ -243,32 +243,36 @@ The app includes a dedicated vision analysis interface:
 
 ---
 
-## 7. Liquid Glass UI Component Specifications & Wireframes
+## 7. Warm & Clean Dribbble-Grade UI Component Specifications
 
-### 7.1 Design Tokens (Neu-Glassmorphic Palette)
+### 7.1 Design Tokens (Warm Linen & Organic Palette)
 ```css
 :root {
-  /* Color Tokens */
-  --bg-primary: #060b11;
-  --bg-secondary: #0c1520;
-  --glass-surface: rgba(16, 28, 44, 0.65);
-  --glass-surface-hover: rgba(24, 42, 66, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-border-glow: rgba(0, 230, 153, 0.35);
+  /* Canvas & Card Surfaces (Dribbble Farhan / Flow Forge Style) */
+  --bg-canvas: #FBF9F5;              /* Warm linen / travertine backdrop */
+  --bg-card: #FFFFFF;                /* Crisp white floating card */
+  --bg-pill-track: #F2EFE9;          /* Soft sand track for toggles */
+  --border-card: rgba(231, 239, 233, 0.6);
 
-  /* Brand Accents */
-  --emerald-neon: #00e699;
-  --cyan-neon: #00d4ff;
-  --amber-warning: #ffb703;
-  --crimson-alert: #ff3366;
-  --violet-ai: #a855f7;
+  /* Organic Botanical Accents */
+  --green-organic: #2D6A4F;          /* Deep rich forest green */
+  --green-sage: #52B788;             /* Fresh eucalyptus green */
+  --green-soft-tint: #E8F5E9;        /* Soft pastel green for badges */
+  --warm-terracotta: #D97736;        /* Warm clay / soil accent */
+  --amber-sunlight: #F4A261;         /* Warm golden indicator */
+  --sky-water: #74C0FC;              /* Gentle blue for irrigation */
 
   /* Typography */
-  --font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  --text-headline: #1C1917;          /* Warm espresso slate */
+  --text-muted: #78716C;             /* Stone gray */
+  --text-faint: #A8A29E;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Outfit', 'Inter', sans-serif;
   
-  /* Glass Blur */
-  --backdrop-blur: blur(20px);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  /* Diffuse Multi-Layer Shadows */
+  --card-shadow: 0 10px 30px -4px rgba(44, 39, 32, 0.05), 0 2px 6px -1px rgba(44, 39, 32, 0.02);
+  --card-shadow-hover: 0 20px 40px -6px rgba(44, 39, 32, 0.08);
+  --radius-card: 28px;
+  --radius-pill: 9999px;
 }
 ```
 
@@ -416,8 +420,12 @@ Build a complete, state-of-the-art Single Page Application (SPA) for "SoilEdge /
    - Can trigger manual pump runs or answer farm queries via voice.
 
 ### Visual & Design Requirements:
-- Use the **Liquid Glass (Neu-Glassmorphic)** design aesthetic: deep obsidian backdrop (#060b11), frosted glass surfaces (backdrop-filter: blur(20px)), subtle glowing borders (rgba(0, 230, 153, 0.3)), vibrant neon emerald (#00e699) and cyan (#00d4ff) accents, and smooth micro-animations.
-- Use Google Fonts ('Outfit' or 'Inter').
+- Use the **Warm Scandinavian & Organic Dribbble** aesthetic (inspired by modern ceramic and clean agtech lifestyle apps):
+  * Warm linen / travertine canvas backdrop (`#FBF9F5`), crisp pure white floating cards (`#FFFFFF`) with generous `28px` rounded corners and diffuse multi-layer ambient drop shadows.
+  * Soft earthy palette: rich botanical green (`#2D6A4F`), fresh eucalyptus sage (`#52B788`), warm terracotta (`#D97736`), and sunlight amber (`#F4A261`).
+  * No harsh pure black, no dark mode, and no neon cyberpunk glow.
+  * Segmented pill tracks (`#F2EFE9`) with smooth floating pill switches for mode selection.
+  * Clean typography with warm espresso text (`#1C1917`) and stone gray subtitles (`#78716C`).
 - Provide mock telemetry simulation mode if hardware is disconnected, so the app is 100% interactive out-of-the-box.
 - Generate clean, modular, production-ready code with complete styling and state management.
 ```
