@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="js/config.js"></script>
   <style>
     :root {
       --bg:        #080e17;
@@ -327,7 +328,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Config
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const API = 'http://localhost:8000';
+// API_BASE provided by js/config.js
 let source = 'api';         // 'api' | 'serial'
 let apiPollTimer = null;
 let eventSource  = null;    // SSE for serial
@@ -537,13 +538,13 @@ function startApiPolling() {
 }
 
 function fetchApiData() {
-  const token   = localStorage.getItem('krishi_token');
-  const fieldId = document.getElementById('fieldIdInput').value || 1;
+  const token   = getToken();
+  const fieldId = document.getElementById('fieldIdInput').value || currentFieldId();
   if (!token) { setConnStatus('', 'Not logged in'); return; }
 
   Promise.all([
-    fetch(`${API}/api/fields/${fieldId}/readings/latest`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
-    fetch(`${API}/api/fields/${fieldId}/events?limit=20`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : []),
+    fetch(`${API_BASE}/api/fields/${fieldId}/readings/latest`, { headers: authHeaders() }).then(r => r.ok ? r.json() : null),
+    fetch(`${API_BASE}/api/fields/${fieldId}/events?limit=20`, { headers: authHeaders() }).then(r => r.ok ? r.json() : []),
   ]).then(([reading, events]) => {
     if (reading) {
       setConnStatus('connected', `API · field ${fieldId}`);

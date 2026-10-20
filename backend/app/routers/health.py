@@ -7,10 +7,13 @@
 """
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+
+logger = logging.getLogger("soiledge.health")
 from sqlalchemy.orm import Session
 
 from .. import models, schemas

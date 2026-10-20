@@ -515,6 +515,7 @@
     <!-- ============================================
     JAVASCRIPT - ALL WORKING
     ============================================ -->
+    <script src="js/config.js"></script>
     <script>
         // ===== 1. TOAST NOTIFICATION =====
         function showToast(message) {
@@ -573,7 +574,7 @@
             loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
             loginBtn.disabled = true;
 
-            fetch('http://localhost:8000/api/auth/login-json', {
+            fetch(`${API_BASE}/api/auth/login-json`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

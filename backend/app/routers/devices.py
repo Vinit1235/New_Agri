@@ -44,6 +44,7 @@ def register_device(
         device_id=payload.device_id,
         name=payload.name,
         token_hash=hash_device_token(plaintext),
+        user_id=user.id,
         field_id=payload.field_id,
     )
     db.add(device)
@@ -94,11 +95,10 @@ def list_my_devices(
     user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all devices linked to fields owned by the current user."""
+    """List all devices owned by the current user."""
     return (
         db.query(models.Device)
-        .join(models.Field, models.Field.id == models.Device.field_id)
-        .filter(models.Field.user_id == user.id)
+        .filter(models.Device.user_id == user.id)
         .order_by(models.Device.id.asc())
         .all()
     )

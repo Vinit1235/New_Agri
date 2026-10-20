@@ -303,7 +303,7 @@ Keep your answer SHORT - maximum 2-3 sentences or 50 words."""
     try:
         # Call Gemini API
         response = client.models.generate_content(
-            model="gemini-2.5-flash",  # Latest Flash model
+            model="gemini-2.0-flash",  # Latest Flash model
             contents=prompt,
         )
         

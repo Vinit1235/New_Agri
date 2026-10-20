@@ -624,6 +624,7 @@
     <!-- ============================================
     JAVASCRIPT - ALL WORKING
     ============================================ -->
+    <script src="js/config.js"></script>
     <script>
         // ===== 1. TOAST NOTIFICATION =====
         function showToast(message) {
@@ -746,7 +747,7 @@
             signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
             signupBtn.disabled = true;
 
-            fetch('http://localhost:8000/api/auth/register', {
+            fetch(`${API_BASE}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

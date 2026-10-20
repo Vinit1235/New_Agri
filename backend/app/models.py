@@ -27,6 +27,9 @@ class User(Base):
     fields: Mapped[List["Field"]] = relationship(
         "Field", back_populates="owner", cascade="all, delete-orphan"
     )
+    devices: Mapped[List["Device"]] = relationship(
+        "Device", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -78,12 +81,16 @@ class Device(Base):
     name: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     last_seen: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
     field_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("fields.id", ondelete="SET NULL"), index=True, nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     field: Mapped[Optional["Field"]] = relationship("Field", back_populates="devices")
+    user: Mapped["User"] = relationship("User", back_populates="devices")
 
 
 # ---------------------------------------------------------------------------

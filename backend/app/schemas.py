@@ -91,6 +91,7 @@ class DeviceOut(BaseModel):
     id: int
     device_id: str
     name: Optional[str] = None
+    user_id: int
     field_id: Optional[int] = None
     last_seen: Optional[datetime] = None
     created_at: datetime

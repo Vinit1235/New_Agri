@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/config.js"></script></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1860,18 +1861,17 @@
         let updateCount = 0;
         let dataPointCount = 0;
 
-        let currentFieldId = 1; // Default field
+        let currentFieldId = currentFieldId || 1;
 
         function updateSensorData() {
-            const token = localStorage.getItem('krishi_token');
+            const token = getToken();
             if (!token) {
-                // If not logged in, just don't fetch or redirect
-                // window.location.href = 'login.html';
+                window.location.href = 'login.html';
                 return;
             }
 
-            fetch(`http://localhost:8000/api/fields/${currentFieldId}/readings/latest`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            fetch(`${API_BASE}/api/fields/${currentFieldId}/readings/latest`, {
+                headers: authHeaders()
             })
             .then(r => {
                 if (r.status === 401) { window.location.href = 'login.html'; throw new Error('Unauthorized'); }

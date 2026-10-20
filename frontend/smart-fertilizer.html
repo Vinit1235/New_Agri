@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/config.js"></script></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -1134,7 +1135,8 @@
         // ===== 5. SENSOR DATA =====
         let dataPointCount = 0;
         let nLevel = 420, pLevel = 32, kLevel = 155;
-        let moisture = 55, temperature = 26, ph = 6.8, ec = 1.2;
+        let moisture = 55, temperature = 26, ph = null, ec = null;
+        let turbidityNtu = null, flowRateLpm = null, sessionVolumeL = null, totalVolumeL = null;
         const nOptimal = { min: 280, max: 560 };
         const pOptimal = { min: 20, max: 40 };
         const kOptimal = { min: 120, max: 180 };
@@ -1143,30 +1145,34 @@
             return Math.round((Math.random() * (max - min) + min) * 10) / 10;
         }
 
-        let currentFieldId = 1;
+        let currentFieldId = currentFieldId || 1;
 
         function updateSensorData() {
-            const token = localStorage.getItem('krishi_token');
+            const token = getToken();
             if (!token) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            fetch(`http://localhost:8000/api/fields/${currentFieldId}/readings/latest`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            fetch(`${API_BASE}/api/fields/${currentFieldId}/readings/latest`, {
+                headers: authHeaders()
             })
             .then(r => r.json())
             .then(data => {
                 if (!data) return;
-                
+
                 dataPointCount++;
-                
-                // Update sensor values
+
+                // Update sensor values from real v3 telemetry
                 moisture = data.moisture || 0;
                 temperature = data.temperature || 0;
                 humidity = data.humidity || 0;
+                turbidityNtu = data.turbidity_ntu || null;
+                flowRateLpm = data.flow_rate_lpm || null;
+                sessionVolumeL = data.session_volume_L || null;
+                totalVolumeL = data.total_volume_L || null;
 
-                // Update nutrient levels (estimated from sensor data for display)
+                // NPK estimated via soil stage rules (clearly labeled as estimate, not sensor)
                 nLevel = Math.max(200, Math.min(600, Math.round(350 + (moisture / 100) * 150 + (temperature / 40) * 80)));
                 pLevel = Math.max(15, Math.min(50, Math.round(25 + (humidity / 100) * 15 + (moisture / 100) * 10)));
                 kLevel = Math.max(100, Math.min(220, Math.round(140 + (temperature / 40) * 60 + (moisture / 100) * 40)));
@@ -1180,25 +1186,49 @@
                 document.getElementById('tempBar').style.width = ((temperature - 10) / 35 * 100) + '%';
                 updateStatus('tempStatus', temperature, 20, 32);
 
-                document.getElementById('phValue').textContent = ph.toFixed(1);
-                const phPercent = ((ph - 4) / 5 * 100);
+                // pH / EC not measured by v3 hardware — show N/A
+                document.getElementById('phValue').textContent = ph !== null ? ph.toFixed(1) : 'N/A';
+                const phPercent = ph !== null ? ((ph - 4) / 5 * 100) : 0;
                 document.getElementById('phBar').style.width = Math.min(phPercent, 100) + '%';
-                updateStatus('phStatus', ph, 6.0, 7.5);
+                if (ph !== null) updateStatus('phStatus', ph, 6.0, 7.5);
+                else {
+                    document.getElementById('phStatus').textContent = 'Not measured';
+                    document.getElementById('phStatus').style.color = '#64748b';
+                }
 
-                document.getElementById('ecValue').textContent = ec.toFixed(1);
-                const ecPercent = (ec / 5 * 100);
+                document.getElementById('ecValue').textContent = ec !== null ? ec.toFixed(1) : 'N/A';
+                const ecPercent = ec !== null ? (ec / 5 * 100) : 0;
                 document.getElementById('ecBar').style.width = Math.min(ecPercent, 100) + '%';
-                updateStatus('ecStatus', ec, 0.5, 2.5);
+                if (ec !== null) updateStatus('ecStatus', ec, 0.5, 2.5);
+                else {
+                    document.getElementById('ecStatus').textContent = 'Not measured';
+                    document.getElementById('ecStatus').style.color = '#64748b';
+                }
+
+                // Update water clarity / flow / volume (real v3 telemetry)
+                const tEl = document.getElementById('turbidityValue');
+                if (tEl && turbidityNtu !== null) tEl.textContent = turbidityNtu.toFixed(1);
+                const fEl = document.getElementById('flowRateValue');
+                if (fEl && flowRateLpm !== null) fEl.textContent = flowRateLpm.toFixed(2);
+                const sEl = document.getElementById('sessionVolumeValue');
+                if (sEl && sessionVolumeL !== null) sEl.textContent = sessionVolumeL.toFixed(2);
+                const totEl = document.getElementById('totalVolumeValue');
+                if (totEl && totalVolumeL !== null) totEl.textContent = totalVolumeL.toFixed(1);
 
                 // Update stats
                 document.getElementById('dataPoints').textContent = dataPointCount;
-                const health = Math.round(60 + (moisture / 100) * 30 + (1 - ec / 5) * 10);
+                const ecForHealth = ec !== null ? ec / 5 : 0;
+                const health = Math.round(60 + (moisture / 100) * 30 + (1 - ecForHealth) * 10);
                 document.getElementById('fieldHealth').textContent = Math.min(health, 98) + '%';
 
-                // Update nutrient status
+                // Update nutrient status (estimated — label clearly in the UI)
                 document.getElementById('nCurrentLevel').textContent = nLevel + ' kg/ha';
                 document.getElementById('pCurrentLevel').textContent = pLevel + ' kg/ha';
                 document.getElementById('kCurrentLevel').textContent = kLevel + ' kg/ha';
+
+                // Label NPK as estimated
+                const estLabel = document.getElementById('npkEstimateLabel');
+                if (estLabel) estLabel.textContent = 'Estimated via Soil Stage Rules';
 
                 // Update nutrient status boxes
                 updateNutrientStatus('nStatusBox', 'nStatusTitle', 'nStatusDesc', nLevel, nOptimal, 'Nitrogen');

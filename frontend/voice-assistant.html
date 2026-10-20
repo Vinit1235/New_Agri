@@ -7,6 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="js/config.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -391,12 +392,12 @@
     </div>
 
     <script>
-        // Configuration
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:8000'
-            : window.location.origin;
-        
+        // Configuration (API_BASE provided by js/config.js)
         const API_ENDPOINT = `${API_BASE}/api/voice/chat`;
+
+        // Latest telemetry state (updated when available via API)
+        let latestMoisture = null, latestTemp = null, latestHumidity = null;
+        let lastAction = null;
 
         // DOM Elements
         const micButton = document.getElementById('micButton');
@@ -544,14 +545,12 @@
                 // Build request body
                 const requestBody = {
                     text: text,
-                    // Try to get field_id from localStorage or use demo values
-                    field_id: parseInt(localStorage.getItem('current_field_id')) || null,
-                    // Demo values as fallback
-                    moisture: 28.5,
-                    ph: 6.7,
-                    ec: 5.4,
-                    temperature: 28.0,
-                    last_action: "Fertilizer blocked (high EC)"
+                    field_id: parseInt(localStorage.getItem('current_field_id') || (typeof currentFieldId === 'function' ? currentFieldId() : 1)) || null,
+                    // Use real latest telemetry if available
+                    moisture: latestMoisture || 28.5,
+                    temperature: latestTemp || 28.0,
+                    humidity: latestHumidity || 60.0,
+                    last_action: lastAction || null
                 };
 
                 console.log('Sending request:', requestBody);

@@ -27,20 +27,6 @@ logger = logging.getLogger("soiledge.health_rules")
 # ---------------------------------------------------------------------------
 # Stage + NDVI expected range
 # ---------------------------------------------------------------------------
-def growth_stage(crop_type: str, planting_date: Optional[date], on: Optional[date] = None) -> str:
-    if planting_date is None:
-        return "unknown"
-    on = on or date.today()
-    days = max(0, (on - planting_date).days)
-    for stage_name, _, _, _ in get_profile_stages(crop_type):
-        # The profile stores a day-of-year window, but growth_stage is
-        # called with days-since-planting. We need stage windows in
-        # days-since-planting. Derive from the "vegetative" stage mid-point
-        # and the crop's typical cycle length.
-        pass
-    return "unknown"  # placeholder, see below
-
-
 def _stage_windows_in_days(crop_type: str) -> list[tuple[str, int, int]]:
     """Return (stage_name, days_since_planting_lo, days_since_planting_hi).
 
