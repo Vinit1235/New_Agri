@@ -472,6 +472,27 @@
                 </div>
 
                 <!-- Options -->
+                                <!-- Target Crop Selection -->
+                <div class="form-group">
+                    <label for="targetCrop"><i class="fas fa-seedling" style="color:#2E7D32;"></i> Select Your Crop (AI Field Profile)</label>
+                    <div class="input-wrapper">
+                        <select id="targetCrop" style="width:100%;padding:14px 16px 14px 44px;border-radius:12px;border:2px solid #e8ecf0;font-size:15px;font-family:inherit;background:#f8fafc;cursor:pointer;font-weight:600;color:#1a1a2e;outline:none;">
+                            <option value="Tomato" selected>🍅 Tomato (Vegetable — 50-65% Moisture)</option>
+                            <option value="Wheat">🌾 Wheat (Grain — 40-50% Moisture)</option>
+                            <option value="Rice">🍚 Rice / Paddy (Grain — 75-85% Moisture)</option>
+                            <option value="Cotton">🌿 Cotton (Cash Crop — 35-45% Moisture)</option>
+                            <option value="Sugarcane">🎋 Sugarcane (Cash Crop — 60-70% Moisture)</option>
+                            <option value="Maize">🌽 Maize / Corn (Grain — 45-60% Moisture)</option>
+                            <option value="Potato">🥔 Potato (Tuber — 55-70% Moisture)</option>
+                            <option value="Chilli">🌶️ Chilli (Spice — 45-60% Moisture)</option>
+                        </select>
+                        <span class="input-icon"><i class="fas fa-leaf" style="color:#2E7D32;"></i></span>
+                    </div>
+                    <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
+                        <i class="fas fa-robot" style="color:#2E7D32;"></i> AI automatically pulls this crop's water and fertilizer rules for the ESP32.
+                    </small>
+                </div>
+
                 <div class="form-options">
                     <label class="remember-me">
                         <input type="checkbox" id="rememberMe" checked />
@@ -588,7 +609,21 @@
                 return response.json();
             })
             .then(data => {
+                const selectedCrop = document.getElementById('targetCrop') ? document.getElementById('targetCrop').value : 'Tomato';
+                localStorage.setItem('selected_crop', selectedCrop);
                 localStorage.setItem('krishi_token', data.access_token);
+                // Background sync crop with field
+                fetch(`${API_BASE}/api/fields`, { headers: { 'Authorization': `Bearer ${data.access_token}` } })
+                    .then(r => r.ok ? r.json() : [])
+                    .then(fields => {
+                        if (fields && fields.length > 0) {
+                            fetch(`${API_BASE}/api/fields/${fields[0].id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${data.access_token}` },
+                                body: JSON.stringify({ name: fields[0].name, crop_type: selectedCrop })
+                            });
+                        }
+                    }).catch(e => console.log('Crop sync:', e));
                 localStorage.setItem('krishi_user', JSON.stringify(data.user));
                 
                 loginBtn.innerHTML = '<i class="fas fa-check-circle"></i> Welcome!';

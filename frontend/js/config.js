@@ -13,7 +13,9 @@
  *     <script src="js/config.js"></script>
  *     <script> ... page logic ... </script>
  */
-const API_BASE = 'http://localhost:8000';
+const API_BASE = (window.location.protocol.startsWith('http'))
+    ? window.location.origin
+    : 'http://localhost:8000';
 const TOKEN_KEY = 'krishi_token';
 const USER_KEY = 'krishi_user';
 const FIELD_KEY = 'current_field_id';

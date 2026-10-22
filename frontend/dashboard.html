@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="js/config.js"></script></script>
+    <script src="js/config.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -947,33 +947,31 @@
                     </div>
                 </div>
 
-                <!-- ===== SOIL pH ===== -->
+                                <!-- ===== WATER TURBIDITY (SILT INDEX) ===== -->
                 <div class="parameter-card">
                     <div class="param-header">
-                        <span class="icon">🧪</span>
-                        <span class="param-name">Soil pH</span>
-                        <span class="param-symbol">(pH)</span>
+                        <span class="icon"><i class="fas fa-water" style="color:#0288d1;font-size:24px;"></i></span>
+                        <span class="param-name">Water Clarity</span>
+                        <span class="param-symbol">(Turbidity NTU)</span>
                     </div>
-                    <div class="param-range">Optimal: 6.0-7.5</div>
+                    <div class="param-range">Optimal: &lt; 25 NTU (Clear)</div>
                     <div class="param-description">
-                        <strong>What it is:</strong> pH measures how acidic or alkaline your soil is. It affects how well plants can absorb nutrients from the soil. Most crops grow best in slightly acidic to neutral soil.
+                        <strong>What it is:</strong> Turbidity measures the clarity and suspended silt particles in your irrigation water. It protects micro-drip emitters, filtration units, and solenoids from clogging.
                     </div>
                     <div class="param-importance">
-                        <strong>🔴 Why It's Critical:</strong> Wrong pH causes:
+                        <strong>Why It's Critical:</strong> High turbidity causes:
                         <ul>
-                            <li><i class="fas fa-check-circle"></i> Nutrient lock-up – plants starve even with fertilizer</li>
-                            <li><i class="fas fa-check-circle"></i> Toxic aluminum and manganese in acidic soil</li>
-                            <li><i class="fas fa-check-circle"></i> Poor beneficial bacteria activity</li>
-                            <li><i class="fas fa-check-circle"></i> Reduced fertilizer efficiency – waste of money</li>
+                            <li><i class="fas fa-check-circle"></i> Clogged drip nozzles & uneven field watering</li>
+                            <li><i class="fas fa-check-circle"></i> Sediment build-up in fertilizer injector valves</li>
+                            <li><i class="fas fa-check-circle"></i> Increased pump friction & impeller wear</li>
+                            <li><i class="fas fa-check-circle"></i> Premature filter exhaustion and pressure drops</li>
                         </ul>
                     </div>
                     <div class="param-effect">
-                        <span class="effect-good">✅ Good: Max nutrients</span>
-                        <span class="effect-bad">❌ Bad: Nutrient lock-up</span>
-                        <span class="effect-good">✅ Good: Healthy microbes</span>
-                        <span class="effect-bad">❌ Bad: Poor microbes</span>
-                        <span class="effect-good">✅ Good: Better fertilizer</span>
-                        <span class="effect-bad">❌ Bad: Waste fertilizer</span>
+                        <span class="effect-good">🟢 Pure: Drip-safe</span>
+                        <span class="effect-bad">🔴 Silt: Clog risk</span>
+                        <span class="effect-good">🟢 Clear: Even spray</span>
+                        <span class="effect-bad">🔴 Dirty: Flush filter</span>
                     </div>
                 </div>
 
@@ -1007,33 +1005,31 @@
                     </div>
                 </div>
 
-                <!-- ===== EC (SALINITY) ===== -->
+                                <!-- ===== VPD TRANSPIRATION STRESS ===== -->
                 <div class="parameter-card">
                     <div class="param-header">
-                        <span class="icon">⚡</span>
-                        <span class="param-name">EC (Salinity)</span>
-                        <span class="param-symbol">(EC)</span>
+                        <span class="icon"><i class="fas fa-wind" style="color:#10b981;font-size:24px;"></i></span>
+                        <span class="param-name">Transpiration Index</span>
+                        <span class="param-symbol">(VPD kPa)</span>
                     </div>
-                    <div class="param-range">Safe: 0.5-2.5 dS/m</div>
+                    <div class="param-range">Optimal: 0.8 - 1.4 kPa</div>
                     <div class="param-description">
-                        <strong>What it is:</strong> Electrical Conductivity measures the salt content in your soil. High salt levels can harm plants by making it difficult for roots to absorb water and nutrients.
+                        <strong>What it is:</strong> Vapor Pressure Deficit (VPD) combines temperature and relative humidity to measure atmospheric water pull. It dictates how efficiently your crop absorbs nutrients from soil.
                     </div>
                     <div class="param-importance">
-                        <strong>🔴 Why It's Critical:</strong> High salinity causes:
+                        <strong>Why It's Critical:</strong> Extreme VPD causes:
                         <ul>
-                            <li><i class="fas fa-check-circle"></i> Roots cannot absorb water – plant dehydrates</li>
-                            <li><i class="fas fa-check-circle"></i> Leaf burn and yellowing</li>
-                            <li><i class="fas fa-check-circle"></i> Stunted growth and reduced yield</li>
-                            <li><i class="fas fa-check-circle"></i> Death of plants in severe cases</li>
+                            <li><i class="fas fa-check-circle"></i> Low VPD (&lt;0.4 kPa) ?" Stagnant humidity triggers fungal blight and mildew</li>
+                            <li><i class="fas fa-check-circle"></i> High VPD (&gt;1.6 kPa) ?" Stomata shut down, halting growth and burning leaves</li>
+                            <li><i class="fas fa-check-circle"></i> Optimal VPD triggers maximum nutrient flow through plant xylem</li>
+                            <li><i class="fas fa-check-circle"></i> Direct guide for misting, shade-netting, and aeration</li>
                         </ul>
                     </div>
                     <div class="param-effect">
-                        <span class="effect-good">✅ Good: Healthy water uptake</span>
-                        <span class="effect-bad">❌ Bad: No water uptake</span>
-                        <span class="effect-good">✅ Good: No salt stress</span>
-                        <span class="effect-bad">❌ Bad: Salt stress</span>
-                        <span class="effect-good">✅ Good: Root protection</span>
-                        <span class="effect-bad">❌ Bad: Root damage</span>
+                        <span class="effect-good">🟢 0.8-1.4: Peak growth</span>
+                        <span class="effect-bad">🔴 &gt;1.6: Heat stress</span>
+                        <span class="effect-good">🟢 Healthy xylem</span>
+                        <span class="effect-bad">⚠️ &lt;0.4: Fungal risk</span>
                     </div>
                 </div>
 
@@ -1330,8 +1326,8 @@
                 <div class="side-panel">
                     <div class="info-card" onclick="showToast('📊 Average moisture across all sensors')">
                         <div class="number" id="avgMoisture">0%</div>
-                        <div class="label">Avg Moisture</div>
-                        <div class="trend up" style="color:#2E7D32;">↑ 3% vs yesterday</div>
+                        <div class="label">Moisture</div>
+                        <div class="trend up" style="color:#2E7D32;">↑ 3% vs yesterday, 💧</div>
                     </div>
                     <div class="info-card" onclick="showToast('🌡️ Average temperature across all sensors')">
                         <div class="number" id="avgTemp">0°C</div>
@@ -1861,20 +1857,23 @@
         let updateCount = 0;
         let dataPointCount = 0;
 
-        let currentFieldId = currentFieldId || 1;
+        function getActiveFieldId() {
+            if (typeof currentFieldId === 'function') {
+                return currentFieldId();
+            }
+            return 1;
+        }
 
         function updateSensorData() {
-            const token = getToken();
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
+            const fieldId = getActiveFieldId();
+            const headers = (typeof authHeaders === 'function' && getToken()) 
+                ? authHeaders() 
+                : { 'Content-Type': 'application/json' };
 
-            fetch(`${API_BASE}/api/fields/${currentFieldId}/readings/latest`, {
-                headers: authHeaders()
+            fetch(`${API_BASE}/api/fields/${fieldId}/readings/latest`, {
+                headers: headers
             })
             .then(r => {
-                if (r.status === 401) { window.location.href = 'login.html'; throw new Error('Unauthorized'); }
                 if (!r.ok) return null;
                 return r.json();
             })
@@ -2078,6 +2077,10 @@
             const phosphorus = getRandomValue(15, 50);
             const potassium = getRandomValue(100, 220);
             updateNutrientChart(nitrogen, phosphorus, potassium);
+        }
+
+        function getRandomValue(min, max) {
+            return Math.round((min + Math.random() * (max - min)) * 10) / 10;
         }
 
         // ===== 15. INITIALIZE =====

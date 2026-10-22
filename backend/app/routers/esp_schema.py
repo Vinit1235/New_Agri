@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from .. import models
@@ -94,7 +95,8 @@ def get_esp_schema(
         "hardware_pins": {
             "moisture_adc_pin": 32,
             "soil_power_pin": 25,
-            "relay_gpio_pin": 26,
+            "pump_relay_pin": 23,
+            "fertilizer_valve_pin": 22,
             "flow_sensor_pin": 27,
             "turbidity_pin": 34,
             "adc_dry_reading": 3300,
@@ -108,3 +110,100 @@ def get_esp_schema(
     }
 
     return schema_doc
+
+
+@router.post("/telemetry")
+async def ingest_esp_telemetry(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    Direct LAN / Cloud ingestion endpoint for ESP32 Field Nodes.
+    Accepts raw JSON telemetry without requiring strict token headers.
+    Auto-detects device, updates last_seen, records SensorReading and optional AutomationEvent.
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    device_id_str = body.get("device_id") or "esp32-01"
+    dev = db.query(models.Device).filter(models.Device.device_id == device_id_str).first()
+    if not dev:
+        dev = db.query(models.Device).filter(models.Device.device_id.like("%esp%")).first()
+
+    dev_id = dev.id if dev else 1
+    field_id = dev.field_id if (dev and dev.field_id) else 1
+
+    now = datetime.utcnow()
+    reading = models.SensorReading(
+        moisture=body.get("moisture"),
+        temperature=body.get("temperature"),
+        humidity=body.get("humidity"),
+        turbidity_ntu=body.get("turbidity_ntu"),
+        flow_rate_lpm=body.get("flow_rate_lpm"),
+        session_volume_L=body.get("session_volume_L"),
+        total_volume_L=body.get("total_volume_L"),
+        timestamp=now,
+        device_id=dev_id,
+        field_id=field_id,
+    )
+    db.add(reading)
+    db.flush()
+
+    if (
+        body.get("action") is not None
+        or body.get("action_name") is not None
+        or body.get("pump")
+        or body.get("fertilizer")
+    ):
+        event = models.AutomationEvent(
+            action=body.get("action"),
+            action_name=body.get("action_name"),
+            pump=bool(body.get("pump")),
+            fertilizer=bool(body.get("fertilizer")),
+            flow_rate_lpm=body.get("flow_rate_lpm"),
+            session_volume_L=body.get("session_volume_L"),
+            total_volume_L=body.get("total_volume_L"),
+            timestamp=now,
+            device_id=dev_id,
+            field_id=field_id,
+        )
+        db.add(event)
+        db.flush()
+
+    if dev:
+        dev.last_seen = now
+    db.commit()
+
+    return {
+        "ok": True,
+        "status": "REAL HARDWARE ONLINE",
+        "reading_id": reading.id,
+        "device_id": device_id_str,
+        "field_id": field_id,
+    }
+
+
+@router.get("/status")
+def get_esp_status(db: Session = Depends(get_db)):
+    """Check hardware connectivity state for dashboard badge."""
+    dev = db.query(models.Device).filter(models.Device.device_id == "esp32-01").first()
+    latest_r = (
+        db.query(models.SensorReading)
+        .order_by(models.SensorReading.timestamp.desc())
+        .first()
+    )
+    is_online = False
+    age_sec = None
+    if latest_r and latest_r.timestamp:
+        age_sec = (datetime.utcnow() - latest_r.timestamp).total_seconds()
+        is_online = age_sec < 35
+    return {
+        "device_id": dev.device_id if dev else "esp32-01",
+        "online": is_online,
+        "age_seconds": round(age_sec, 1) if age_sec is not None else None,
+        "last_seen": dev.last_seen if dev else (latest_r.timestamp if latest_r else None),
+        "status": "REAL HARDWARE ONLINE" if is_online else "OFFLINE",
+    }
+

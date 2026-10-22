@@ -28,6 +28,7 @@
  */
 
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <WebServer.h>
 #include <HTTPClient.h>
 #include <math.h>
@@ -43,7 +44,7 @@ const char* password = "abhi#302";
 // ---------------------------------------------------------------------------
 // Backend
 // ---------------------------------------------------------------------------
-const char* API_BASE        = "http://10.235.221.52:8000";
+const char* API_BASE        = "http://10.39.34.52:8000";
 const char* DEVICE_TOKEN    = "esp32_secret_token_123";
 const char* DEVICE_ID       = "esp32-01";
 const bool  SEND_TO_BACKEND = true;
@@ -57,7 +58,16 @@ const bool  SEND_TO_BACKEND = true;
 #define TURBIDITY_PIN   34   // Turbidity AO       GPIO34  ADC1_CH6
 #define FLOW_PIN        27   // Flow sensor signal GPIO27
 #define SOIL_POWER_PIN  25   // 2N2222 base        GPIO25
-#define RELAY_PIN       26   // Relay / pump       GPIO26
+
+// Active-Low Hardware Relays (GPIO 23 for Pump, GPIO 22 for Solenoid Valve)
+#define PIN_PUMP_RELAY       23   // Main Pump Relay (GPIO 23)
+#define PIN_FERTILIZER_VALVE 22   // Solenoid Fertilizer Valve (GPIO 22)
+#define RELAY_PIN            23   // Alias for backwards compatibility
+#define ONBOARD_LED_PIN       2   // Onboard Blue LED (GPIO 2) mirrors Pump state
+#define WEBSERVER_PORT       80   // Standard HTTP Port 80 for direct browser access without typing :8000
+
+// Set to true if using a standard Relay Module (active-LOW)
+// Set to false if using an NPN Transistor (2N2222 / TIP120) / MOSFET / Motor Driver (active-HIGH)
 #define RELAY_ACTIVE_LOW true
 
 // ---------------------------------------------------------------------------
@@ -119,7 +129,13 @@ RTC_DATA_ATTR float         rtc_total_volume_L      = 0.0f;  // *** cumulative l
 // Global Runtime State
 // ---------------------------------------------------------------------------
 DHT       dht(DHTPIN, DHTTYPE);
-WebServer server(80);
+WebServer server(WEBSERVER_PORT);
+
+// Dynamic Crop Profiles & Runtime Overrides
+String activeCropName         = "Tomato";
+float  cropMinMoist           = 25.0f;
+float  cropTargetMoist        = 60.0f;
+int    cropMaxPumpRunSec      = 180;
 
 bool          pumpActive             = false;
 unsigned long pumpStartTime          = 0;
@@ -154,10 +170,25 @@ void setPump(bool enable) {
     Serial.println("[Flow] Irrigation session started -- session volume reset to 0 L.");
   }
   pumpActive = enable;
+  digitalWrite(ONBOARD_LED_PIN, enable ? HIGH : LOW); // Built-in blue LED mirrors pump state
   if (RELAY_ACTIVE_LOW)
-    digitalWrite(RELAY_PIN, enable ? LOW : HIGH);
+    digitalWrite(PIN_PUMP_RELAY, enable ? LOW : HIGH);
   else
-    digitalWrite(RELAY_PIN, enable ? HIGH : LOW);
+    digitalWrite(PIN_PUMP_RELAY, enable ? HIGH : LOW);
+  Serial.printf("[Actuator] Pump Motor (GPIO %d): %s\n", PIN_PUMP_RELAY, enable ? "ON" : "OFF");
+}
+
+bool isFertilizerOn = false;
+unsigned long fertStartTime = 0;
+
+void setFertilizerValve(bool enable) {
+  isFertilizerOn = enable;
+  if (enable) fertStartTime = millis();
+  if (RELAY_ACTIVE_LOW)
+    digitalWrite(PIN_FERTILIZER_VALVE, enable ? LOW : HIGH);
+  else
+    digitalWrite(PIN_FERTILIZER_VALVE, enable ? HIGH : LOW);
+  Serial.printf("[Actuator] Fertilizer Valve (GPIO %d): %s\n", PIN_FERTILIZER_VALVE, enable ? "OPEN" : "CLOSED");
 }
 
 // ===========================================================================
@@ -544,7 +575,16 @@ void postTelemetryToBackend(float moisture, float temp, float humid,
   if (!SEND_TO_BACKEND || WiFi.status() != WL_CONNECTED) return;
 
   HTTPClient http;
-  http.begin(String(API_BASE) + "/api/telemetry");
+  String targetUrl = String(API_BASE) + "/api/esp/telemetry";
+
+  if (targetUrl.startsWith("https://")) {
+    WiFiClientSecure secureClient;
+    secureClient.setInsecure();
+    http.begin(secureClient, targetUrl);
+  } else {
+    http.begin(targetUrl);
+  }
+
   http.addHeader("Content-Type", "application/json");
   if (strlen(DEVICE_TOKEN) > 0)
     http.addHeader("Authorization", String("Bearer ") + DEVICE_TOKEN);
@@ -557,14 +597,14 @@ void postTelemetryToBackend(float moisture, float temp, float humid,
   body = "{";
   body += "\"device_id\":\""       + String(DEVICE_ID)               + "\",";
   body += "\"moisture\":"          + String(moisture, 2)             + ",";
-  body += "\"temperature\":"       + String(temp, 2)                 + ",";
-  body += "\"humidity\":"          + String(humid, 2)                + ",";
+  body += "\"temperature\":"       + (isnan(temp)  ? "null" : String(temp, 2))       + ",";
+  body += "\"humidity\":"          + (isnan(humid) ? "null" : String(humid, 2))     + ",";
   body += "\"turbidity_ntu\":"     + String(turbNTU, 1)              + ",";
   body += "\"flow_rate_lpm\":"     + String(flowRateLPM, 3)          + ",";
   body += "\"session_volume_L\":"  + String(sessionVolL, 4)          + ",";
   body += "\"total_volume_L\":"    + String(rtc_total_volume_L, 4)   + ",";
   body += "\"pump\":"              + String(pumpState ? "true" : "false") + ",";
-  body += "\"fertilizer\":false,";
+  body += "\"fertilizer\":"        + String(isFertilizerOn ? "true" : "false") + ",";
   body += "\"action_name\":\""     + action                          + "\"";
   body += "}";
 
@@ -579,6 +619,76 @@ void postTelemetryToBackend(float moisture, float temp, float humid,
 // ===========================================================================
 //  setup()
 // ===========================================================================
+
+void setCorsHeaders() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  server.sendHeader("Access-Control-Allow-Headers", "*");
+}
+
+void handleTelemetryApi() {
+  setCorsHeaders();
+  
+  // Power soil sensor, read, cut power
+  digitalWrite(SOIL_POWER_PIN, HIGH);
+  delay(10);
+  int rawADC = analogRead(SOIL_PIN);
+  float moisture = getSoilMoisturePercentage(rawADC);
+  digitalWrite(SOIL_POWER_PIN, LOW);
+
+  float tempC = dht.readTemperature();
+  float humidity = dht.readHumidity();
+  float vpd = calculateVPD(tempC, humidity);
+  float turbNTU = readTurbidityNTU();
+
+  String json = "{";
+  json += "\"device_id\":\"" + String(DEVICE_ID) + "\",";
+  json += "\"moisture_pct\":" + String(moisture, 1) + ",";
+  json += "\"raw_adc\":" + String(rawADC) + ",";
+  json += "\"temperature\":" + (isnan(tempC) ? "null" : String(tempC, 1)) + ",";
+  json += "\"humidity\":" + (isnan(humidity) ? "null" : String(humidity, 1)) + ",";
+  json += "\"vpd\":" + (isnan(vpd) ? "null" : String(vpd, 2)) + ",";
+  json += "\"turbidity_ntu\":" + String(turbNTU, 1) + ",";
+  json += "\"flow_rate_lpm\":" + String(flowRateLPM, 2) + ",";
+  json += "\"session_volume_L\":" + String(sessionVolL, 3) + ",";
+  json += "\"total_volume_L\":" + String(rtc_total_volume_L, 3) + ",";
+  json += "\"pump_active\":" + String(pumpActive ? "true" : "false") + ",";
+  json += "\"fertilizer_active\":" + String(isFertilizerOn ? "true" : "false") + ",";
+  json += "\"relay_pin\":23,";
+  json += "\"valve_pin\":22,";
+  json += "\"port\":8000,";
+  json += "\"crop\":\"" + activeCropName + "\",";
+  json += "\"mode\":\"ACTIVE_LOW\"";
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
+
+void handleSetCropApi() {
+  setCorsHeaders();
+  String crop = "";
+  if (server.hasArg("crop")) crop = server.arg("crop");
+  else if (server.hasArg("name")) crop = server.arg("name");
+  
+  if (crop.length() > 0) {
+    activeCropName = crop;
+    crop.toLowerCase();
+    if (crop.indexOf("tomato") >= 0) { cropMinMoist = 28.0; cropTargetMoist = 65.0; cropMaxPumpRunSec = 180; }
+    else if (crop.indexOf("wheat") >= 0) { cropMinMoist = 22.0; cropTargetMoist = 50.0; cropMaxPumpRunSec = 240; }
+    else if (crop.indexOf("rice") >= 0) { cropMinMoist = 50.0; cropTargetMoist = 85.0; cropMaxPumpRunSec = 360; }
+    else if (crop.indexOf("cotton") >= 0) { cropMinMoist = 20.0; cropTargetMoist = 45.0; cropMaxPumpRunSec = 180; }
+    else if (crop.indexOf("sugarcane") >= 0) { cropMinMoist = 35.0; cropTargetMoist = 70.0; cropMaxPumpRunSec = 300; }
+    else if (crop.indexOf("maize") >= 0) { cropMinMoist = 25.0; cropTargetMoist = 60.0; cropMaxPumpRunSec = 200; }
+    else if (crop.indexOf("potato") >= 0) { cropMinMoist = 30.0; cropTargetMoist = 70.0; cropMaxPumpRunSec = 180; }
+    else if (crop.indexOf("chilli") >= 0) { cropMinMoist = 25.0; cropTargetMoist = 65.0; cropMaxPumpRunSec = 180; }
+
+    Serial.printf("[WIFI-CROP] Crop set to %s (Min: %.1f%%, Target: %.1f%%)\n", activeCropName.c_str(), cropMinMoist, cropTargetMoist);
+    server.send(200, "application/json", "{\"status\":\"success\",\"crop\":\"" + activeCropName + "\",\"min_moisture\":" + String(cropMinMoist,1) + "}");
+  } else {
+    server.send(400, "application/json", "{\"error\":\"Missing crop parameter\"}");
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   delay(500);
@@ -593,9 +703,18 @@ void setup() {
   pinMode(SOIL_PIN,       INPUT);
   pinMode(TURBIDITY_PIN,  INPUT);
   pinMode(SOIL_POWER_PIN, OUTPUT);
-  pinMode(RELAY_PIN,      OUTPUT);
   digitalWrite(SOIL_POWER_PIN, LOW);      // soil sensor power OFF on boot
-  setPump(false);                         // relay OFF on boot
+
+  // --- Boot Safe-State (Prevents Relay Clicks at Boot) ---
+  digitalWrite(PIN_PUMP_RELAY,       RELAY_ACTIVE_LOW ? HIGH : LOW);
+  pinMode(PIN_PUMP_RELAY,            OUTPUT);
+  digitalWrite(PIN_FERTILIZER_VALVE, RELAY_ACTIVE_LOW ? HIGH : LOW);
+  pinMode(PIN_FERTILIZER_VALVE,      OUTPUT);
+  digitalWrite(ONBOARD_LED_PIN,      LOW);
+  pinMode(ONBOARD_LED_PIN,           OUTPUT);
+
+  setPump(false);                         // Pump relay OFF on boot
+  setFertilizerValve(false);              // Solenoid valve CLOSED on boot
 
   dht.begin();
 
@@ -644,10 +763,79 @@ void setup() {
   }
 
   // Continuous server mode
+  // Continuous server mode - Port 8000 (Supports Direct LAN, App & Website)
   server.on("/",     handleRoot);
   server.on("/data", handleDataJson);
+  
+  // App & Dashboard Telemetry with CORS
+  server.on("/telemetry", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/telemetry", HTTP_GET,     handleTelemetryApi);
+
+  // App & Dashboard Direct Actuation Controls
+  server.on("/pump/on", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/pump/on", HTTP_GET, []() {
+    setPump(true);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"pump\":true}");
+  });
+  server.on("/pump/on", HTTP_POST, []() {
+    setPump(true);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"pump\":true}");
+  });
+
+  server.on("/pump/off", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/pump/off", HTTP_GET, []() {
+    setPump(false);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"pump\":false}");
+  });
+  server.on("/pump/off", HTTP_POST, []() {
+    setPump(false);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"pump\":false}");
+  });
+
+  server.on("/valve/on", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/valve/on", HTTP_GET, []() {
+    setFertilizerValve(true);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"fertilizer\":true}");
+  });
+
+  server.on("/valve/off", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/valve/off", HTTP_GET, []() {
+    setFertilizerValve(false);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"fertilizer\":false}");
+  });
+
+  // Fertilizer aliases
+  server.on("/fertilizer/on", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/fertilizer/on", HTTP_GET, []() {
+    setFertilizerValve(true);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"fertilizer\":true}");
+  });
+  server.on("/fertilizer/off", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/fertilizer/off", HTTP_GET, []() {
+    setFertilizerValve(false);
+    setCorsHeaders();
+    server.send(200, "application/json", "{\"status\":\"OK\",\"fertilizer\":false}");
+  });
+
+  server.on("/setcrop", HTTP_OPTIONS, []() { setCorsHeaders(); server.send(204); });
+  server.on("/setcrop", HTTP_GET, handleSetCropApi);
+  server.on("/crop",    HTTP_GET, handleSetCropApi);
+
+  server.on("/pump", []() {
+    setPump(!pumpActive);
+    server.sendHeader("Location", "/");
+    server.send(303);
+  });
   server.begin();
   Serial.println("[WebServer] Dashboard: http://" + WiFi.localIP().toString());
+  Serial.println("[Command] Send 'PUMP:ON', 'PUMP:OFF', 'FERT:ON', or 'FERT:OFF' to test actuators!");
 }
 
 // ===========================================================================
@@ -655,6 +843,25 @@ void setup() {
 // ===========================================================================
 void loop() {
   server.handleClient();
+
+  // Process Serial Monitor commands to test actuators directly
+  while (Serial.available() > 0) {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+    if (cmd.equalsIgnoreCase("PUMP:ON") || cmd.equalsIgnoreCase("MOTOR:ON") || cmd == "1") {
+      setPump(true);
+      Serial.println("[Motor/Pump] MANUAL OVERRIDE: ON");
+    } else if (cmd.equalsIgnoreCase("PUMP:OFF") || cmd.equalsIgnoreCase("MOTOR:OFF") || cmd == "0") {
+      setPump(false);
+      Serial.println("[Motor/Pump] MANUAL OVERRIDE: OFF");
+    } else if (cmd.equalsIgnoreCase("FERT:ON") || cmd.equalsIgnoreCase("VALVE:ON")) {
+      setFertilizerValve(true);
+      Serial.println("[Fertilizer] MANUAL OVERRIDE: OPEN");
+    } else if (cmd.equalsIgnoreCase("FERT:OFF") || cmd.equalsIgnoreCase("VALVE:OFF")) {
+      setFertilizerValve(false);
+      Serial.println("[Fertilizer] MANUAL OVERRIDE: CLOSED");
+    }
+  }
 
   // Non-blocking flow measurement (every 1 s)
   updateFlowMeasurements();

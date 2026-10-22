@@ -563,7 +563,7 @@ async function scanPorts() {
   const sel = document.getElementById('portSelect');
   sel.innerHTML = '<option>Scanning...</option>';
   try {
-    const res  = await fetch(`${API}/api/serial/ports`);
+    const res  = await fetch(`${API_BASE}/api/serial/ports`);
     const data = await res.json();
     sel.innerHTML = data.ports.length
       ? data.ports.map(p => `<option value="${p.device}">${p.device} — ${p.description}</option>`).join('')
@@ -580,7 +580,7 @@ async function connectSerial() {
 
   setConnStatus('connecting', `Opening ${port}...`);
   try {
-    const res  = await fetch(`${API}/api/serial/connect`, {
+    const res  = await fetch(`${API_BASE}/api/serial/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ port, baud }),
@@ -595,7 +595,7 @@ async function connectSerial() {
     document.getElementById('sensorGrid').style.display    = '';
 
     // Load existing log buffer
-    const logRes  = await fetch(`${API}/api/serial/log?n=100`);
+    const logRes  = await fetch(`${API_BASE}/api/serial/log?n=100`);
     const logData = await logRes.json();
     if (logData.lines) logData.lines.forEach(l => appendTermLine(l));
 
@@ -607,7 +607,7 @@ async function connectSerial() {
 }
 
 async function disconnectSerial() {
-  await fetch(`${API}/api/serial/disconnect`, { method: 'POST' });
+  await fetch(`${API_BASE}/api/serial/disconnect`, { method: 'POST' });
   stopAll();
   document.getElementById('connectBtn').style.display    = '';
   document.getElementById('disconnectBtn').style.display = 'none';
@@ -618,7 +618,7 @@ async function disconnectSerial() {
 
 function startSSE() {
   if (eventSource) eventSource.close();
-  eventSource = new EventSource(`${API}/api/serial/stream`);
+  eventSource = new EventSource(`${API_BASE}/api/serial/stream`);
 
   eventSource.addEventListener('message', e => {
     appendTermLine(e.data);

@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="js/config.js"></script></script>
+    <script src="js/config.js"></script>
     <style>
         /* ===== ALL EXISTING STYLES REMAIN SAME ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1035,6 +1035,17 @@
     JAVASCRIPT - ALL WORKING
     ============================================ -->
     <script>
+        // ===== 0. CONFIG FALLBACK & VALIDATION =====
+        // Fallback if config.js fails to load
+        if (typeof API_BASE === 'undefined') {
+            window.API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:8000'
+                : window.location.origin;
+            console.warn('⚠️ API_BASE not found from config.js, using fallback:', API_BASE);
+        } else {
+            console.log('✅ API_BASE loaded from config.js:', API_BASE);
+        }
+
         // ===== 1. MOBILE MENU =====
         document.getElementById('mobileMenuBtn').addEventListener('click', function() {
             document.getElementById('navLinks').classList.toggle('active');
@@ -1294,14 +1305,36 @@
                 }
 
                 activePolygonGeoJSON = geometry;
-                const fieldObj = currentFieldList.find(f => f.id === currentFieldId) || { name: 'My Wheat Field', crop_type: 'Wheat', polygon: geometry };
+                
+                // Create or update field object
+                const fieldObj = currentFieldList.find(f => f.id === currentFieldId) || { 
+                    id: currentFieldId || 1,
+                    name: 'My Field', 
+                    crop_type: 'Wheat', 
+                    polygon: geometry,
+                    lat: null,
+                    lon: null
+                };
+                
+                // Calculate centroid for lat/lon
+                if (geometry.coordinates && geometry.coordinates[0]) {
+                    const ring = geometry.coordinates[0];
+                    let sumLat = 0, sumLon = 0;
+                    ring.forEach(pt => { sumLon += pt[0]; sumLat += pt[1]; });
+                    fieldObj.lat = sumLat / ring.length;
+                    fieldObj.lon = sumLon / ring.length;
+                }
+                
                 fieldObj.polygon = geometry;
                 renderFieldOnMaps(fieldObj);
 
                 updatePolygonStats(geometry);
                 togglePolygonModal();
-                showToast('✅ Polygon geometry applied! Click "Save Boundary" to store.');
+                showToast('✅ Polygon geometry applied! Now click "Save Boundary" to persist, then "Fetch Sentinel-2" for NDVI/NDWI.');
+                
+                console.log('✅ GeoJSON applied:', geometry);
             } catch (err) {
+                console.error('GeoJSON parse error:', err);
                 showToast('❌ Invalid JSON format: ' + err.message);
             }
         }
@@ -1311,14 +1344,13 @@
                 showToast('⚠️ Draw a boundary or paste a GeoJSON Polygon first');
                 return;
             }
+            
             const token = localStorage.getItem('krishi_token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
+            const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 
             try {
                 showToast('💾 Saving field boundary to server...');
+                
                 let centerLat = 30.8945, centerLon = 75.8420;
                 if (activePolygonGeoJSON.coordinates && activePolygonGeoJSON.coordinates[0]) {
                     const ring = activePolygonGeoJSON.coordinates[0];
@@ -1328,37 +1360,41 @@
                     centerLon = sumLon / ring.length;
                 }
 
+                console.log('Saving polygon with center:', { lat: centerLat, lon: centerLon });
+
+                // If no field exists, create one first
                 if (!currentFieldId || currentFieldList.length === 0) {
+                    console.log('Creating new field with polygon...');
                     const createRes = await fetch(`${API_BASE}/api/fields`, {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
+                        headers: headers,
                         body: JSON.stringify({
-                            name: 'My Wheat Field',
+                            name: 'My Field',
                             crop_type: 'Wheat',
                             lat: centerLat,
                             lon: centerLon,
                             polygon: activePolygonGeoJSON
                         })
                     });
+                    
                     if (createRes.ok) {
                         const newField = await createRes.json();
                         currentFieldId = newField.id;
+                        console.log('✅ Field created with ID:', currentFieldId);
                         await loadUserFields();
-                        showToast('✅ Field created and boundary saved successfully!');
-                        refreshSatelliteData();
+                        showToast('✅ Field created and boundary saved! Now click "Fetch Sentinel-2" to get NDVI/NDWI data.');
                         return;
+                    } else {
+                        const errorText = await createRes.text();
+                        throw new Error(`Failed to create field: ${createRes.status} - ${errorText}`);
                     }
                 }
 
+                // Update existing field with polygon
+                console.log('Updating field', currentFieldId, 'with polygon...');
                 const res = await fetch(`${API_BASE}/api/fields/${currentFieldId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         polygon: activePolygonGeoJSON,
                         lat: centerLat,
@@ -1368,33 +1404,58 @@
 
                 if (res.ok) {
                     const updated = await res.json();
-                    showToast('✅ Field polygon boundary saved successfully!');
-                    refreshSatelliteData();
+                    console.log('✅ Field polygon saved:', updated);
+                    showToast('✅ Field boundary saved successfully! Now click "Fetch Sentinel-2" to get NDVI/NDWI.');
                 } else {
                     const err = await res.json().catch(() => ({}));
-                    showToast('❌ Failed to save polygon: ' + (err.detail || 'Error ' + res.status));
+                    throw new Error(err.detail || 'Error ' + res.status);
                 }
             } catch (e) {
-                showToast('❌ Network error while saving polygon');
-                console.error(e);
+                console.error('Save polygon error:', e);
+                showToast('❌ Failed to save polygon: ' + e.message);
             }
         }
 
         async function refreshSatelliteData() {
+            if (!activePolygonGeoJSON) {
+                showToast('⚠️ Please draw or paste a field boundary first');
+                return;
+            }
+            
+            if (!currentFieldId) {
+                showToast('⚠️ No field selected. Please select or create a field first.');
+                return;
+            }
+            
             const token = localStorage.getItem('krishi_token');
-            if (!token) return;
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-            showToast('🛰️ Requesting Sentinel-2 satellite indices for field...');
+            showToast('🛰️ Requesting Sentinel-2 satellite indices for field... This may take 10-30 seconds.');
+            
             try {
+                console.log(`Fetching Sentinel-2 data for field ${currentFieldId}...`);
+                
                 const refreshRes = await fetch(`${API_BASE}/api/fields/${currentFieldId}/satellite/refresh`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: headers
                 });
 
+                if (!refreshRes.ok) {
+                    const errorText = await refreshRes.text();
+                    console.error('Satellite refresh failed:', refreshRes.status, errorText);
+                    showToast(`❌ Satellite refresh failed: ${refreshRes.status} - ${errorText.substring(0, 100)}`);
+                    return;
+                }
+                
+                const result = await refreshRes.json();
+                console.log('✅ Satellite refresh response:', result);
+
                 await fetchFieldHealth();
-                showToast('✅ Sentinel-2 satellite metrics updated on both maps!');
+                showToast('✅ Sentinel-2 satellite metrics updated! NDVI and NDWI data now displayed on maps.');
             } catch (err) {
                 console.error('Satellite refresh error:', err);
+                showToast('❌ Network error during satellite refresh: ' + err.message);
+                // Still try to fetch existing health data
                 fetchFieldHealth();
             }
         }
@@ -1402,23 +1463,35 @@
         // ===== 6. FIELD SELECTOR & DATA BINDING =====
         async function loadUserFields() {
             const token = localStorage.getItem('krishi_token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             try {
-                const res = await fetch(`${API_BASE}/api/fields`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!res.ok) throw new Error('Failed to fetch fields');
+                console.log('📡 Fetching fields from:', `${API_BASE}/api/fields`);
+                
+                const res = await fetch(`${API_BASE}/api/fields`, { headers });
+                
+                console.log('📡 Fields response status:', res.status);
+                
+                if (!res.ok) {
+                    console.error('Failed to fetch fields:', res.status, res.statusText);
+                    throw new Error('Failed to fetch fields');
+                }
+                
                 currentFieldList = await res.json();
+                console.log('✅ Loaded', currentFieldList.length, 'fields:', currentFieldList);
 
                 const select = document.getElementById('fieldSelector');
+                
+                if (!select) {
+                    console.error('❌ fieldSelector element not found!');
+                    return;
+                }
+                
                 select.innerHTML = '';
 
                 if (currentFieldList.length === 0) {
-                    select.innerHTML = '<option value="">No fields found</option>';
+                    select.innerHTML = '<option value="">No fields found - Create one by drawing or pasting GeoJSON</option>';
+                    console.log('ℹ️ No fields available');
                     return;
                 }
 
@@ -1431,9 +1504,15 @@
                 });
 
                 currentFieldId = currentFieldList[0].id;
+                console.log('✅ Field selector populated. Current field ID:', currentFieldId);
+                
                 await fetchFieldHealth();
             } catch (err) {
-                console.error('Error loading fields:', err);
+                console.error('❌ Error loading fields:', err);
+                const select = document.getElementById('fieldSelector');
+                if (select) {
+                    select.innerHTML = '<option value="">Error loading fields - Check console</option>';
+                }
             }
         }
 
@@ -1447,12 +1526,10 @@
 
         async function fetchFieldHealth() {
             const token = localStorage.getItem('krishi_token');
-            if (!token) return;
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             try {
-                const res = await fetch(`${API_BASE}/api/fields/${currentFieldId}/health`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch(`${API_BASE}/api/fields/${currentFieldId}/health`, { headers });
                 if (!res.ok) return;
                 const health = await res.json();
 
@@ -1617,13 +1694,22 @@
 
         // ===== 9. INITIALIZE =====
         window.addEventListener('DOMContentLoaded', () => {
+            console.log('🌾 Crop Health Page - DOM Loaded');
+            console.log('📍 API_BASE:', API_BASE);
+            console.log('🗺️ Initializing Leaflet maps...');
+            
             initLeafletMaps();
+            console.log('✅ Maps initialized');
+            
+            console.log('📡 Loading user fields...');
             loadUserFields();
         });
 
         // Periodic Health Poll
         setInterval(() => {
-            fetchFieldHealth();
+            if (currentFieldId) {
+                fetchFieldHealth();
+            }
         }, 15000);
 
         // ===== 10. CONSOLE =====

@@ -43,15 +43,15 @@
 // 1. NETWORK & BACKEND CREDENTIALS
 // ------------------------------------------------------------------------------
 // Adjust these to match your Wi-Fi and Laptop / Server IP
-const char* WIFI_SSID             = "YOUR_WIFI_SSID";
-const char* WIFI_PASSWORD         = "YOUR_WIFI_PASSWORD";
+const char* WIFI_SSID             = "realme C67 5G";
+const char* WIFI_PASSWORD         = "abhi#302";
 
 // Website Backend Gateway (FastAPI)
-const char* BACKEND_BASE_URL      = "http://192.168.1.100:8000"; // Your PC's LAN IP or localhost
+const char* BACKEND_BASE_URL      = "http://10.39.34.52:8000"; // Your PC's LAN IP
 const char* DEVICE_TOKEN          = "esp32_secret_token_123";   // Matches token from web registration
 
 // Optional: Cloud Run / AI Studio App Schema Feed URL
-const char* SCHEMA_FEED_URL       = "http://192.168.1.100:8000/api/esp/schema";
+const char* SCHEMA_FEED_URL       = "http://10.39.34.52:8000/api/esp/schema";
 const char* ESP_DEVICE_SECRET     = "soiledge_sec_esp32_token_981e80ce";
 
 // ------------------------------------------------------------------------------
@@ -64,6 +64,7 @@ const char* ESP_DEVICE_SECRET     = "soiledge_sec_esp32_token_981e80ce";
 #define DEFAULT_TURBIDITY_PIN     34   // Turbidity Sensor AO (GPIO 34, ADC1)
 #define DEFAULT_FLOW_PIN          27   // Water Flow Hall Sensor (GPIO 27, Interrupt)
 #define DEFAULT_RELAY_PIN         26   // Submersible Pump Relay (GPIO 26)
+#define DEFAULT_FERT_VALVE_PIN    22   // Solenoid Fertilizer Valve (GPIO 22)
 #define RELAY_ACTIVE_LOW        true   // True for standard active-low relay modules
 
 // Flow sensor calibration (YF-S201: 7.5 pulses/s = 1 L/min)
@@ -120,6 +121,7 @@ WebServer server(80);
 
 // Actuator States
 bool          isPumpOn              = false;
+bool          isValveOn             = false;
 unsigned long pumpStartTimeMs       = 0;
 bool          safetyCutoutActive    = false;
 unsigned long safetyCutoutTimeMs    = 0;
@@ -157,6 +159,19 @@ void IRAM_ATTR onFlowPulse() {
 // ------------------------------------------------------------------------------
 // 6. ACTUATOR & RELAY CONTROL (WITH FAILSAFE WATCHDOG)
 // ------------------------------------------------------------------------------
+
+void setValve(bool enable, const char* reason = "MANUAL") {
+  isValveOn = enable;
+  int pin = DEFAULT_FERT_VALVE_PIN;
+  pinMode(pin, OUTPUT);
+  if (RELAY_ACTIVE_LOW) {
+    digitalWrite(pin, enable ? LOW : HIGH);
+  } else {
+    digitalWrite(pin, enable ? HIGH : LOW);
+  }
+  Serial.printf("[Fertilizer Valve] %s (%s) | GPIO %d\n", enable ? "OPEN" : "CLOSED", reason, pin);
+}
+
 void setPump(bool enable, const char* reason = "MANUAL") {
   if (safetyCutoutActive && enable) {
     Serial.println("[Safety] Blocked pump start: safety lockout is currently ACTIVE.");
@@ -354,7 +369,7 @@ void postTelemetryToWebsite() {
   payload += "\"session_volume_L\":" + String(sessionVolumeL, 3)       + ",";
   payload += "\"total_volume_L\":"   + String(rtcTotalVolumeL, 3)      + ",";
   payload += "\"pump\":"             + String(isPumpOn ? "true" : "false") + ",";
-  payload += "\"fertilizer\":false,";
+  payload += "\"fertilizer\":" + String(isValveOn ? "true" : "false") + ",";
   payload += "\"action_name\":\""    + actionName                      + "\"";
   payload += "}";
 
@@ -410,6 +425,87 @@ void handleLocalDataApi() {
   server.send(200, "application/json", j);
 }
 
+
+// ------------------------------------------------------------------------------
+// OVER-THE-AIR WI-FI CROP CONFIGURATION ENDPOINT (GET/POST /setcrop or /crop)
+// ------------------------------------------------------------------------------
+void handleSetCrop() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  String cropName = "";
+
+  if (server.hasArg("crop")) {
+    cropName = server.arg("crop");
+  } else if (server.hasArg("name")) {
+    cropName = server.arg("name");
+  } else if (server.hasArg("plain")) {
+    // Check if sent via JSON payload
+    StaticJsonDocument<256> doc;
+    if (deserializeJson(doc, server.arg("plain")) == DeserializationError::Ok) {
+      if (doc.containsKey("crop")) cropName = doc["crop"].as<String>();
+      else if (doc.containsKey("crop_name")) cropName = doc["crop_name"].as<String>();
+    }
+  }
+
+  if (cropName.length() == 0) {
+    server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Missing crop parameter. Example: /setcrop?crop=Tomato\"}");
+    return;
+  }
+
+  cropName.trim();
+  float minM = 25.0;
+  float targetM = 60.0;
+  int maxRun = 180;
+  float maxEc = 2.5;
+
+  String lower = cropName;
+  lower.toLowerCase();
+
+  if (lower.indexOf("tomato") >= 0) {
+    minM = 28.0; targetM = 65.0; maxRun = 180; maxEc = 2.5;
+  } else if (lower.indexOf("wheat") >= 0) {
+    minM = 22.0; targetM = 50.0; maxRun = 240; maxEc = 4.0;
+  } else if (lower.indexOf("rice") >= 0 || lower.indexOf("paddy") >= 0) {
+    minM = 50.0; targetM = 85.0; maxRun = 360; maxEc = 3.0;
+  } else if (lower.indexOf("cotton") >= 0) {
+    minM = 20.0; targetM = 45.0; maxRun = 180; maxEc = 5.0;
+  } else if (lower.indexOf("sugarcane") >= 0) {
+    minM = 35.0; targetM = 70.0; maxRun = 300; maxEc = 3.5;
+  } else if (lower.indexOf("maize") >= 0 || lower.indexOf("corn") >= 0) {
+    minM = 25.0; targetM = 60.0; maxRun = 200; maxEc = 3.2;
+  } else if (lower.indexOf("potato") >= 0) {
+    minM = 30.0; targetM = 70.0; maxRun = 180; maxEc = 2.5;
+  } else if (lower.indexOf("chilli") >= 0) {
+    minM = 25.0; targetM = 65.0; maxRun = 180; maxEc = 2.0;
+  }
+
+  // Update in-memory configuration
+  strncpy(config.crop_name, cropName.c_str(), sizeof(config.crop_name) - 1);
+  config.min_moisture_pct = minM;
+  config.target_moisture_pct = targetM;
+  config.max_pump_runtime_sec = maxRun;
+  config.max_ec_dsm = maxEc;
+
+  // Persist to Flash (Preferences) so it survives power cycles
+  prefs.putString("saved_crop", cropName);
+  prefs.putFloat("saved_min_m", minM);
+  prefs.putFloat("saved_target_m", targetM);
+  prefs.putInt("saved_max_run", maxRun);
+
+  Serial.printf("\n[OTA-CROP] >>> Successfully modified crop over Wi-Fi to: %s <<<\n", config.crop_name);
+  Serial.printf("   New Autonomous Thresholds: Min Moisture: %.1f%% | Target: %.1f%% | Max Pump Run: %ds\n",
+                minM, targetM, maxRun);
+
+  String resp = "{\"status\":\"success\",\"message\":\"Crop successfully modified over Wi-Fi\",\"crop\":\"" + cropName +
+                "\",\"min_moisture\":" + String(minM, 1) +
+                ",\"target_moisture\":" + String(targetM, 1) +
+                ",\"max_runtime_sec\":" + String(maxRun) +
+                ",\"max_ec_dsm\":" + String(maxEc, 1) + "}";
+  server.send(200, "application/json", resp);
+}
+
 void handlePumpToggle() {
   setPump(!isPumpOn, "LOCAL_WEB_TOGGLE");
   server.sendHeader("Location", "/");
@@ -431,9 +527,13 @@ void parseSerialCommand(String cmd) {
     applyDynamicJsonSchema(jsonFeed);
   } else if (cmd.startsWith("{") && cmd.endsWith("}")) {
     applyDynamicJsonSchema(cmd);
-  } else if (cmd.equalsIgnoreCase("PUMP:ON") || cmd.equalsIgnoreCase("FAN:ON")) {
+  } else if (cmd.equalsIgnoreCase("VALVE:ON") || cmd.equalsIgnoreCase("FERT:ON")) {
+    setValve(true, "SERIAL_COMMAND");
+  } else if (cmd.equalsIgnoreCase("VALVE:OFF") || cmd.equalsIgnoreCase("FERT:OFF")) {
+    setValve(false, "SERIAL_COMMAND");
+  } else if (cmd.equalsIgnoreCase("PUMP:ON") || cmd.equalsIgnoreCase("MOTOR:ON") || cmd.equalsIgnoreCase("FAN:ON")) {
     setPump(true, "SERIAL_COMMAND");
-  } else if (cmd.equalsIgnoreCase("PUMP:OFF") || cmd.equalsIgnoreCase("FAN:OFF")) {
+  } else if (cmd.equalsIgnoreCase("PUMP:OFF") || cmd.equalsIgnoreCase("MOTOR:OFF") || cmd.equalsIgnoreCase("FAN:OFF")) {
     setPump(false, "SERIAL_COMMAND");
   } else if (cmd.equalsIgnoreCase("STATUS")) {
     Serial.printf("[Telemetry] M=%.1f%%  T=%.1fC  RH=%.1f%%  Turb=%.0f NTU  Flow=%.2f L/m  Sess=%.3f L  Total=%.3f L  Pump=%s\n",
@@ -464,6 +564,8 @@ void setup() {
 
   // Initialize Sensors & Peripherals
   dht.begin();
+  pinMode(DEFAULT_FERT_VALVE_PIN, OUTPUT);
+  digitalWrite(DEFAULT_FERT_VALVE_PIN, RELAY_ACTIVE_LOW ? HIGH : LOW); // Boot safe state
   pinMode(config.flow_sensor_pin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(config.flow_sensor_pin), onFlowPulse, FALLING);
   lastFlowCalcMs = millis();
@@ -490,6 +592,8 @@ void setup() {
     server.on("/", handleLocalDashboard);
     server.on("/data", handleLocalDataApi);
     server.on("/pump", handlePumpToggle);
+    server.on("/crop", HTTP_ANY, handleSetCrop);
+    server.on("/setcrop", HTTP_ANY, handleSetCrop);
     server.begin();
     Serial.println("[WEB] Local dashboard active at http://" + WiFi.localIP().toString());
 

@@ -85,6 +85,38 @@ def _reader_thread():
                     _log_lines.append(entry)
                     if len(_log_lines) > MAX_LOG_LINES:
                         _log_lines.pop(0)
+
+                # Persist live USB telemetry directly into database so all dashboard pages update
+                if "[Telemetry]" in line:
+                    parsed = _parse_telemetry_line(line)
+                    if parsed and "M" in parsed:
+                        try:
+                            from ..database import SessionLocal
+                            from .. import models
+                            from datetime import datetime
+                            db = SessionLocal()
+                            try:
+                                dev = db.query(models.Device).filter(models.Device.device_id == 'esp32-01').first()
+                                dev_id = dev.id if dev else 1
+                                f_id = dev.field_id if (dev and dev.field_id) else 1
+                                r = models.SensorReading(
+                                    moisture=parsed.get("M"),
+                                    temperature=parsed.get("T"),
+                                    humidity=parsed.get("RH"),
+                                    turbidity_ntu=parsed.get("Turb"),
+                                    flow_rate_lpm=parsed.get("Flow"),
+                                    session_volume_L=parsed.get("Sess"),
+                                    total_volume_L=parsed.get("Total"),
+                                    timestamp=datetime.utcnow(),
+                                    device_id=dev_id,
+                                    field_id=f_id,
+                                )
+                                db.add(r)
+                                db.commit()
+                            finally:
+                                db.close()
+                        except Exception:
+                            pass
         except Exception:
             time.sleep(0.1)
 

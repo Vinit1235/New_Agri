@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="js/config.js"></script></script>
+    <script src="js/config.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -947,33 +947,31 @@
                     </div>
                 </div>
 
-                <!-- ===== SOIL pH ===== -->
+                                <!-- ===== WATER TURBIDITY (SILT INDEX) ===== -->
                 <div class="parameter-card">
                     <div class="param-header">
-                        <span class="icon">🧪</span>
-                        <span class="param-name">Soil pH</span>
-                        <span class="param-symbol">(pH)</span>
+                        <span class="icon"><i class="fas fa-water" style="color:#0288d1;font-size:24px;"></i></span>
+                        <span class="param-name">Water Clarity</span>
+                        <span class="param-symbol">(Turbidity NTU)</span>
                     </div>
-                    <div class="param-range">Optimal: 6.0-7.5</div>
+                    <div class="param-range">Optimal: &lt; 25 NTU (Clear)</div>
                     <div class="param-description">
-                        <strong>What it is:</strong> pH measures how acidic or alkaline your soil is. It affects how well plants can absorb nutrients from the soil. Most crops grow best in slightly acidic to neutral soil.
+                        <strong>What it is:</strong> Turbidity measures the clarity and suspended silt particles in your irrigation water. It protects micro-drip emitters, filtration units, and solenoids from clogging.
                     </div>
                     <div class="param-importance">
-                        <strong>🔴 Why It's Critical:</strong> Wrong pH causes:
+                        <strong>Why It's Critical:</strong> High turbidity causes:
                         <ul>
-                            <li><i class="fas fa-check-circle"></i> Nutrient lock-up – plants starve even with fertilizer</li>
-                            <li><i class="fas fa-check-circle"></i> Toxic aluminum and manganese in acidic soil</li>
-                            <li><i class="fas fa-check-circle"></i> Poor beneficial bacteria activity</li>
-                            <li><i class="fas fa-check-circle"></i> Reduced fertilizer efficiency – waste of money</li>
+                            <li><i class="fas fa-check-circle"></i> Clogged drip nozzles & uneven field watering</li>
+                            <li><i class="fas fa-check-circle"></i> Sediment build-up in fertilizer injector valves</li>
+                            <li><i class="fas fa-check-circle"></i> Increased pump friction & impeller wear</li>
+                            <li><i class="fas fa-check-circle"></i> Premature filter exhaustion and pressure drops</li>
                         </ul>
                     </div>
                     <div class="param-effect">
-                        <span class="effect-good">✅ Good: Max nutrients</span>
-                        <span class="effect-bad">❌ Bad: Nutrient lock-up</span>
-                        <span class="effect-good">✅ Good: Healthy microbes</span>
-                        <span class="effect-bad">❌ Bad: Poor microbes</span>
-                        <span class="effect-good">✅ Good: Better fertilizer</span>
-                        <span class="effect-bad">❌ Bad: Waste fertilizer</span>
+                        <span class="effect-good">🟢 Pure: Drip-safe</span>
+                        <span class="effect-bad">🔴 Silt: Clog risk</span>
+                        <span class="effect-good">🟢 Clear: Even spray</span>
+                        <span class="effect-bad">🔴 Dirty: Flush filter</span>
                     </div>
                 </div>
 
@@ -1007,33 +1005,31 @@
                     </div>
                 </div>
 
-                <!-- ===== EC (SALINITY) ===== -->
+                                <!-- ===== VPD TRANSPIRATION STRESS ===== -->
                 <div class="parameter-card">
                     <div class="param-header">
-                        <span class="icon">⚡</span>
-                        <span class="param-name">EC (Salinity)</span>
-                        <span class="param-symbol">(EC)</span>
+                        <span class="icon"><i class="fas fa-wind" style="color:#10b981;font-size:24px;"></i></span>
+                        <span class="param-name">Transpiration Index</span>
+                        <span class="param-symbol">(VPD kPa)</span>
                     </div>
-                    <div class="param-range">Safe: 0.5-2.5 dS/m</div>
+                    <div class="param-range">Optimal: 0.8 - 1.4 kPa</div>
                     <div class="param-description">
-                        <strong>What it is:</strong> Electrical Conductivity measures the salt content in your soil. High salt levels can harm plants by making it difficult for roots to absorb water and nutrients.
+                        <strong>What it is:</strong> Vapor Pressure Deficit (VPD) combines temperature and relative humidity to measure atmospheric water pull. It dictates how efficiently your crop absorbs nutrients from soil.
                     </div>
                     <div class="param-importance">
-                        <strong>🔴 Why It's Critical:</strong> High salinity causes:
+                        <strong>Why It's Critical:</strong> Extreme VPD causes:
                         <ul>
-                            <li><i class="fas fa-check-circle"></i> Roots cannot absorb water – plant dehydrates</li>
-                            <li><i class="fas fa-check-circle"></i> Leaf burn and yellowing</li>
-                            <li><i class="fas fa-check-circle"></i> Stunted growth and reduced yield</li>
-                            <li><i class="fas fa-check-circle"></i> Death of plants in severe cases</li>
+                            <li><i class="fas fa-check-circle"></i> Low VPD (&lt;0.4 kPa) ?" Stagnant humidity triggers fungal blight and mildew</li>
+                            <li><i class="fas fa-check-circle"></i> High VPD (&gt;1.6 kPa) ?" Stomata shut down, halting growth and burning leaves</li>
+                            <li><i class="fas fa-check-circle"></i> Optimal VPD triggers maximum nutrient flow through plant xylem</li>
+                            <li><i class="fas fa-check-circle"></i> Direct guide for misting, shade-netting, and aeration</li>
                         </ul>
                     </div>
                     <div class="param-effect">
-                        <span class="effect-good">✅ Good: Healthy water uptake</span>
-                        <span class="effect-bad">❌ Bad: No water uptake</span>
-                        <span class="effect-good">✅ Good: No salt stress</span>
-                        <span class="effect-bad">❌ Bad: Salt stress</span>
-                        <span class="effect-good">✅ Good: Root protection</span>
-                        <span class="effect-bad">❌ Bad: Root damage</span>
+                        <span class="effect-good">🟢 0.8-1.4: Peak growth</span>
+                        <span class="effect-bad">🔴 &gt;1.6: Heat stress</span>
+                        <span class="effect-good">🟢 Healthy xylem</span>
+                        <span class="effect-bad">⚠️ &lt;0.4: Fungal risk</span>
                     </div>
                 </div>
 
@@ -1326,17 +1322,16 @@
                 <div class="main-chart">
                     <h4 style="font-size:16px;font-weight:700;margin-bottom:12px;"><i class="fas fa-chart-line" style="color:#2E7D32;"></i> Live Sensor Trends</h4>
                     <canvas id="liveChart"></canvas>
-                </div>
                 <div class="side-panel">
-                    <div class="info-card" onclick="showToast('📊 Average moisture across all sensors')">
+                    <div class="info-card" onclick="showToast('💧 Real-time Soil Moisture from ESP32')">
                         <div class="number" id="avgMoisture">0%</div>
-                        <div class="label">Avg Moisture</div>
-                        <div class="trend up" style="color:#2E7D32;">↑ 3% vs yesterday</div>
+                        <div class="label">Moisture</div>
+                        <div class="trend up" id="moistureStatusBadge" style="color:#2E7D32;">↑ 3% vs yesterday, 💧</div>
                     </div>
-                    <div class="info-card" onclick="showToast('🌡️ Average temperature across all sensors')">
+                    <div class="info-card" onclick="showToast('🌡️ Real-time Temperature from DHT11')">
                         <div class="number" id="avgTemp">0°C</div>
-                        <div class="label">Avg Temperature</div>
-                        <div class="trend down" style="color:#E53935;">↓ 1°C vs yesterday</div>
+                        <div class="label">🌡️ Temperature</div>
+                        <div class="trend" id="tempStatusBadge" style="color:#0288D1;">● Normal</div>
                     </div>
                     <div class="info-card" onclick="showToast('🌱 Overall field health score based on all parameters')">
                         <div class="number" id="fieldHealth">0%</div>
@@ -1860,63 +1855,147 @@
         // ===== 10. SENSOR DATA =====
         let updateCount = 0;
         let dataPointCount = 0;
+        let lastReadingId  = null;   // track if we received a truly new reading
 
-        let currentFieldId = currentFieldId || 1;
+        function getActiveFieldId() {
+            if (typeof currentFieldId === 'function') return currentFieldId();
+            return 1;
+        }
+
+        // Inject a live-status badge into the Live Data section header once
+        function injectLiveBadge() {
+            const hdr = document.querySelector('#live-data .section-header');
+            if (!hdr || document.getElementById('liveStatusBadge')) return;
+            const style = document.createElement('style');
+            style.textContent = '@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}';
+            document.head.appendChild(style);
+            const badge = document.createElement('div');
+            badge.id = 'liveStatusBadge';
+            badge.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(229,57,53,0.1);color:#c62828;border:1px solid rgba(229,57,53,0.3);margin-top:10px;transition:all .4s ease;';
+            badge.innerHTML = '<span id="liveStatusDot" style="width:8px;height:8px;border-radius:50%;background:#c62828;display:inline-block;"></span><span id="liveStatusText">Waiting for ESP32...</span>';
+            hdr.appendChild(badge);
+        }
+
+        function setLiveStatus(state) {
+            const badge = document.getElementById('liveStatusBadge');
+            const dot   = document.getElementById('liveStatusDot');
+            const txt   = document.getElementById('liveStatusText');
+            if (!badge || !dot || !txt) return;
+            if (state === 'live') {
+                badge.style.cssText += 'background:rgba(46,125,50,0.12);color:#2E7D32;border:1px solid rgba(46,125,50,0.35);';
+                dot.style.background  = '#2E7D32';
+                dot.style.boxShadow   = '0 0 7px #2E7D32';
+                dot.style.animation   = 'livePulse 1.2s infinite';
+                txt.textContent       = '🟢 REAL HARDWARE ONLINE';
+            } else if (state === 'stale') {
+                badge.style.cssText += 'background:rgba(245,124,0,0.12);color:#E65100;border:1px solid rgba(245,124,0,0.35);';
+                dot.style.background  = '#F57C00';
+                dot.style.boxShadow   = 'none';
+                dot.style.animation   = 'none';
+                txt.textContent       = '⏸ Showing Last Reading';
+            } else {
+                badge.style.cssText += 'background:rgba(229,57,53,0.1);color:#c62828;border:1px solid rgba(229,57,53,0.3);';
+                dot.style.background  = '#c62828';
+                dot.style.boxShadow   = 'none';
+                dot.style.animation   = 'none';
+                txt.textContent       = '○ ESP32 Disconnected';
+            }
+        }
 
         function updateSensorData() {
-            const token = getToken();
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
+            const fieldId = getActiveFieldId();
+            const headers = (typeof authHeaders === 'function' && getToken())
+                ? authHeaders()
+                : { 'Content-Type': 'application/json' };
 
-            fetch(`${API_BASE}/api/fields/${currentFieldId}/readings/latest`, {
-                headers: authHeaders()
-            })
+            fetch(`${API_BASE}/api/fields/${fieldId}/readings/latest`, { headers })
             .then(r => {
-                if (r.status === 401) { window.location.href = 'login.html'; throw new Error('Unauthorized'); }
-                if (!r.ok) return null;
+                if (!r.ok) throw new Error('no-data');
                 return r.json();
             })
             .then(data => {
-                if (!data) return;
-                
+                if (!data) throw new Error('empty');
+
+                // How old is this reading?
+                const ageMs = data.timestamp
+                    ? Date.now() - new Date(data.timestamp + 'Z').getTime()
+                    : 999999999;
+                const isRecent = ageMs < 35000;   // within 35 s = live
+
+                lastReadingId = data.id;
                 updateCount++;
                 dataPointCount++;
-                
-                const moisture = data.moisture || 0;
-                const temp = data.temperature || 0;
-                const humidity = data.humidity || 0;
-                
-                document.getElementById('avgMoisture').textContent = Math.round(moisture) + '%';
-                document.getElementById('avgTemp').textContent = temp + '°C';
-                const health = Math.round(65 + (moisture / 100) * 25);
-                document.getElementById('fieldHealth').textContent = Math.min(health, 95) + '%';
-                document.getElementById('dataPoints').textContent = dataPointCount;
 
-                document.getElementById('irrigationBar').style.width = moisture + '%';
-                document.getElementById('waterSaved').textContent = '35%';
+                // Update live badge
+                if (isRecent) setLiveStatus('live');
+                else if (data.moisture != null) setLiveStatus('stale');
+                else setLiveStatus('offline');
+
+                const moisture = data.moisture    != null ? +data.moisture    : 0;
+                const temp     = data.temperature != null ? +data.temperature : 0;
+                const humidity = data.humidity    != null ? +data.humidity    : 0;
+
+                // ── Side-panel cards ──
+                document.getElementById('avgMoisture').textContent = moisture.toFixed(1) + '%';
+                document.getElementById('avgTemp').textContent     = temp.toFixed(1) + '°C';
                 
-                document.getElementById('healthStatus').textContent = Math.min(health, 95) + '%';
-                document.getElementById('healthBar').style.width = Math.min(health, 95) + '%';
-                document.getElementById('ndviValue').textContent = (Math.min(health, 95) / 100).toFixed(2);
+                const mBadge = document.getElementById('moistureStatusBadge');
+                if (mBadge) {
+                    if (moisture < 20) {
+                        mBadge.textContent = '● Critically Dry';
+                        mBadge.style.color = '#E53935';
+                    } else if (moisture > 75) {
+                        mBadge.textContent = '● Saturated';
+                        mBadge.style.color = '#0288D1';
+                    } else {
+                        mBadge.textContent = '● Normal';
+                        mBadge.style.color = '#2E7D32';
+                    }
+                }
+
+                const tBadge = document.getElementById('tempStatusBadge');
+                if (tBadge) {
+                    if (temp > 35) {
+                        tBadge.textContent = '● High Heat';
+                        tBadge.style.color = '#E53935';
+                    } else if (temp < 15) {
+                        tBadge.textContent = '● Low Temp';
+                        tBadge.style.color = '#0288D1';
+                    } else {
+                        tBadge.textContent = '● Normal';
+                        tBadge.style.color = '#2E7D32';
+                    }
+                }
+
+                const health = Math.min(Math.round(65 + (moisture / 100) * 25), 95);
+                document.getElementById('fieldHealth').textContent = health + '%';
+                document.getElementById('dataPoints').textContent  = dataPointCount;
+
+                // ── Feature-card live previews ──
+                try { document.getElementById('irrigationBar').style.width = moisture + '%'; } catch(e){}
+                try { document.getElementById('waterSaved').textContent = '35%'; } catch(e){}
+                try { document.getElementById('healthStatus').textContent = health + '%'; } catch(e){}
+                try { document.getElementById('healthBar').style.width = health + '%'; } catch(e){}
+                try { document.getElementById('ndviValue').textContent = (health/100).toFixed(2); } catch(e){}
 
                 if (moisture < 15 || moisture > 65) {
-                    document.getElementById('fertStatus').textContent = 'Blocked';
-                    document.getElementById('fertBar').style.width = '10%';
-                    document.getElementById('fertBar').style.background = '#E53935';
+                    try { document.getElementById('fertStatus').textContent = 'Blocked'; } catch(e){}
+                    try { document.getElementById('fertBar').style.width = '10%'; } catch(e){}
+                    try { document.getElementById('fertBar').style.background = '#E53935'; } catch(e){}
                 } else {
-                    document.getElementById('fertStatus').textContent = 'Safe';
-                    document.getElementById('fertBar').style.width = '40%';
-                    document.getElementById('fertBar').style.background = '#0288D1';
+                    try { document.getElementById('fertStatus').textContent = 'Safe'; } catch(e){}
+                    try { document.getElementById('fertBar').style.width = '40%'; } catch(e){}
+                    try { document.getElementById('fertBar').style.background = '#0288D1'; } catch(e){}
                 }
-                try { document.getElementById('ecLevel').textContent = humidity.toFixed(1) + '% RH'; } catch(e) {}
+                try { document.getElementById('ecLevel').textContent = humidity.toFixed(1) + '% RH'; } catch(e){}
 
-                updateLiveChart(moisture, temp, humidity, 0);
+                // ── Charts ──
+                const turbidityEc = data.turbidity_ntu != null ? data.turbidity_ntu / 100 : 0;
+                updateLiveChart(moisture, temp, humidity, turbidityEc);
                 updateNutrientChart(moisture, humidity, temp);
                 updateMiniCharts(moisture, temp, humidity, 0);
             })
-            .catch(console.error);
+            .catch(() => setLiveStatus('offline'));
         }
 
         // ===== 11. REMOTE CONTROL =====
@@ -2079,7 +2158,13 @@
             updateNutrientChart(nitrogen, phosphorus, potassium);
         }
 
+        function getRandomValue(min, max) {
+            return Math.round((min + Math.random() * (max - min)) * 10) / 10;
+        }
+
         // ===== 15. INITIALIZE =====
+        injectLiveBadge();   // add status badge to Live Data header before first poll
+
         for (let i = 0; i < 20; i++) {
             const m = getRandomValue(25, 75), t = getRandomValue(18, 35), p = getRandomValue(5.8, 7.6), e = getRandomValue(0.8, 3.2);
             liveLabels.push(`-${20-i}s`);
